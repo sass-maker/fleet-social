@@ -643,6 +643,7 @@ test('api key works logged out, stays out of key management', async () => {
 	test.setTimeout(120_000);
 	await page.goto('/settings');
 	await expect(page.getByTestId('api-key-section')).toBeVisible();
+	await expect(page.getByTestId('api-key-status')).toContainText('No active key');
 	await page.getByLabel('New key access').selectOption('full');
 	await clickUntilVisible(
 		page,
@@ -657,6 +658,7 @@ test('api key works logged out, stays out of key management', async () => {
 	await page.getByRole('button', { name: 'I have saved it' }).click();
 	await expect(reveal).toBeHidden();
 	await expect(page.getByTestId('api-key-status')).toContainText(rawKey.trim().slice(0, 12));
+	await expect(page.getByTestId('api-key-status')).toContainText('Read + write');
 
 	// Logged-out Node fetch (no cookies): key reads + writes as the user…
 	const origin = new URL(page.url()).origin;
