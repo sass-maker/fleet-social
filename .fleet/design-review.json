@@ -57,7 +57,7 @@
 			}
 		],
 		"projectCheck": {
-			"command": "npm test; npm run check; npm run lint; npm run build",
+			"command": "npm test; npm run check; npm run lint; npm run build; Playwright 54-case local suite",
 			"status": "pass"
 		},
 		"critique": {

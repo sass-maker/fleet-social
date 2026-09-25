@@ -3,10 +3,12 @@ import { expect, test, type Page } from '@playwright/test';
 import {
 	E2E_ACCOUNT,
 	E2E_D1_FLAGS,
+	approveComposer,
 	attachUntilAnswered,
 	clickUntilVisible,
 	e2eVars,
-	fillUntilKept
+	fillUntilKept,
+	selectFleetProject
 } from './e2e-env';
 
 /** RFC 6238 TOTP (SHA-1, 30s) for the base32 secret shown on setup-2fa. */
@@ -141,6 +143,7 @@ test('signs in and enrolls 2fa', async () => {
 
 test('autosaves a draft and restores it on reload', async () => {
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await fillUntilKept(page.getByTestId('segment-input-0'), DRAFT_TEXT);
 	await expect
 		.poll(() => new URL(page.url()).searchParams.get('id'), { timeout: 30000 })
@@ -468,6 +471,7 @@ test('publish asks for confirmation listing destinations', async () => {
 	test.setTimeout(120_000);
 	await seedFirewalledBluesky(page, 'test.bsky.social');
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await clickUntilVisible(
 		page,
 		page.getByTestId('destinations-toggle'),
@@ -479,6 +483,7 @@ test('publish asks for confirmation listing destinations', async () => {
 	});
 	await page.keyboard.press('Escape');
 	await fillUntilKept(page.getByTestId('segment-input-0'), 'confirm flow probe');
+	await approveComposer(page);
 	// Button opens the dialog instead of publishing.
 	await page.getByRole('button', { name: 'Publish', exact: true }).click();
 	const dialog = page.getByTestId('publish-confirm-destinations');
@@ -542,7 +547,9 @@ test('publishing to two destinations tracks each one', async () => {
 	test.setTimeout(120_000);
 	await seedFirewalledBluesky(page, 'second.bsky.social');
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await fillUntilKept(page.getByTestId('segment-input-0'), 'fan-out probe');
+	await approveComposer(page);
 	await clickUntilVisible(
 		page,
 		page.getByRole('button', { name: 'Publish', exact: true }),
@@ -567,6 +574,7 @@ test('a saved draft restores the accounts it was written for', async () => {
 	// Both bluesky accounts exist by now (seeded by the two tests above);
 	// reuse them so the shared connection list stays unchanged.
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await clickUntilVisible(
 		page,
 		page.getByTestId('destinations-toggle'),
@@ -616,7 +624,9 @@ test('publish without asking runs headless and still reports failures', async ()
 	test.setTimeout(120_000);
 	await page.evaluate(() => localStorage.setItem('cogsend-skip-publish-confirm', '1'));
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await fillUntilKept(page.getByTestId('segment-input-0'), 'skip-ask fan-out probe');
+	await approveComposer(page);
 	// No confirmation dialog: the click publishes straight away.
 	await page.getByTestId('publish-now').click();
 	await expect(page.getByTestId('publish-confirm-destinations')).toHaveCount(0);
@@ -633,6 +643,7 @@ test('api key works logged out, stays out of key management', async () => {
 	test.setTimeout(120_000);
 	await page.goto('/settings');
 	await expect(page.getByTestId('api-key-section')).toBeVisible();
+	await page.getByLabel('New key access').selectOption('full');
 	await clickUntilVisible(
 		page,
 		page.getByRole('button', { name: 'Generate API key' }),
@@ -684,6 +695,7 @@ test('api key works logged out, stays out of key management', async () => {
 
 test('composer chrome: counts, thread cards and override tabs', async () => {
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await expect(page.getByTestId('segment-input-0')).toBeVisible();
 	// Count pill tracks the typed text against the strictest selected cap.
 	await fillUntilKept(page.getByTestId('segment-input-0'), 'gauge probe text');
@@ -874,6 +886,7 @@ test('Alt+Arrow keys reorder thread posts and follow the media', async () => {
 
 test('navigating away with pending edits flushes the draft', async () => {
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	const text = `flush probe ${Date.now()}`;
 	await fillUntilKept(page.getByTestId('segment-input-0'), text);
 	// Leave within the autosave debounce window via SPA navigation.
@@ -897,7 +910,9 @@ test('navigating away with pending edits flushes the draft', async () => {
 
 test('publish confirmation can be skipped and reset from settings', async () => {
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await fillUntilKept(page.getByTestId('segment-input-0'), 'skip-ask probe');
+	await approveComposer(page);
 	await clickUntilVisible(
 		page,
 		page.getByTestId('publish-now'),
@@ -951,7 +966,7 @@ test('key pages do not scroll sideways on a 320px phone', async () => {
 
 test('duplicate API, insights page, and failed-tab deep link', async () => {
 	const created = await page.request.post('/api/drafts', {
-		data: { baseBody: 'e2e duplicate source' }
+		data: { projectId: 'fleet-social', baseBody: 'e2e duplicate source' }
 	});
 	expect(created.status()).toBe(201);
 	const source = (await created.json()).draft;
@@ -1121,6 +1136,7 @@ test('a refused draft delete restores the card and says so', async () => {
 	// Seed a fresh draft so the first card is unambiguous.
 	const text = `delete-refusal probe ${Date.now()}`;
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await fillUntilKept(page.getByTestId('segment-input-0'), text);
 	await expect
 		.poll(() => new URL(page.url()).searchParams.get('id'), { timeout: 30000 })
@@ -1164,6 +1180,7 @@ test('a refused draft delete restores the card and says so', async () => {
 test('deleting an already-deleted draft keeps the card hidden', async () => {
 	const text = `already-gone probe ${Date.now()}`;
 	await page.goto('/compose');
+	await selectFleetProject(page);
 	await fillUntilKept(page.getByTestId('segment-input-0'), text);
 	await expect
 		.poll(() => new URL(page.url()).searchParams.get('id'), { timeout: 30000 })
@@ -1201,7 +1218,9 @@ test('a retryable publish failure is reported as retrying, not failed', async ()
 	const connId = await seedFirewalledBluesky(page, 'retry.bsky.social');
 	try {
 		await page.goto('/compose');
+		await selectFleetProject(page);
 		await fillUntilKept(page.getByTestId('segment-input-0'), 'retry probe');
+		await approveComposer(page);
 		await page.route('**/api/drafts/*/publish', async (route) => {
 			const body = JSON.parse(route.request().postData() ?? '{}') as {
 				connectionIds?: string[];

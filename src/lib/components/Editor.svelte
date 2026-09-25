@@ -2908,7 +2908,7 @@
 					title="Schedule Options"
 					aria-label="Schedule Options"
 					aria-expanded={scheduleOpen}
-					disabled={publishing || approvalState !== 'approved'}
+					disabled={publishing}
 					onclick={openSchedule}
 				>
 					<Calendar class="h-4 w-4 text-stone-300 transition-colors group-hover:text-white" />

@@ -44,6 +44,17 @@ export const E2E_ACCOUNT = { email: 'e2e@localhost', password: 'e2e-password' };
 /** Extra flags for every `wrangler d1 …` call inside a spec. */
 export const E2E_D1_FLAGS = `--persist-to ${E2E_PERSIST_TO}`;
 
+/** Fleet drafts need explicit ownership before the composer can autosave. */
+export async function selectFleetProject(page: Page) {
+	await page.getByLabel('Fleet project').selectOption('fleet-social');
+}
+
+/** Approval is a separate owner action after the current draft is saved. */
+export async function approveComposer(page: Page) {
+	await page.getByRole('button', { name: 'Approve draft' }).click();
+	await expect(page.getByText('Approved', { exact: true })).toBeVisible();
+}
+
 /**
  * Click a control and wait for what it opens, retrying the click.
  *

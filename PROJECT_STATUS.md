@@ -13,6 +13,7 @@ Private Fleet social publishing hub based on CogSend. The approved first release
 ## Timeline
 
 - 2026-09-25: Private repository created and [first-release scope](https://github.com/sass-maker/fleet-social/issues/1) approved. Fleet variant passed 998 unit tests, Svelte check, lint, build, responsive browser review, and a local D1 backup/restore rehearsal. The canonical Fleet catalog records the private product as undeployed.
+- 2026-09-26: The complete 54-case browser suite passed on a fresh local D1 instance after adapting the upstream scenarios to required project ownership and approval.
 
 ## Products
 
