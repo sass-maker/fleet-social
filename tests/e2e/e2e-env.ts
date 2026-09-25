@@ -46,7 +46,23 @@ export const E2E_D1_FLAGS = `--persist-to ${E2E_PERSIST_TO}`;
 
 /** Fleet drafts need explicit ownership before the composer can autosave. */
 export async function selectFleetProject(page: Page) {
-	await page.getByLabel('Fleet project').selectOption('fleet-social');
+	const project = page.getByLabel('Fleet project');
+	const approval = page.getByRole('button', { name: 'Approve draft' });
+	await page
+		.waitForFunction(() => '__svelte' in window, undefined, { timeout: 5000 })
+		.catch(() => {});
+	for (let attempt = 0; attempt < 3; attempt++) {
+		await project.selectOption('fleet-social');
+		try {
+			// The native select can change before hydration; the button reflects
+			// the Svelte project state that the save and approval actions use.
+			await expect(approval).toBeEnabled({ timeout: 2000 });
+			return;
+		} catch {
+			// A change event beat hydration. Select again after the client is ready.
+		}
+	}
+	await expect(approval).toBeEnabled();
 }
 
 /** Approval is a separate owner action after the current draft is saved. */
