@@ -18,6 +18,7 @@ import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
 import { publishCallEstimate, publishTarget } from '$lib/server/publish';
 import { runSchedulerTick } from '$lib/server/scheduler';
 import type { FetchLike } from '$lib/server/providers/types';
+import { approveTestTargets } from './fleet-approval';
 
 describe('parseSubrequestLimit', () => {
 	it('defaults to the Free plan and accepts a positive integer as text or number', () => {
@@ -204,6 +205,7 @@ describe('publishing within a request budget', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, draftId, [connId]);
 		return id;
 	}
 

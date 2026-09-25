@@ -4,7 +4,7 @@ import { randomBytes } from './bytes';
 export const TOTP_DIGITS = 6;
 export const TOTP_PERIOD = 30;
 export const TOTP_WINDOW = 1;
-export const TOTP_ISSUER = 'CogSend';
+export const TOTP_ISSUER = 'Fleet Social';
 
 export function generateTotpSecret(): { bytes: Uint8Array; base32: string } {
 	const bytes = randomBytes(20);

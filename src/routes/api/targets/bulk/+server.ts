@@ -12,6 +12,7 @@ import { fail, handleError, ok } from '$lib/server/http';
 import { PUBLISH_RESERVE_CALLS, publishTarget, refreshDraftStatus } from '$lib/server/publish';
 import { refuseInFlightOrPublished } from '$lib/server/publish-plan';
 import { requireScope, requireUser } from '$lib/server/require';
+import { approvalProblem } from '$lib/server/draft-approval';
 
 type BulkOp = 'cancel' | 'retry' | 'reschedule';
 
@@ -93,6 +94,26 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 			if (!target || !ownedDraftIds.has(target.draftId)) {
 				results.push({ id, ok: false, error: 'Not found' });
 				continue;
+			}
+			if (target.status === 'uncertain' || target.status === 'publishing') {
+				results.push({
+					id,
+					ok: false,
+					error: 'Check the social account and reconcile this outcome first'
+				});
+				continue;
+			}
+			if (op !== 'cancel') {
+				const reviewProblem = await approvalProblem(
+					locals.db,
+					target.draftId,
+					[target.connectionId],
+					'subset'
+				);
+				if (reviewProblem) {
+					results.push({ id, ok: false, error: reviewProblem });
+					continue;
+				}
 			}
 			if (op === 'cancel') {
 				if (target.status === 'published' || target.remotePostId) {

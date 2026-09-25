@@ -6,6 +6,7 @@ import { newId, type AppDb } from '$lib/server/db/client';
 import { connections, drafts, publishTargets, users } from '$lib/server/db/schema';
 import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
 import { POST as publishPOST } from '../src/routes/api/drafts/[id]/publish/+server';
+import { approveTestTargets } from './fleet-approval';
 
 describe('POST /api/drafts/[id]/publish within a call budget', () => {
 	let db: AppDb;
@@ -54,6 +55,7 @@ describe('POST /api/drafts/[id]/publish within a call budget', () => {
 				updatedAt: now
 			});
 		}
+		await approveTestTargets(db, draftId, conns);
 	});
 	afterAll(() => close());
 

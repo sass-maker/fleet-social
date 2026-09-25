@@ -1,3 +1,13 @@
+# Fleet Social
+
+Private Fleet publishing hub based on [CogSend](https://github.com/deepakness/cogsend) (MIT). Fleet product feeds can create project-attributed drafts with a draft-intake key. The owner reviews the saved content and destinations before scheduling or publishing. Each account keeps its own delivery outcome; an ambiguous provider response waits for owner reconciliation in Posts.
+
+This fork passed local tests, lint, Svelte checks, and build. It has **not** been deployed to Fleet Cloudflare resources or proven with a live social account. See [PROJECT_STATUS.md](PROJECT_STATUS.md) and [issue #1](https://github.com/sass-maker/fleet-social/issues/1) for the rollout gates.
+
+For local code qualification, use `npm ci`, `node scripts/sync-fleet-projects.mjs` when the canonical Fleet catalog changes, then `npm test`, `npm run check`, `npm run lint`, and `npm run build`. The CogSend install and release instructions below document the upstream foundation; Fleet needs distinct Worker, D1, and R2 resources before those deployment commands are used.
+
+## Upstream CogSend reference
+
 <p align="center">
   <img width="150" alt="CogSend" src="https://github.com/user-attachments/assets/42c2579f-b1f2-4345-980a-01e24c9e027c" />
 </p>

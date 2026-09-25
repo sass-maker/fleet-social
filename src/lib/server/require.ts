@@ -62,3 +62,12 @@ export function requireScope(locals: { apiKeyScopes?: string[] | null }, scope: 
 		throw Object.assign(new Error('Insufficient scope'), { status: 403 });
 	}
 }
+
+export function requireAnyScope(
+	locals: { apiKeyScopes?: string[] | null },
+	scopes: ApiScope[]
+): void {
+	if (!locals.apiKeyScopes) return;
+	if (scopes.some((scope) => hasApiScope(locals.apiKeyScopes as ApiScope[], scope))) return;
+	throw Object.assign(new Error('Insufficient scope'), { status: 403 });
+}

@@ -1,0 +1,108 @@
+{
+	"$schema": "fleet.design-review.v1",
+	"version": 1,
+	"project": "fleet-social",
+	"target": "Compose and Posts review controls",
+	"surfaceMode": "operate",
+	"mode": "preserve",
+	"register": "product",
+	"context": {
+		"product": "PRODUCT.md",
+		"design": "DESIGN.md"
+	},
+	"direction": {
+		"references": [],
+		"probes": [],
+		"selected": "existing-design",
+		"approval": "not-required",
+		"before": "artifacts/design/before.png",
+		"library": {
+			"strategy": "upstream-first",
+			"primary": "existing-project-system",
+			"sources": [],
+			"runtime": "existing",
+			"customReplacement": {
+				"used": false,
+				"authorization": "not-required",
+				"reason": ""
+			}
+		},
+		"contract": {
+			"purpose": "Fleet Social keeps project-owned social drafts, review decisions, schedules, and per-destination publishing outcomes together.",
+			"purposeSource": "PRODUCT.md: Product Purpose; saas-maker/catalog/projects.json: fleet-social lifecycle.scopeDecision.keep",
+			"canonicalPurpose": "Fleet Social helps the Fleet owner review and publish posts for Fleet projects by binding each draft to its project, exact approval, and per-destination receipt.",
+			"purposeAlignment": "match",
+			"driftNote": "",
+			"audience": "Fleet owner managing social accounts for multiple Fleet products",
+			"job": "Select the originating project, review the saved post, and verify delivery for each destination.",
+			"thesis": "Keep project and approval controls beside the composer decision and delivery evidence in Posts.",
+			"system": "Preserve CogSend's centered canvas, floating navigation, white rounded cards, stone type, and semantic status colors.",
+			"signature": "Project attribution and approval state are visible together immediately above the post editor.",
+			"risk": "The added review card consumes vertical space on a phone; the composer and publish action remain reachable at 390 pixels."
+		}
+	},
+	"evidence": {
+		"screenshots": [
+			{
+				"width": 390,
+				"path": "artifacts/design/after-390.png"
+			},
+			{
+				"width": 768,
+				"path": "artifacts/design/after-768.png"
+			},
+			{
+				"width": 1440,
+				"path": "artifacts/design/after-1440.png"
+			}
+		],
+		"projectCheck": {
+			"command": "npm test; npm run check; npm run lint; npm run build",
+			"status": "pass"
+		},
+		"critique": {
+			"score": 34,
+			"maximum": 40
+		},
+		"audit": {
+			"score": 18,
+			"maximum": 20
+		},
+		"unresolved": {
+			"p0": 0,
+			"p1": 0
+		},
+		"detector": {
+			"posture": "advisory",
+			"findings": [
+				"Local provider canary remains unverified; visual review used a seeded draft and no connected account."
+			]
+		},
+		"comprehension": {
+			"status": "not-applicable",
+			"reviewer": "",
+			"answers": {
+				"product": "",
+				"audience": "",
+				"value": "",
+				"mechanism": "",
+				"proof": "",
+				"nextAction": ""
+			},
+			"purposeScore": {
+				"product": 0,
+				"audience": 0,
+				"value": 0,
+				"mechanism": 0,
+				"proof": 0,
+				"nextAction": 0,
+				"total": 0
+			},
+			"mismatches": []
+		}
+	},
+	"ownerFeedback": {
+		"decision": "keep",
+		"note": "Preserve the approved CogSend visual language for this bounded Fleet-specific addition."
+	}
+}

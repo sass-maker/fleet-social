@@ -70,10 +70,10 @@ describe('verifyTotp window and replay', () => {
 });
 
 describe('otpauth URI', () => {
-	it('uses SHA1 / 6 / 30 and issuer CogSend', () => {
+	it('uses SHA1 / 6 / 30 and issuer Fleet Social', () => {
 		const url = buildOtpauthUrl({ email: 'admin@example.com', secretBase32: 'MFRGGZDFMZTWQ2LK' });
 		expect(url.startsWith('otpauth://totp/')).toBe(true);
-		expect(url).toContain('issuer=CogSend');
+		expect(url).toContain('issuer=Fleet+Social');
 		expect(url).toContain('algorithm=SHA1');
 		expect(url).toContain('digits=6');
 		expect(url).toContain('period=30');

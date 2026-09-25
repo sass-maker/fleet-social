@@ -37,6 +37,7 @@ import {
 } from './providers';
 import { providerFetch } from './providers/timed-fetch';
 import { countingFetch, type SubrequestBudget } from './budget';
+import { approvalProblem } from './draft-approval';
 
 /** Scheduler stops auto-retrying a target after this many claims; manual retry stays available. */
 export const MAX_PUBLISH_ATTEMPTS = 5;
@@ -266,7 +267,7 @@ export function publishCallEstimate(platform: string, content: NormalizedPost): 
 	// Claim, connection, attempt row, resume lookup, success, attempt summary
 	// and draft status, a checkpoint per segment, and one more for whichever of
 	// a credential write, a lease renewal or a connection-status fix happens.
-	const database = 8 + segments.length;
+	const database = 12 + segments.length;
 	const storage = media.length;
 	let platformCalls = 1;
 	switch (platform) {
@@ -349,12 +350,79 @@ export async function publishTarget(
 	if (target.status === 'cancelled') {
 		return { status: 'cancelled', error: 'Target cancelled' };
 	}
+	if (target.status === 'uncertain') {
+		return {
+			status: 'uncertain',
+			error: 'Check the social account before retrying',
+			skipped: true
+		};
+	}
+	if (
+		target.status === 'publishing' &&
+		target.updatedAt <= new Date(now.getTime() - STALE_CLAIM_MS)
+	) {
+		const unfinished = await first(
+			db
+				.select({ id: publishAttempts.id })
+				.from(publishAttempts)
+				.where(
+					and(eq(publishAttempts.publishTargetId, targetId), isNull(publishAttempts.finishedAt))
+				)
+		);
+		if (unfinished) {
+			const parked = await db
+				.update(publishTargets)
+				.set({
+					status: 'uncertain',
+					jobId: null,
+					errorMessage:
+						'The worker stopped during a provider request. Check the social account before retrying.',
+					updatedAt: now
+				})
+				.where(
+					and(
+						eq(publishTargets.id, targetId),
+						eq(publishTargets.status, 'publishing'),
+						eq(publishTargets.attemptCount, target.attemptCount),
+						lte(publishTargets.updatedAt, new Date(now.getTime() - STALE_CLAIM_MS))
+					)
+				)
+				.returning({ id: publishTargets.id });
+			if (parked.length) await refreshDraftStatus(db, target.draftId);
+			return {
+				status: 'uncertain',
+				error: 'Check the social account before retrying',
+				skipped: true
+			};
+		}
+	}
+	const reviewProblem = await approvalProblem(db, target.draftId, [target.connectionId], 'subset');
+	if (reviewProblem) {
+		const parked = await db
+			.update(publishTargets)
+			.set({ status: 'failed', errorMessage: reviewProblem, jobId: null, updatedAt: now })
+			.where(
+				and(
+					eq(publishTargets.id, targetId),
+					isNull(publishTargets.remotePostId),
+					inArray(publishTargets.status, ['pending', 'scheduled', 'failed'])
+				)
+			)
+			.returning({ id: publishTargets.id });
+		if (parked.length) await refreshDraftStatus(db, target.draftId);
+		return {
+			status: parked.length ? 'failed' : target.status,
+			error: reviewProblem,
+			skipped: true
+		};
+	}
 
 	// Fail fast when the stored credential cannot possibly work (expired
 	// token with no refresh path): mark the connection expired and park the
 	// target WITHOUT burning an attempt. The WHERE excludes scheduled rows
 	// so future schedules are never touched here.
 	let knownPlatform: string | null = null;
+	let providerStarted = false;
 	try {
 		const preConn = await first(
 			db.select().from(connections).where(eq(connections.id, target.connectionId))
@@ -605,6 +673,7 @@ export async function publishTarget(
 		);
 		let result: PublishResult;
 		try {
+			providerStarted = true;
 			result = await provider.publish(
 				content,
 				workingCreds,
@@ -686,8 +755,15 @@ export async function publishTarget(
 		}
 		const partial = err instanceof PublishPartialError ? err : null;
 		const errorDetail = err instanceof ProviderError ? (err.detail ?? null) : null;
+		const providerFailure = classifyProviderError(err);
 		// The returned status is what callers report to the UI: `scheduled`
 		// means "retrying automatically", `failed` means terminal.
+		const uncertain =
+			providerStarted &&
+			(partial !== null ||
+				providerFailure.code === 'network' ||
+				(providerFailure.status !== undefined && providerFailure.status >= 500) ||
+				/^(Provider request timed out|fetch failed)/i.test(message));
 		const nextStatus = await markFailed(
 			db,
 			targetId,
@@ -700,7 +776,8 @@ export async function publishTarget(
 				retryable: isFailureRetryable(err, message),
 				now,
 				partial,
-				errorDetail
+				errorDetail,
+				uncertain
 			}
 		);
 		return { status: nextStatus, error: message };
@@ -782,11 +859,13 @@ async function markFailed(
 		now?: Date;
 		partial?: PublishPartialError | null;
 		errorDetail?: string | null;
+		uncertain?: boolean;
 	} = {}
-): Promise<'scheduled' | 'failed' | 'published'> {
+): Promise<'scheduled' | 'failed' | 'published' | 'uncertain'> {
 	const now = opts.now ?? new Date();
-	const nextStatus =
-		claimedGeneration >= MAX_PUBLISH_ATTEMPTS
+	const nextStatus = opts.uncertain
+		? 'uncertain'
+		: claimedGeneration >= MAX_PUBLISH_ATTEMPTS
 			? 'failed'
 			: statusAfterFailedPublish({
 					retryable: Boolean(opts.retryable),
@@ -855,7 +934,9 @@ async function markFailed(
 				.from(publishTargets)
 				.where(eq(publishTargets.id, targetId))
 		);
-		return latest?.status === 'published' || latest?.status === 'scheduled'
+		return latest?.status === 'published' ||
+			latest?.status === 'scheduled' ||
+			latest?.status === 'uncertain'
 			? latest.status
 			: 'failed';
 	}
@@ -884,7 +965,7 @@ const DRAFT_STATUS_SQL = sql`(
 		SELECT
 			COUNT(CASE WHEN status <> 'cancelled' THEN 1 END) AS a,
 			COUNT(CASE WHEN status = 'published' THEN 1 END) AS p,
-			COUNT(CASE WHEN status = 'failed' THEN 1 END) AS f,
+			COUNT(CASE WHEN status IN ('failed', 'uncertain') THEN 1 END) AS f,
 			COUNT(CASE WHEN status IN ('scheduled', 'pending', 'publishing') THEN 1 END) AS s
 		FROM publish_targets
 		WHERE draft_id = drafts.id

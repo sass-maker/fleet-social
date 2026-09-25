@@ -96,6 +96,10 @@ export const drafts = sqliteTable(
 			.references(() => users.id, { onDelete: 'cascade' }),
 		title: text('title'),
 		baseBody: text('base_body').notNull().default(''),
+		projectId: text('project_id'),
+		sourceRef: text('source_ref'),
+		approvalHash: text('approval_hash'),
+		approvedAt: integer('approved_at', { mode: 'timestamp_ms' }),
 		// JSON array of the connection ids the composer had selected. NULL
 		// means "never saved" (fall back to publish targets / defaults); an
 		// empty array is an explicit "no accounts" selection.
@@ -106,7 +110,8 @@ export const drafts = sqliteTable(
 	},
 	(t) => [
 		index('drafts_user_status_idx').on(t.userId, t.status),
-		index('drafts_user_updated_idx').on(t.userId, t.updatedAt)
+		index('drafts_user_updated_idx').on(t.userId, t.updatedAt),
+		uniqueIndex('drafts_project_source_uq').on(t.projectId, t.sourceRef)
 	]
 );
 

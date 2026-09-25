@@ -11,7 +11,7 @@ const envSchema = z.object({
 	APP_URL: z.string().optional(),
 	// Instance display name: the UI title, header and login screen. Self-hosters
 	// can rename their instance from config without touching code.
-	APP_NAME: z.string().min(1).default('CogSend'),
+	APP_NAME: z.string().min(1).default('Fleet Social'),
 	// 32+ chars (≈256-bit when random). TEST/dev use 64-hex; weak keys make the
 	// DB-stored OAuth/TOTP ciphertexts trivially brute-forceable on DB leak.
 	APP_ENCRYPTION_KEY: z.string().min(32),

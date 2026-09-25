@@ -6,6 +6,7 @@ import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
 import { readAppEnv } from '$lib/server/env';
 import { connections, publishTargets } from '$lib/server/db/schema';
 import { publishTarget } from '$lib/server/publish';
+import { approveTestTargets } from './fleet-approval';
 import { POST as mediaPOST } from '../src/routes/api/drafts/[id]/media/+server';
 
 /**
@@ -107,6 +108,7 @@ describe('ENABLE_VIDEO_UPLOAD', () => {
 			segmentIndex: 0,
 			createdAt: now
 		});
+		await approveTestTargets(db, owner.draftId, [connectionId]);
 
 		const result = await publishTarget(db, TEST_ENV, createTestMedia(), targetId, {
 			fetchImpl: async () => new Response('unmocked', { status: 404 })

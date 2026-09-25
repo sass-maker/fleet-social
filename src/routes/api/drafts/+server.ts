@@ -1,5 +1,6 @@
-import { desc, eq, inArray, type InferSelectModel } from 'drizzle-orm';
+import { and, desc, eq, inArray, type InferSelectModel } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { isFleetProjectId } from '$lib/domain/fleet-projects';
 import { parseDraftBody, parseDraftTitle } from '$lib/domain/validation/draft-fields';
 import { batchQueries, chunkIds, newId } from '$lib/server/db/client';
 import {
@@ -16,7 +17,7 @@ import {
 	publishTargets
 } from '$lib/server/db/schema';
 import { fail, handleError, ok } from '$lib/server/http';
-import { requireScope, requireUser } from '$lib/server/require';
+import { requireAnyScope, requireScope, requireUser } from '$lib/server/require';
 import { serializeDraft } from '$lib/server/serialize';
 import { normalizeSelectedConnectionIds } from '$lib/domain/request-limits';
 
@@ -132,10 +133,8 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		const user = requireUser(locals.user);
-		requireScope(locals, 'write');
-		// Every field here is optional, so an empty body is a legitimate
-		// "create a draft with defaults" (that is what this did before the
-		// guard). Malformed JSON is still a 400 rather than a 500.
+		requireAnyScope(locals, ['write', 'intake']);
+		// Parse before validating the required Fleet project. Malformed JSON is a 400.
 		const raw = await request.text().catch(() => '');
 		let body: unknown = {};
 		if (raw.trim()) {
@@ -147,12 +146,41 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 		if (!body || typeof body !== 'object') return fail('Invalid JSON body', 400);
 		const fields = body as Record<string, unknown>;
+		if (!isFleetProjectId(fields.projectId)) return fail('Choose an active Fleet project', 400);
+		const sourceRef = fields.sourceRef ?? null;
+		if (
+			sourceRef !== null &&
+			(typeof sourceRef !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_./:-]{0,199}$/.test(sourceRef))
+		) {
+			return fail('sourceRef must be a stable identifier (max 200 characters)', 400);
+		}
+		if (
+			locals.apiKeyScopes?.includes('intake') &&
+			!locals.apiKeyScopes.includes('write') &&
+			!sourceRef
+		) {
+			return fail('sourceRef required for draft intake', 400);
+		}
 		const selection = normalizeSelectedConnectionIds(fields.selectedConnectionIds);
 		if (!selection.ok) return fail(selection.error, 400);
 		const title = parseDraftTitle(fields.title ?? null);
 		if (!title.ok) return fail(title.error, 400);
 		const text = parseDraftBody(fields.baseBody ?? '');
 		if (!text.ok) return fail(text.error, 400);
+		if (sourceRef) {
+			const existing = await locals.db
+				.select()
+				.from(drafts)
+				.where(
+					and(
+						eq(drafts.userId, user.id),
+						eq(drafts.projectId, fields.projectId),
+						eq(drafts.sourceRef, sourceRef)
+					)
+				)
+				.limit(1);
+			if (existing[0]) return ok({ draft: serializeDraft(existing[0]), existing: true });
+		}
 		const now = new Date();
 		const [draft] = await locals.db
 			.insert(drafts)
@@ -161,12 +189,30 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				userId: user.id,
 				title: title.value,
 				baseBody: text.value,
+				projectId: fields.projectId,
+				sourceRef,
 				...(selection.value !== undefined ? { selectedConnectionIds: selection.value } : {}),
 				status: 'draft',
 				createdAt: now,
 				updatedAt: now
 			})
+			.onConflictDoNothing()
 			.returning();
+		if (!draft && sourceRef) {
+			const [existing] = await locals.db
+				.select()
+				.from(drafts)
+				.where(
+					and(
+						eq(drafts.userId, user.id),
+						eq(drafts.projectId, fields.projectId),
+						eq(drafts.sourceRef, sourceRef)
+					)
+				)
+				.limit(1);
+			if (existing) return ok({ draft: serializeDraft(existing), existing: true });
+		}
+		if (!draft) return fail('Could not create draft', 409);
 		return ok({ draft: serializeDraft(draft, { variants: [], media: [], targets: [] }) }, 201);
 	} catch (err) {
 		return handleError(err);

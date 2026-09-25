@@ -20,6 +20,7 @@
 	import { displayHandle, platformName, platformRank } from '$lib/domain/platforms';
 	import { draftExcerpt } from '$lib/domain/excerpt';
 	import { humanizeError } from '$lib/domain/human-error';
+	import { fleetProjects } from '$lib/domain/fleet-projects';
 	import { sessionExpiredIfUnauthorized } from '$lib/components/session-expired';
 	import { menuNav } from '$lib/components/menu-nav';
 	import {
@@ -68,6 +69,7 @@
 
 	type Draft = {
 		id: string;
+		projectId?: string | null;
 		title: string | null;
 		baseBody: string;
 		status: string;
@@ -85,6 +87,7 @@
 		errorMessage: string | null;
 		draft: {
 			id: string;
+			projectId?: string | null;
 			title: string | null;
 			baseBody: string;
 			status: string;
@@ -124,6 +127,7 @@
 		remoteUrl: string | null;
 		error: string | null;
 		draftId: string;
+		projectId?: string | null;
 		targetId: string | null;
 		/** Absolute local time + zone, computed once at card build (not per render). */
 		whenText: string;
@@ -313,6 +317,7 @@
 					key: `draft-${d.id}`,
 					kind: 'draft' as const,
 					status: 'draft',
+					projectId: d.projectId,
 					body,
 					when: d.updatedAt,
 					sortKey: toTime(d.updatedAt),
@@ -366,10 +371,17 @@
 			const primary = group[0];
 
 			const hasFailed = group.some((t) => t.status === 'failed');
+			const hasUncertain = group.some((t) => t.status === 'uncertain');
 			// Scheduled rows keep their errorMessage when a transient failure
 			// backs off: they are auto-retrying, not terminally failed.
 			const hasRetrying = group.some((t) => t.status === 'scheduled' && t.errorMessage);
-			const cardStatus = hasFailed ? 'failed' : hasRetrying ? 'retrying' : primary.status;
+			const cardStatus = hasUncertain
+				? 'uncertain'
+				: hasFailed
+					? 'failed'
+					: hasRetrying
+						? 'retrying'
+						: primary.status;
 
 			// Cancelled (discarded) platforms leave the card entirely: the
 			// error rows key off failed rows and the icon row off this list.
@@ -398,6 +410,7 @@
 				key: `target-${primary.id}`,
 				kind: 'target' as const,
 				status: cardStatus,
+				projectId: primary.draft.projectId,
 				body,
 				when,
 				sortKey: ['scheduled', 'pending', 'publishing'].includes(primary.status)
@@ -426,7 +439,7 @@
 		targets.filter((t) => ['scheduled', 'pending', 'publishing'].includes(t.status))
 	);
 	const history = $derived(
-		targets.filter((t) => ['published', 'failed', 'cancelled'].includes(t.status))
+		targets.filter((t) => ['published', 'failed', 'uncertain', 'cancelled'].includes(t.status))
 	);
 
 	// Grouped cards (one card per draft). Counts must use these lengths, not the
@@ -438,7 +451,9 @@
 
 	// Failed is a slice of history, not a separate source: a card with any
 	// failed platform carries status 'failed' even when a sibling is retrying.
-	const failedCards = $derived(historyCards.filter((c) => c.status === 'failed'));
+	const failedCards = $derived(
+		historyCards.filter((c) => c.status === 'failed' || c.status === 'uncertain')
+	);
 
 	type AccountOption = {
 		id: string;
@@ -673,6 +688,35 @@
 	// only that platform's target is reset + republished — published siblings
 	// are never touched (server skips rows with remotePostId).
 	let busyTarget = $state<string | null>(null);
+	let reconcileUrls = $state<Record<string, string>>({});
+	let checkedAbsent = $state<Record<string, boolean>>({});
+
+	function fleetProjectName(id: string | null | undefined): string {
+		return fleetProjects.find((project) => project.id === id)?.name ?? 'Unassigned project';
+	}
+
+	async function reconcileTarget(targetId: string, action: 'published' | 'not_published') {
+		busyTarget = targetId;
+		error = null;
+		try {
+			const response = await fetch(`/api/targets/${targetId}/reconcile`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					action,
+					remoteUrl: reconcileUrls[targetId]?.trim(),
+					confirmation: checkedAbsent[targetId] ? 'I checked the destination account' : null
+				})
+			});
+			const payload = await response.json().catch(() => ({}));
+			if (!response.ok) throw new Error(payload.error || 'Could not reconcile outcome');
+			await load({ keepError: true });
+		} catch (cause) {
+			error = humanizeError(cause instanceof Error ? cause.message : 'Could not reconcile outcome');
+		} finally {
+			busyTarget = null;
+		}
+	}
 
 	async function retryAll(cardKey: string, ids: string[]) {
 		if (!ids.length) return;
@@ -744,6 +788,7 @@
 		if (status === 'retrying') return 'retrying';
 		if (status === 'published') return 'published';
 		if (status === 'failed') return 'failed';
+		if (status === 'uncertain') return 'uncertain';
 		return 'draft';
 	}
 
@@ -983,7 +1028,7 @@
 							{:else}
 								<div
 									class="flex h-8 w-8 items-center justify-center rounded-full border border-stone-100 bg-stone-50 {platform.status ===
-									'failed'
+										'failed' || platform.status === 'uncertain'
 										? 'border-red-200 bg-red-50'
 										: platform.status === 'scheduled' && platform.error
 											? 'border-amber-200 bg-amber-50'
@@ -1027,6 +1072,12 @@
 							>
 								<XCircle class="h-3 w-3" /> Failed
 							</span>
+						{:else if badge === 'uncertain'}
+							<span
+								class="inline-flex items-center gap-1.5 rounded bg-amber-50 px-2.5 py-1 text-[10px] font-bold tracking-widest text-amber-800 uppercase"
+							>
+								<XCircle class="h-3 w-3" /> Check outcome
+							</span>
 						{:else if badge === 'retrying'}
 							<span
 								class="inline-flex items-center gap-1.5 rounded bg-amber-50 px-2.5 py-1 text-[10px] font-bold tracking-widest text-amber-700 uppercase"
@@ -1045,6 +1096,9 @@
 				</div>
 
 				<!-- Post Content -->
+				<p class="mb-2 text-[11px] font-bold tracking-wide text-stone-500 uppercase">
+					{fleetProjectName(card.projectId)}
+				</p>
 				<p
 					class="mb-5 text-[14px] leading-relaxed font-medium break-words whitespace-pre-wrap text-stone-800"
 				>
@@ -1106,7 +1160,72 @@
 					{/if}
 				{/if}
 
-				{#if failedOf(card).length > 0}
+				{#if card.platforms.some((platform) => platform.status === 'uncertain')}
+					<div class="mb-4 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+						<p class="text-xs font-bold text-amber-900">
+							The provider may have accepted this post. Check each destination account before
+							choosing an outcome.
+						</p>
+						{#each card.platforms.filter((platform) => platform.status === 'uncertain') as platform (platform.targetId)}
+							{#if platform.targetId}
+								<div class="flex flex-col gap-2 border-t border-amber-200 pt-3">
+									<p class="text-xs font-bold text-amber-900">
+										{platformName(platform.name)}{platform.handle
+											? ` · ${displayHandle(platform.handle)}`
+											: ''}
+									</p>
+									<label
+										class="text-xs font-medium text-amber-900"
+										for="reconcile-{platform.targetId}"
+										>If the post is live, paste its HTTPS URL</label
+									>
+									<input
+										id="reconcile-{platform.targetId}"
+										type="url"
+										placeholder="https://…"
+										value={reconcileUrls[platform.targetId] ?? ''}
+										oninput={(event) =>
+											(reconcileUrls = {
+												...reconcileUrls,
+												[platform.targetId!]: event.currentTarget.value
+											})}
+										class="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs text-stone-900 focus:border-stone-500 focus:outline-none"
+									/>
+									<div class="flex flex-wrap items-center gap-3">
+										<button
+											type="button"
+											disabled={busyTarget === platform.targetId ||
+												!reconcileUrls[platform.targetId]?.trim()}
+											onclick={() => void reconcileTarget(platform.targetId!, 'published')}
+											class="text-xs font-bold text-stone-900 underline-offset-2 hover:underline disabled:opacity-50"
+											>Mark published</button
+										>
+										<label class="flex items-center gap-2 text-xs font-medium text-amber-900">
+											<input
+												type="checkbox"
+												checked={checkedAbsent[platform.targetId] ?? false}
+												onchange={(event) =>
+													(checkedAbsent = {
+														...checkedAbsent,
+														[platform.targetId!]: event.currentTarget.checked
+													})}
+											/>
+											I checked this account and found no post
+										</label>
+										<button
+											type="button"
+											disabled={busyTarget === platform.targetId ||
+												!checkedAbsent[platform.targetId]}
+											onclick={() => void reconcileTarget(platform.targetId!, 'not_published')}
+											class="text-xs font-bold text-stone-900 underline-offset-2 hover:underline disabled:opacity-50"
+											>Allow manual retry</button
+										>
+									</div>
+								</div>
+							{/if}
+						{/each}
+					</div>
+				{:else if failedOf(card).length > 0}
 					<div class="mb-4 flex flex-col gap-2 rounded-2xl border border-red-100 bg-red-50/50 p-3">
 						{#each failedOf(card) as platform (platform.targetId)}
 							{@const reconnect = needsReconnect(platform)}
@@ -1202,7 +1321,9 @@
 				<!-- remoteUrl removed in favor of clickable platform icons -->
 
 				<!-- Post Footer -->
-				<div class="mt-auto flex items-center justify-between border-t border-stone-100 pt-4">
+				<div
+					class="mt-auto flex flex-col items-start gap-3 border-t border-stone-100 pt-4 sm:flex-row sm:items-center sm:justify-between"
+				>
 					<p class="text-[12px] font-bold text-stone-500">
 						{#if card.whenLabel === 'scheduled' && card.when}
 							Will publish
@@ -1216,7 +1337,7 @@
 						{/if}
 					</p>
 
-					<div class="flex items-center gap-4">
+					<div class="flex flex-wrap items-center gap-x-4 gap-y-1">
 						{#if card.kind === 'draft'}
 							<a
 								href="/compose?id={card.draftId}"

@@ -24,6 +24,7 @@
 		platformLimit
 	} from '$lib/domain/editor-limits';
 	import { humanizeError } from '$lib/domain/human-error';
+	import { fleetProjects } from '$lib/domain/fleet-projects';
 	import { dialogFocus } from '$lib/components/dialog-focus';
 	import { platformColorClass } from '$lib/components/platform-color';
 	import {
@@ -116,12 +117,14 @@
 		connectionId: string;
 		// `retrying` = a retryable failure the scheduler will attempt again
 		// automatically; the target is `scheduled` with an error, not failed.
-		status: 'pending' | 'published' | 'failed' | 'publishing' | 'retrying';
+		status: 'pending' | 'published' | 'failed' | 'publishing' | 'retrying' | 'uncertain';
 		error?: string | null;
 	};
 
 	type EditorDraft = {
 		id: string;
+		projectId?: string | null;
+		approvedAt?: Date | string | null;
 		baseBody?: string | null;
 		selectedConnectionIds?: string[] | null;
 		variants?: Array<{
@@ -211,6 +214,10 @@
 	);
 
 	let draftId = $state<string | null>(page.url.searchParams.get('id'));
+	let projectId = $state(seededDraft?.projectId ?? '');
+	let projectTouched = false;
+	let approvalState = $state<'unapproved' | 'approved' | 'checking'>('unapproved');
+	let approvalBusy = $state(false);
 	let baseBody = $state(seededBody);
 	let activeTab = $state<ActiveTab>('global');
 	let overrides = $state<PlatformOverrideMap>(seededOverrides);
@@ -302,7 +309,46 @@
 		} catch {
 			// storage unavailable: defaults hold
 		}
+		if (draftId) void refreshApproval(draftId);
 	});
+
+	async function refreshApproval(id: string) {
+		approvalState = 'checking';
+		try {
+			const res = await fetch(`/api/drafts/${id}/approval`);
+			const data = await res.json();
+			if (draftId === id) approvalState = res.ok && data.approved ? 'approved' : 'unapproved';
+		} catch {
+			if (draftId === id) approvalState = 'unapproved';
+		}
+	}
+
+	async function approveCurrentDraft() {
+		if (approvalBusy) return;
+		if (!projectId) {
+			showToast('Choose a Fleet project before review', 'warn');
+			return;
+		}
+		if (!selected.size) {
+			showToast('Select at least one account before review', 'warn');
+			return;
+		}
+		approvalBusy = true;
+		try {
+			const id = await persistForAction();
+			if (!id) return;
+			const res = await fetch(`/api/drafts/${id}/approval`, { method: 'POST' });
+			const data = await res.json().catch(() => ({}));
+			if (!res.ok) throw new Error(data.error || 'Could not approve draft');
+			approvalState = 'approved';
+			showToast('Draft approved for selected accounts');
+		} catch (error) {
+			approvalState = 'unapproved';
+			showToast(humanizeError(error instanceof Error ? error.message : 'Approval failed'), 'error');
+		} finally {
+			approvalBusy = false;
+		}
+	}
 
 	function setLocalFlag(key: string, on: boolean) {
 		try {
@@ -578,6 +624,7 @@
 		for (const k of Object.keys(overrides).sort())
 			sorted[k as PlatformId] = overrides[k as PlatformId]!;
 		return JSON.stringify({
+			project: projectId,
 			b: baseBody,
 			o: sorted,
 			v: mastoVisibility,
@@ -591,6 +638,7 @@
 	function markDirty() {
 		dirty = true;
 		saveStatus = 'idle';
+		approvalState = 'unapproved';
 	}
 
 	function setActiveBody(nextBody: string) {
@@ -629,6 +677,9 @@
 
 	function resetEditorForNewDraft() {
 		draftId = null;
+		projectId = '';
+		projectTouched = false;
+		approvalState = 'unapproved';
 		baseBody = '';
 		overrides = {};
 		media = [];
@@ -707,6 +758,8 @@
 			loadFailedId = null;
 			if (page.url.searchParams.get('id') !== id) return;
 			const d = data.draft;
+			if (!projectTouched) projectId = d.projectId ?? '';
+			projectTouched = false;
 			if (before && draftId !== null && draftId !== id) {
 				// An autosave or media upload claimed a brand-new draft while this
 				// fetch was in flight; it owns the editor now (the URL was
@@ -809,6 +862,7 @@
 				saveStatus = 'idle';
 				savedSnapshot = takeSnapshot();
 			}
+			void refreshApproval(id);
 			// Otherwise the local edits stay dirty on purpose: the autosave
 			// effect below persists the merged content once the load settles.
 		} catch (err) {
@@ -824,6 +878,7 @@
 	}
 
 	type SaveSnapshot = {
+		projectId: string;
 		baseBody: string;
 		overrides: PlatformOverrideMap;
 		mastoVisibility: string;
@@ -834,6 +889,7 @@
 
 	async function ensureDraft(
 		snap: SaveSnapshot = {
+			projectId,
 			baseBody,
 			overrides,
 			mastoVisibility,
@@ -849,6 +905,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					baseBody: snap.baseBody,
+					projectId: snap.projectId,
 					selectedConnectionIds: snap.selectedConnectionIds
 				})
 			});
@@ -861,6 +918,7 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				baseBody: snap.baseBody,
+				projectId: snap.projectId,
 				selectedConnectionIds: snap.selectedConnectionIds
 			})
 		});
@@ -886,6 +944,7 @@
 	async function saveVariants(
 		id: string,
 		snap: SaveSnapshot = {
+			projectId,
 			baseBody,
 			overrides,
 			mastoVisibility,
@@ -987,6 +1046,7 @@
 		saveStatus = 'saving';
 		const before = takeSnapshot();
 		const snap: SaveSnapshot = {
+			projectId,
 			baseBody,
 			overrides,
 			mastoVisibility,
@@ -1062,6 +1122,10 @@
 	async function requestPublish(connectionIds: string[]) {
 		// Prevent overlapping publishes/schedules (publishing covers both).
 		if (publishing) return;
+		if (approvalState !== 'approved') {
+			showToast('Review and approve the saved draft before publishing', 'warn');
+			return;
+		}
 		// Fast empty check before opening any UI: mirrors doPersist's
 		// emptyNew guard so an empty composer toasts without flashing the
 		// dialog (or the publishing spinner in skip-ask mode).
@@ -1225,6 +1289,11 @@
 						});
 						return { connectionId, status: 'retrying' as const, error: message };
 					}
+					if (row.status === 'uncertain') {
+						const message = 'Check the social account before retrying';
+						setDestinationProgress(connectionId, { status: 'uncertain', error: message });
+						return { connectionId, status: 'uncertain' as const, error: message };
+					}
 					const message = humanizeError(row.error ?? 'Publish failed');
 					setDestinationProgress(connectionId, { status: 'failed', error: message });
 					return { connectionId, status: 'failed' as const, error: message };
@@ -1240,7 +1309,17 @@
 		const published = settled.filter((s) => s.status === 'published');
 		const inFlight = settled.filter((s) => s.status === 'publishing');
 		const retrying = settled.filter((s) => s.status === 'retrying');
-		if (failed.length) {
+		const uncertain = settled.filter((s) => s.status === 'uncertain');
+		if (uncertain.length) {
+			showToast(
+				'A destination may have received this post. Check its account and reconcile it in Posts.',
+				'warn',
+				{ label: 'View posts', href: '/posts?tab=failed' }
+			);
+			announcePublish(
+				`Check the outcome for ${uncertain.map((item) => destinationName(item.connectionId)).join(', ')}.`
+			);
+		} else if (failed.length) {
 			showToast(
 				humanizeError(
 					failed
@@ -2105,14 +2184,20 @@
 		if (isDiscardOpen || discarding) return;
 		const emptyNew = !draftId && !baseBody.trim();
 		if (emptyNew) return;
+		if (!projectId) return;
 		const timer = setTimeout(() => {
 			void persistAll();
 		}, 1400);
 		return () => clearTimeout(timer);
 	});
 
-	beforeNavigate(() => {
+	beforeNavigate((navigation) => {
 		if (!dirty && Object.keys(altPending).length === 0) return;
+		if (!projectId) {
+			navigation.cancel();
+			showToast('Choose a Fleet project to save this post', 'warn');
+			return;
+		}
 		void persistAll(false, { navigate: false });
 		void flushAltPending();
 	});
@@ -2198,6 +2283,48 @@
 			</button>
 		</div>
 	{/if}
+	<div
+		class="mb-5 flex flex-wrap items-end gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm"
+	>
+		<label class="min-w-48 flex-1 text-[11px] font-bold tracking-wide text-stone-500 uppercase">
+			Fleet project
+			<select
+				value={projectId}
+				onchange={(event) => {
+					projectId = event.currentTarget.value;
+					projectTouched = true;
+					markDirty();
+				}}
+				class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-500 focus:outline-none"
+			>
+				<option value="">Choose a project</option>
+				{#each fleetProjects as project (project.id)}
+					<option value={project.id}>{project.name}</option>
+				{/each}
+			</select>
+		</label>
+		<div class="flex items-center gap-2">
+			<span
+				class="text-[12px] font-semibold {approvalState === 'approved'
+					? 'text-emerald-700'
+					: 'text-amber-700'}"
+			>
+				{approvalState === 'approved'
+					? 'Approved'
+					: approvalState === 'checking'
+						? 'Checking review…'
+						: 'Needs review'}
+			</span>
+			<button
+				type="button"
+				disabled={approvalBusy || approvalState === 'approved' || !projectId}
+				onclick={() => void approveCurrentDraft()}
+				class="rounded-full bg-stone-900 px-4 py-2.5 text-[12px] font-bold text-white transition-colors hover:bg-stone-800 disabled:opacity-50"
+			>
+				{approvalBusy ? 'Saving…' : 'Approve draft'}
+			</button>
+		</div>
+	</div>
 	<!-- Platform Tabs (Always visible) -->
 	<div class="relative mb-8 flex flex-wrap items-center gap-2 pt-2">
 		<!-- Global Tab -->
@@ -2762,7 +2889,7 @@
 					type="button"
 					data-testid="publish-now"
 					class="flex cursor-pointer items-center gap-2 rounded-l-full px-6 py-2.5 text-[13px] font-bold transition-all hover:bg-stone-800 disabled:opacity-60"
-					disabled={publishing}
+					disabled={publishing || approvalState !== 'approved'}
 					aria-busy={publishButtonBusy}
 					onclick={() => void onPublish()}
 				>
@@ -2781,7 +2908,7 @@
 					title="Schedule Options"
 					aria-label="Schedule Options"
 					aria-expanded={scheduleOpen}
-					disabled={publishing}
+					disabled={publishing || approvalState !== 'approved'}
 					onclick={openSchedule}
 				>
 					<Calendar class="h-4 w-4 text-stone-300 transition-colors group-hover:text-white" />
@@ -2793,7 +2920,9 @@
 						class="absolute right-0 bottom-full z-40 mb-3 w-64 origin-bottom-right rounded-[1.5rem] border border-stone-200/80 bg-white/95 p-3 text-stone-900 shadow-[0_12px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
 						transition:fly={{ y: 10, duration: 250, opacity: 0 }}
 						role="dialog"
-						aria-label={publishProgress?.some((d) => d.status === 'failed')
+						aria-label={publishProgress?.some(
+							(d) => d.status === 'failed' || d.status === 'uncertain'
+						)
 							? 'Publish results'
 							: 'Confirm post'}
 						use:dialogFocus={{
@@ -2806,7 +2935,7 @@
 						}}
 					>
 						<div class="px-2 pt-2 pb-4 text-center">
-							{#if publishProgress?.some((d) => d.status === 'failed')}
+							{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
 								<h4 class="mb-1 text-[14px] font-extrabold text-stone-900">
 									Couldn’t publish everywhere
 								</h4>
@@ -2842,7 +2971,7 @@
 										>
 											<Check class="h-2.5 w-2.5" />
 										</span>
-									{:else if state?.status === 'failed'}
+									{:else if state?.status === 'failed' || state?.status === 'uncertain'}
 										<span
 											class="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white"
 										>
@@ -2853,7 +2982,7 @@
 							{/each}
 						</div>
 
-						{#if publishProgress?.some((d) => d.status === 'failed')}
+						{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
 							<ul class="mb-3 space-y-1.5" data-testid="publish-progress">
 								{#each publishProgress ?? [] as dest (dest.connectionId)}
 									<li
@@ -2873,6 +3002,13 @@
 											<span class="text-[11px] font-bold text-stone-700">
 												{destinationName(dest.connectionId)} — published
 											</span>
+										{:else if dest.status === 'uncertain'}
+											<TriangleAlert class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+											<span
+												class="min-w-0 flex-1 text-[11px] font-medium break-words text-amber-800"
+												>{destinationName(dest.connectionId)} — outcome uncertain. Check Posts before
+												retrying.</span
+											>
 										{:else if dest.status === 'retrying'}
 											<RefreshCw class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
 											<span
@@ -2893,7 +3029,7 @@
 							</ul>
 						{/if}
 
-						{#if publishProgress?.some((d) => d.status === 'failed')}
+						{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
 							<button
 								type="button"
 								data-testid="publish-progress-close"
@@ -3059,7 +3195,7 @@
 							type="button"
 							data-testid="schedule-confirm"
 							class="w-full cursor-pointer rounded-full bg-stone-900 py-2.5 text-[13px] font-bold text-white shadow-sm transition-all hover:bg-stone-800 disabled:opacity-60"
-							disabled={publishing}
+							disabled={publishing || approvalState !== 'approved'}
 							onclick={() => void onSchedule()}
 						>
 							Confirm Schedule
