@@ -25,7 +25,7 @@ declare global {
 			user: SessionUser | null;
 			// How locals.user was established: interactive cookie session vs
 			// a bearer credential (API_TOKEN machine user or API key).
-			authMethod: 'session' | 'bearer' | null;
+			authMethod: 'session' | 'access' | 'bearer' | null;
 			// API-key scopes (null for sessions and the env API_TOKEN operator
 			// key, which stay unrestricted). Null = no scope check.
 			apiKeyScopes: string[] | null;

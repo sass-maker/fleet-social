@@ -20,6 +20,8 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 		if (!draft || draft.userId !== user.id) return fail('Not found', 404);
 		if (target.status === 'published' || target.remotePostId) return fail('Already published');
 		if (target.status === 'cancelled') return ok({ target });
+		if (target.status === 'uncertain' || target.status === 'publishing')
+			return fail('Check the social account and reconcile this outcome first', 409);
 		const now = new Date();
 		const blocked = refuseInFlightOrPublished(target, now);
 		if (blocked) return fail(blocked, 409);

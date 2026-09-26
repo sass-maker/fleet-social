@@ -33,7 +33,7 @@ describe('draft selected accounts', () => {
 			request: new Request('http://localhost/api/drafts', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body)
+				body: JSON.stringify({ projectId: 'codevetter', ...body })
 			}),
 			locals: localsFor()
 		} as never)) as Response;
@@ -263,7 +263,7 @@ describe('draft field validation', () => {
 		close();
 	});
 
-	it('creates a draft from an empty body and rejects malformed JSON', async () => {
+	it('requires a Fleet project and rejects malformed JSON', async () => {
 		await seed();
 		const post = (body?: string) =>
 			draftsPOST({
@@ -275,9 +275,9 @@ describe('draft field validation', () => {
 				locals: localsFor()
 			} as never) as Promise<Response>;
 
-		// Every field is optional, so no body at all means "create a draft".
-		expect((await post()).status).toBe(201);
-		expect((await post('{}')).status).toBe(201);
+		expect((await post()).status).toBe(400);
+		expect((await post('{}')).status).toBe(400);
+		expect((await post('{"projectId":"codevetter"}')).status).toBe(201);
 		expect((await post('{"baseBody":')).status).toBe(400);
 	});
 

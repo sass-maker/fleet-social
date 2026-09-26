@@ -1,0 +1,146 @@
+[
+	{
+		"id": "anchor",
+		"name": "Anchor"
+	},
+	{
+		"id": "anime-list",
+		"name": "Anime List"
+	},
+	{
+		"id": "app-health",
+		"name": "App Health"
+	},
+	{
+		"id": "browserdaddy",
+		"name": "BrowserDaddy"
+	},
+	{
+		"id": "calorie",
+		"name": "Calorie"
+	},
+	{
+		"id": "chatgpt-connections",
+		"name": "ChatGPT Connections"
+	},
+	{
+		"id": "codevetter",
+		"name": "CodeVetter"
+	},
+	{
+		"id": "contextdaddy",
+		"name": "ContextDaddy"
+	},
+	{
+		"id": "daddyrad",
+		"name": "DaddyRad"
+	},
+	{
+		"id": "every-song-is-a-website",
+		"name": "Every Song Is a Website"
+	},
+	{
+		"id": "fleet-social",
+		"name": "Fleet Social"
+	},
+	{
+		"id": "nutrition-formula-engine",
+		"name": "Formula Composition Engine"
+	},
+	{
+		"id": "free-ai",
+		"name": "Free AI"
+	},
+	{
+		"id": "pace",
+		"name": "HeyPace"
+	},
+	{
+		"id": "high-signal",
+		"name": "High Signal"
+	},
+	{
+		"id": "ios-landings",
+		"name": "iOS landings"
+	},
+	{
+		"id": "karte",
+		"name": "Karte"
+	},
+	{
+		"id": "kith",
+		"name": "Kith"
+	},
+	{
+		"id": "knowledge-base",
+		"name": "Knowledge Base"
+	},
+	{
+		"id": "live",
+		"name": "Live"
+	},
+	{
+		"id": "meme-lab",
+		"name": "Meme Lab"
+	},
+	{
+		"id": "mentionpilot",
+		"name": "MentionPilot"
+	},
+	{
+		"id": "what-it-takes-to-win",
+		"name": "Paths"
+	},
+	{
+		"id": "performancedaddy",
+		"name": "PerformanceDaddy"
+	},
+	{
+		"id": "ph-catalog",
+		"name": "PH Catalog"
+	},
+	{
+		"id": "posttrainllm",
+		"name": "PostTrainLLM"
+	},
+	{
+		"id": "saas-maker",
+		"name": "SaaS Maker"
+	},
+	{
+		"id": "setline",
+		"name": "Setline"
+	},
+	{
+		"id": "significanthobbies",
+		"name": "Significant Hobbies"
+	},
+	{
+		"id": "site-health",
+		"name": "Site Health"
+	},
+	{
+		"id": "slow-serp",
+		"name": "Slow SERP"
+	},
+	{
+		"id": "starboard",
+		"name": "Starboard"
+	},
+	{
+		"id": "storagedaddy",
+		"name": "storagedaddy"
+	},
+	{
+		"id": "swe-interview-prep",
+		"name": "SWE Interview Prep"
+	},
+	{
+		"id": "unified-portfolio",
+		"name": "Unified Portfolio"
+	},
+	{
+		"id": "war-chest",
+		"name": "War Chest"
+	}
+]

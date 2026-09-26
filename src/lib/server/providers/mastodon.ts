@@ -401,7 +401,7 @@ export async function mastodonRegisterApp(
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
-			client_name: 'CogSend',
+			client_name: 'Fleet Social',
 			redirect_uris: `${appUrl.replace(/\/$/, '')}/api/connections/mastodon/callback`,
 			scopes: 'read write:statuses write:media',
 			website: appUrl

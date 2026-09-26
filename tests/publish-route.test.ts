@@ -6,6 +6,7 @@ import { newId, type AppDb } from '$lib/server/db/client';
 import { connections, drafts, publishTargets, users } from '$lib/server/db/schema';
 import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
 import { POST as publishPOST } from '../src/routes/api/drafts/[id]/publish/+server';
+import { approveTestTargets } from './fleet-approval';
 
 describe('POST /api/drafts/[id]/publish guard', () => {
 	let db: AppDb;
@@ -116,6 +117,7 @@ describe('POST /api/drafts/[id]/publish guard', () => {
 				updatedAt: now
 			}
 		]);
+		await approveTestTargets(db, draftId, [connDone, connStale]);
 	});
 
 	afterAll(() => close());
@@ -170,6 +172,7 @@ describe('POST /api/drafts/[id]/publish guard', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, batchDraft, [connDone, connSecond]);
 
 		// The first refreshDraftStatus (which runs after a publish succeeds) is
 		// where this fake database dies — i.e. after the first post is out.
@@ -219,7 +222,9 @@ describe('POST /api/drafts/[id]/publish guard', () => {
 		// Nothing is left wedged mid-publish, and every target is either done or
 		// still due — which is what makes a retry safe after a stopped batch.
 		expect(rows.some((r) => r.status === 'publishing')).toBe(false);
-		expect(rows.every((r) => ['published', 'scheduled', 'pending'].includes(r.status))).toBe(true);
+		expect(
+			rows.every((r) => ['published', 'scheduled', 'pending', 'uncertain'].includes(r.status))
+		).toBe(true);
 		// The reason the batch stopped is in the log, for the operator.
 		expect(loggedLines(logged).join('\n')).toContain('[publish] aborted');
 	});
@@ -244,6 +249,7 @@ describe('POST /api/drafts/[id]/publish guard', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, liveDraft, [connDone]);
 		const res = (await publishPOST({
 			params: { id: liveDraft },
 			request: new Request('http://localhost/api/drafts/x/publish', {

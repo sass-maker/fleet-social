@@ -8,6 +8,7 @@ import { refreshDraftStatus } from '$lib/server/publish';
 import { refuseInFlightOrPublished } from '$lib/server/publish-plan';
 import { requireScope, requireUser } from '$lib/server/require';
 import { runAtError } from '$lib/domain/request-limits';
+import { approvalProblem } from '$lib/server/draft-approval';
 
 export const POST: RequestHandler = async ({ params, request, locals }) => {
 	try {
@@ -23,6 +24,15 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		const blocked = refuseInFlightOrPublished(target, now);
 		if (blocked) return fail(blocked, 409);
 		if (target.status === 'cancelled') return fail('Cancelled — retry instead');
+		if (target.status === 'uncertain' || target.status === 'publishing')
+			return fail('Check the social account and reconcile this outcome before rescheduling', 409);
+		const reviewProblem = await approvalProblem(
+			locals.db,
+			target.draftId,
+			[target.connectionId],
+			'subset'
+		);
+		if (reviewProblem) return fail(reviewProblem, 409);
 		const body = await request.json().catch(() => null);
 		if (!body || typeof body !== 'object') return fail('Invalid JSON body', 400);
 		const runAt = body.runAt ? new Date(body.runAt) : null;

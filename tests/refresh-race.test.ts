@@ -6,6 +6,7 @@ import { connections, drafts, publishTargets, users } from '$lib/server/db/schem
 import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
 import { publishTarget } from '$lib/server/publish';
 import type { FetchLike } from '$lib/server/providers/types';
+import { approveTestTargets } from './fleet-approval';
 
 /**
  * X rotates the refresh token on every use. Two publishes of one account that
@@ -71,6 +72,7 @@ describe('a refresh another publish already did', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, draftId, [connId]);
 		return { connId, targetId };
 	}
 

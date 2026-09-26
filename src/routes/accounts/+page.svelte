@@ -44,11 +44,12 @@
 		)
 	);
 	// svelte-ignore state_referenced_locally
-	let configured = $state<{ linkedin: boolean; threads: boolean; x: boolean }>(
+	let configured = $state<{ linkedin: boolean; threads: boolean; x: boolean; youtube: boolean }>(
 		data.configured ?? {
 			linkedin: true,
 			threads: true,
-			x: true
+			x: true,
+			youtube: true
 		}
 	);
 	// Per-secret presence from the API. The panel names the missing half of a
@@ -74,7 +75,11 @@
 	let pendingDisconnect = $state<{ id: string; label: string } | null>(null);
 	let disconnectBusy = $state(false);
 	let showConnectDialog = $state(false);
-	let modalForm = $state<'none' | 'bluesky' | 'mastodon'>('none');
+	let modalForm = $state<'none' | 'bluesky' | 'mastodon' | 'youtube-consent'>('none');
+	// svelte-ignore state_referenced_locally
+	let consentAccepted = $state(Boolean(data.youtubeConsent));
+	let consentChecked = $state(false);
+	let connectAfterConsent = $state(true);
 	// Set when the picked platform has no credentials on this deployment: the
 	// dialog shows its setup steps instead of a request that can only fail.
 	let setupPanel = $state<OAuthPlatformId | null>(null);
@@ -84,6 +89,12 @@
 	let connectCloseBtn: HTMLButtonElement | null = $state(null);
 
 	const availablePlatforms = [
+		{
+			id: 'youtube',
+			name: 'YouTube',
+			description: 'Connect your channel for private Shorts and videos',
+			form: null
+		},
 		{
 			id: 'x',
 			name: 'X',
@@ -140,7 +151,8 @@
 				configured = {
 					linkedin: payload.configured.linkedin !== false,
 					threads: payload.configured.threads !== false,
-					x: payload.configured.x !== false
+					x: payload.configured.x !== false,
+					youtube: payload.configured.youtube !== false
 				};
 			}
 			if (payload.secrets && typeof payload.secrets === 'object') {
@@ -179,7 +191,7 @@
 	}
 
 	async function connectOAuth(
-		platform: 'mastodon' | 'linkedin' | 'threads' | 'x',
+		platform: 'mastodon' | 'linkedin' | 'threads' | 'x' | 'youtube',
 		body: Record<string, string>
 	) {
 		loading = true;
@@ -217,6 +229,41 @@
 		await connectOAuth('mastodon', { instanceUrl });
 	}
 
+	async function acceptYoutubeConsent(e: Event) {
+		e.preventDefault();
+		if (!consentChecked) return;
+		loading = true;
+		err = null;
+		try {
+			const res = await fetch('/api/connections/youtube/consent', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ accepted: true })
+			});
+			const payload = await res.json().catch(() => ({}));
+			if (!res.ok) throw new Error(payload.error || 'Could not save privacy agreement');
+			consentAccepted = true;
+			if (connectAfterConsent) {
+				await connectOAuth('youtube', {});
+			} else {
+				closeConnectDialog();
+				msg = 'YouTube privacy agreement saved';
+			}
+		} catch (e) {
+			err = humanizeError(e instanceof Error ? e.message : 'Could not save privacy agreement');
+		} finally {
+			loading = false;
+		}
+	}
+
+	function showYoutubeConsent(connectAfter: boolean) {
+		err = null;
+		consentChecked = false;
+		connectAfterConsent = connectAfter;
+		modalForm = 'youtube-consent';
+		showConnectDialog = true;
+	}
+
 	function pickPlatform(id: string) {
 		const found = availablePlatforms.find((p) => p.id === id);
 		if (!found) return;
@@ -228,6 +275,10 @@
 		// so say what it needs instead of requesting an authorize URL.
 		if (needsSetup(id, configured)) {
 			showSetupPanel(id as OAuthPlatformId);
+			return;
+		}
+		if (id === 'youtube' && !consentAccepted) {
+			showYoutubeConsent(true);
 			return;
 		}
 		if (isOAuthPlatform(id)) void connectOAuth(id, {});
@@ -311,10 +362,15 @@
 		if (
 			account.platform === 'linkedin' ||
 			account.platform === 'threads' ||
-			account.platform === 'x'
+			account.platform === 'x' ||
+			account.platform === 'youtube'
 		) {
 			if (needsSetup(account.platform, configured)) {
 				showSetupPanel(account.platform);
+				return;
+			}
+			if (account.platform === 'youtube' && !consentAccepted) {
+				showYoutubeConsent(true);
 				return;
 			}
 			void connectOAuth(account.platform, {});
@@ -381,6 +437,19 @@
 			role="alert"
 		>
 			{err || msg}
+		</div>
+	{/if}
+
+	{#if !consentAccepted && connections.some((account) => account.platform === 'youtube')}
+		<div
+			class="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+		>
+			<p class="min-w-0 flex-1">
+				Review the current privacy policy before Fleet Social uses this YouTube connection again.
+			</p>
+			<button type="button" class="font-bold underline" onclick={() => showYoutubeConsent(false)}
+				>Review and agree</button
+			>
 		</div>
 	{/if}
 
@@ -708,6 +777,52 @@
 						</button>
 					{/each}
 				</div>
+			{:else if modalForm === 'youtube-consent'}
+				<form onsubmit={acceptYoutubeConsent} class="space-y-4">
+					<button
+						type="button"
+						onclick={backToPlatforms}
+						class="text-[13px] font-bold text-stone-500 hover:text-stone-900"
+						>← All platforms</button
+					>
+					<h3 class="text-[17px] font-extrabold tracking-tight text-stone-900">
+						YouTube privacy agreement
+					</h3>
+					<p class="text-sm leading-relaxed text-stone-600">
+						Fleet Social uses YouTube API Services to identify your channel and upload only an
+						approved video. Read the <a
+							href="/privacy"
+							target="_blank"
+							rel="noreferrer"
+							class="font-bold underline">privacy policy</a
+						>
+						and
+						<a href="/terms" target="_blank" rel="noreferrer" class="font-bold underline">terms</a>,
+						including the linked YouTube Terms of Service.
+					</p>
+					<label
+						class="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm text-stone-700"
+					>
+						<input
+							type="checkbox"
+							bind:checked={consentChecked}
+							required
+							class="mt-1 size-4 accent-stone-900"
+						/>
+						<span>I agree to the current Fleet Social privacy policy and terms.</span>
+					</label>
+					{#if err}<p class="text-sm text-red-600">{err}</p>{/if}
+					<button
+						type="submit"
+						disabled={loading || !consentChecked}
+						class="w-full rounded-full bg-stone-900 py-2.5 text-[13px] font-bold text-white hover:bg-stone-800 disabled:opacity-50"
+						>{loading
+							? 'Saving…'
+							: connectAfterConsent
+								? 'Agree and connect YouTube'
+								: 'Agree and continue'}</button
+					>
+				</form>
 			{:else if modalForm === 'bluesky'}
 				<form onsubmit={connectBluesky} class="space-y-3">
 					<button

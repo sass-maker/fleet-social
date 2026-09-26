@@ -51,6 +51,10 @@
 		try {
 			const res = await fetch('/api/auth/logout', { method: 'POST' });
 			if (!res.ok) throw new Error(`Logout failed (${res.status})`);
+			if (data.authMethod === 'access') {
+				window.location.assign('/cdn-cgi/access/logout');
+				return;
+			}
 			await invalidateAll();
 			await goto('/login');
 		} catch (err) {
@@ -364,6 +368,13 @@
 			class="relative mx-auto flex min-h-dvh w-full max-w-[800px] flex-col px-6 pt-32 pb-20 focus:outline-none"
 		>
 			{@render children()}
+			<nav
+				aria-label="Legal"
+				class="mt-10 flex justify-center gap-5 text-xs font-medium text-stone-500"
+			>
+				<a href="/privacy" class="underline hover:text-stone-900">Privacy</a>
+				<a href="/terms" class="underline hover:text-stone-900">Terms</a>
+			</nav>
 		</main>
 	</div>
 {/if}

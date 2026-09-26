@@ -71,6 +71,10 @@ CREATE TABLE IF NOT EXISTS \`drafts\` (
 	\`user_id\` text NOT NULL,
 	\`title\` text,
 	\`base_body\` text NOT NULL DEFAULT '',
+	\`project_id\` text,
+	\`source_ref\` text,
+	\`approval_hash\` text,
+	\`approved_at\` integer,
 	\`selected_connection_ids\` text,
 	\`status\` text NOT NULL DEFAULT 'draft',
 	\`created_at\` integer NOT NULL,
@@ -79,6 +83,7 @@ CREATE TABLE IF NOT EXISTS \`drafts\` (
 );
 CREATE INDEX IF NOT EXISTS \`drafts_user_status_idx\` ON \`drafts\` (\`user_id\`, \`status\`);
 CREATE INDEX IF NOT EXISTS \`drafts_user_updated_idx\` ON \`drafts\` (\`user_id\`, \`updated_at\`);
+CREATE UNIQUE INDEX IF NOT EXISTS \`drafts_project_source_uq\` ON \`drafts\` (\`project_id\`, \`source_ref\`);
 
 CREATE TABLE IF NOT EXISTS \`draft_variants\` (
 	\`id\` text PRIMARY KEY NOT NULL,
@@ -226,6 +231,7 @@ async function execStatements(d1: D1Database, sql: string) {
 const BACKFILL_INDEXES = [
 	'CREATE INDEX IF NOT EXISTS publish_targets_conn_status_idx ON publish_targets (connection_id, status, scheduled_for)',
 	'CREATE INDEX IF NOT EXISTS drafts_user_updated_idx ON drafts (user_id, updated_at)',
+	'CREATE UNIQUE INDEX IF NOT EXISTS drafts_project_source_uq ON drafts (project_id, source_ref)',
 	'CREATE INDEX IF NOT EXISTS connections_user_status_idx ON connections (user_id, status)',
 	'CREATE INDEX IF NOT EXISTS connections_user_created_idx ON connections (user_id, created_at)',
 	'CREATE INDEX IF NOT EXISTS publish_targets_status_updated_idx ON publish_targets (status, updated_at)',
@@ -291,7 +297,13 @@ const COLUMN_BACKFILLS: Array<{ table: string; columns: { name: string; ddl: str
 	},
 	{
 		table: 'drafts',
-		columns: [{ name: 'selected_connection_ids', ddl: 'selected_connection_ids text' }]
+		columns: [
+			{ name: 'selected_connection_ids', ddl: 'selected_connection_ids text' },
+			{ name: 'project_id', ddl: 'project_id text' },
+			{ name: 'source_ref', ddl: 'source_ref text' },
+			{ name: 'approval_hash', ddl: 'approval_hash text' },
+			{ name: 'approved_at', ddl: 'approved_at integer' }
+		]
 	},
 	{ table: 'api_keys', columns: [{ name: 'scopes', ddl: 'scopes text' }] },
 	{

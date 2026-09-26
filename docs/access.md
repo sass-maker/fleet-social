@@ -1,5 +1,7 @@
 # Putting it behind Cloudflare Access
 
+Fleet Social's owner deployment uses Cloudflare Access for sign-in, with Cloudflare, GitHub and Google as identity providers. The Worker verifies the Access JWT before accepting a user session and matches it to the seeded owner email. The instructions below describe optional Access setup for a general CogSend instance, whose local login remains separate.
+
 Optional. The app has its own login, so Access is an extra gate for an instance only you (or a small team) reach — it does not replace the login, and it does not replace the secrets: `APP_ENCRYPTION_KEY` still encrypts your provider tokens and derives the key that signs the publish-time media URLs, and `AUTH_SECRET` still signs sessions and OAuth state.
 
 ## Turning it on

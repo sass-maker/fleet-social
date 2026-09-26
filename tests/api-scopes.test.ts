@@ -96,7 +96,7 @@ describe('route enforcement', () => {
 				request: new Request('http://localhost/api/drafts', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ baseBody: 'yes' })
+					body: JSON.stringify({ projectId: 'codevetter', baseBody: 'yes' })
 				}),
 				locals: { db, user, apiKeyScopes: ['read', 'write'] }
 			} as never)) as Response;

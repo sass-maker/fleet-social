@@ -12,6 +12,7 @@ import { connections, drafts, publishTargets, users } from '$lib/server/db/schem
 import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
 import { captureConsole, loggedLines } from './console-spy';
 import { draftHasInFlightPublish } from '$lib/server/publish-plan';
+import { approveTestTargets } from './fleet-approval';
 import {
 	claimDueTargets,
 	consumePublishJob,
@@ -70,6 +71,7 @@ describe('claimDueTargets stale publishing', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, draftId, [connId]);
 	});
 
 	afterAll(() => close());
@@ -201,6 +203,7 @@ describe('claimDueTargets stale publishing', () => {
 			// Past the stale window: the consumer that claimed it is gone.
 			updatedAt: new Date(now.getTime() - 16 * 60_000)
 		});
+		await approveTestTargets(db, d, [connId]);
 		const sent: Array<{ targetId: string }> = [];
 		const tick = await runSchedulerTick(db, TEST_ENV, {
 			store: createTestMedia(),
@@ -264,6 +267,7 @@ describe('claimDueTargets stale publishing', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, qDraft, [connId]);
 		const targetId = newId();
 		await db.insert(publishTargets).values({
 			id: targetId,
@@ -510,7 +514,7 @@ describe('scheduler statement budget', () => {
 		return { db: drizzle(client, { schema }) as unknown as AppDb, close: () => client.close() };
 	}
 	beforeAll(async () => {
-		({ db, close } = await budgetDb(/publish_attempts/i));
+		({ db, close } = await budgetDb(/insert into.*publish_attempts/i));
 		const now = new Date();
 		const userId = newId();
 		await db.insert(users).values({
@@ -552,6 +556,7 @@ describe('scheduler statement budget', () => {
 				createdAt: now,
 				updatedAt: now
 			});
+			await approveTestTargets(db, draftId, [connId]);
 		}
 	});
 	afterAll(() => close());

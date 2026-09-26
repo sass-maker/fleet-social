@@ -7,6 +7,7 @@ import { hashPassword } from '$lib/server/crypto';
 import { newId, type AppDb } from '$lib/server/db/client';
 import { draftMedia, drafts, sessions, totpBackupCodes, users } from '$lib/server/db/schema';
 import { createTestAdmin, createTestDb, TEST_ENV } from '$lib/server/db/test';
+import { hasCurrentYouTubeConsent, recordYouTubeConsent } from '$lib/server/youtube-consent';
 import { enrollConfirm, enrollStart, startEnrollChallenge } from '$lib/server/totp';
 import { DELETE } from '../src/routes/api/auth/me/+server';
 
@@ -155,6 +156,7 @@ describe('deleting the account', () => {
 
 	it('deletes the account, every session, and the media behind it', async () => {
 		await createSession(db, TEST_ENV, userId, true, true, passwordHash);
+		await recordYouTubeConsent(db, userId);
 		expect(await db.select().from(sessions)).not.toHaveLength(0);
 
 		const deleted: string[] = [];
@@ -173,6 +175,7 @@ describe('deleting the account', () => {
 		// The account, its sessions and its one-time codes are gone.
 		expect(await db.select().from(users).where(eq(users.id, userId))).toHaveLength(0);
 		expect(await db.select().from(sessions).where(eq(sessions.userId, userId))).toHaveLength(0);
+		expect(await hasCurrentYouTubeConsent(db, userId)).toBe(false);
 		expect(
 			await db.select().from(totpBackupCodes).where(eq(totpBackupCodes.userId, userId))
 		).toHaveLength(0);

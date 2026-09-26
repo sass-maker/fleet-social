@@ -1,6 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { first } from '$lib/server/db/client';
+import { approvalProblem } from '$lib/server/draft-approval';
 import { connections, drafts } from '$lib/server/db/schema';
 import { fail, handleError, ok } from '$lib/server/http';
 import { classifyConnections, ensureTargets } from '$lib/server/publish-plan';
@@ -31,6 +32,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		const connectionIds = normalizeConnectionIds(body.connectionIds);
 		const runAt = body.runAt ? new Date(body.runAt) : null;
 		if (!connectionIds.length) return fail('connectionIds required');
+		const reviewProblem = await approvalProblem(locals.db, params.id, connectionIds);
+		if (reviewProblem) return fail(reviewProblem, 409);
 		const runAtProblem = runAtError(body.runAt, now);
 		if (runAtProblem) return fail(runAtProblem, 400);
 		if (!runAt) return fail('runAt required (ISO date)', 400);

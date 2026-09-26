@@ -8,9 +8,11 @@ import { POST as linkedinPOST } from '../src/routes/api/connections/linkedin/+se
 import { POST as mastodonPOST } from '../src/routes/api/connections/mastodon/+server';
 import { POST as threadsPOST } from '../src/routes/api/connections/threads/+server';
 import { POST as xPOST } from '../src/routes/api/connections/x/+server';
+import { POST as youtubePOST } from '../src/routes/api/connections/youtube/+server';
 import { platformName } from '$lib/domain/platforms';
 import { PLATFORM_SECRET_NAMES, PLATFORM_SETUP } from '$lib/domain/platform-setup';
 import { OAUTH_PENDING_TTL_MS } from '$lib/domain/oauth-pending';
+import { recordYouTubeConsent } from '$lib/server/youtube-consent';
 
 /**
  * The four connect entry points. They were untested: a regression here (a
@@ -30,7 +32,9 @@ describe('connect routes', () => {
 		X_CLIENT_ID: 'x-client',
 		X_CLIENT_SECRET: 'x-secret',
 		LINKEDIN_CLIENT_ID: 'li-client',
-		LINKEDIN_CLIENT_SECRET: 'li-secret'
+		LINKEDIN_CLIENT_SECRET: 'li-secret',
+		YOUTUBE_CLIENT_ID: 'youtube-client',
+		YOUTUBE_CLIENT_SECRET: 'youtube-secret'
 	};
 
 	const locals = (overrides: Record<string, unknown> = {}) => ({
@@ -74,12 +78,13 @@ describe('connect routes', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await recordYouTubeConsent(db, userId);
 	});
 	afterAll(() => close());
 	afterEach(() => vi.unstubAllGlobals());
 
 	it('refuses bearer credentials — connecting is session-only', async () => {
-		for (const handler of [mastodonPOST, threadsPOST, xPOST, linkedinPOST]) {
+		for (const handler of [mastodonPOST, threadsPOST, xPOST, linkedinPOST, youtubePOST]) {
 			const res = await call(
 				handler,
 				{ instanceUrl: 'https://mastodon.example' },
@@ -97,7 +102,8 @@ describe('connect routes', () => {
 		for (const [handler, platform, secrets] of [
 			[threadsPOST, 'threads', ['THREADS_APP_ID', 'THREADS_APP_SECRET']],
 			[xPOST, 'x', ['X_CLIENT_ID']],
-			[linkedinPOST, 'linkedin', ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET']]
+			[linkedinPOST, 'linkedin', ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET']],
+			[youtubePOST, 'youtube', ['YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET']]
 		] as const) {
 			const res = await call(handler, undefined, { env: { ...TEST_ENV } });
 			expect(res.status).toBe(409);
@@ -129,7 +135,8 @@ describe('connect routes', () => {
 		for (const [handler, platform] of [
 			[threadsPOST, 'threads'],
 			[xPOST, 'x'],
-			[linkedinPOST, 'linkedin']
+			[linkedinPOST, 'linkedin'],
+			[youtubePOST, 'youtube']
 		] as const) {
 			const setup = PLATFORM_SETUP[platform];
 			const complete: Record<string, unknown> = { ...env };
@@ -168,7 +175,7 @@ describe('connect routes', () => {
 			secrets: Record<string, boolean>;
 			appUrl?: string;
 		};
-		expect(body.configured).toEqual({ linkedin: true, threads: true, x: true });
+		expect(body.configured).toEqual({ linkedin: true, threads: true, x: true, youtube: true });
 		expect(body.appUrl).toBe('https://cogsend.example.com/');
 		// Presence per secret, not just per platform: this is what lets the
 		// dialog name the missing half instead of repeating "no credentials".
@@ -188,7 +195,8 @@ describe('connect routes', () => {
 		expect(bareBody.configured).toEqual({
 			linkedin: false,
 			threads: false,
-			x: false
+			x: false,
+			youtube: false
 		});
 		expect(Object.values(bareBody.secrets).some(Boolean)).toBe(false);
 		// Half uploaded: the state that used to be indistinguishable from
@@ -229,10 +237,11 @@ describe('connect routes', () => {
 		expect(row.clientSecretEnc).not.toContain('x-secret');
 	});
 
-	it('returns Threads and LinkedIn authorize URLs with a bound state', async () => {
+	it('returns OAuth authorize URLs with a bound state', async () => {
 		for (const [handler, marker, client] of [
 			[threadsPOST, 'threads', 'threads-app'],
-			[linkedinPOST, 'linkedin', 'li-client']
+			[linkedinPOST, 'linkedin', 'li-client'],
+			[youtubePOST, 'youtube', 'youtube-client']
 		] as const) {
 			const res = await call(handler);
 			expect(res.status).toBe(200);

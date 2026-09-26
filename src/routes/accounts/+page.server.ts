@@ -1,12 +1,18 @@
 import type { PageServerLoad } from './$types';
 import { listConnections } from '$lib/server/connection-list';
 import { requireUser } from '$lib/server/require';
+import { hasCurrentYouTubeConsent } from '$lib/server/youtube-consent';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const user = requireUser(locals.user);
 	try {
+		const [connectionData, youtubeConsent] = await Promise.all([
+			listConnections(locals.db, locals.env, user.id),
+			hasCurrentYouTubeConsent(locals.db, user.id)
+		]);
 		return {
-			...(await listConnections(locals.db, locals.env, user.id)),
+			...connectionData,
+			youtubeConsent,
 			loadFailed: false
 		};
 	} catch (err) {
@@ -15,9 +21,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		console.error('[accounts] list failed', err);
 		return {
 			connections: [],
-			configured: { linkedin: false, threads: false, x: false },
+			configured: { linkedin: false, threads: false, x: false, youtube: false },
 			secrets: {},
 			appUrl: locals.env.APP_URL,
+			youtubeConsent: false,
 			loadFailed: true
 		};
 	}

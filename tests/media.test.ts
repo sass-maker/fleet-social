@@ -81,6 +81,30 @@ describe('groupMediaBySegment', () => {
 });
 
 describe('media serve hardening', () => {
+	it('stores an MP4 as a Blob after checking only its header', async () => {
+		const { saveVideoFile } = await import('$lib/server/media');
+		const bytes = new Uint8Array([0, 0, 0, 16, 0x66, 0x74, 0x79, 0x70, 1, 2, 3, 4]);
+		const file = new File([bytes], 'clip.mp4', { type: 'video/mp4' });
+		let stored: Blob | null = null;
+		const saved = await saveVideoFile(
+			{
+				get: async () => null,
+				put: async () => {
+					throw new Error('unexpected full byte copy');
+				},
+				putBlob: async (_key, blob) => {
+					stored = blob;
+				},
+				delete: async () => {}
+			},
+			file
+		);
+		expect(stored).toBe(file);
+		expect(saved.size).toBe(file.size);
+		expect(saved.mime).toBe('video/mp4');
+		expect(saved.storageKey).toMatch(/\.mp4$/);
+	});
+
 	it('rejects validation failures with 400, not 500', async () => {
 		const { saveMediaBytes } = await import('$lib/server/media');
 		const { createTestMedia } = await import('$lib/server/db/test');

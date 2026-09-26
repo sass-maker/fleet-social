@@ -52,9 +52,11 @@ async function seedScheduledDraft(page: Page, body: string, scheduledFor: string
 	const status = scheduledFor === null ? 'cancelled' : 'scheduled';
 	d1(
 		`INSERT INTO connections (id, user_id, platform, handle, credentials_encrypted, meta_json, status, created_at, updated_at) VALUES ('${connId}', '${userId}', 'bluesky', '${handle}', 'enc', '{}', 'active', ${now}, ${now}); ` +
-			`INSERT INTO drafts (id, user_id, title, base_body, status, created_at, updated_at) VALUES ('${draftId}', '${userId}', NULL, '${body}', '${scheduledFor === null ? 'draft' : 'scheduled'}', ${now}, ${now}); ` +
+			`INSERT INTO drafts (id, user_id, title, base_body, project_id, selected_connection_ids, status, created_at, updated_at) VALUES ('${draftId}', '${userId}', NULL, '${body}', 'fleet-social', json_array('${connId}'), '${scheduledFor === null ? 'draft' : 'scheduled'}', ${now}, ${now}); ` +
 			`INSERT INTO publish_targets (id, draft_id, connection_id, status, scheduled_for, attempt_count, created_at, updated_at) VALUES ('${randomUUID()}', '${draftId}', '${connId}', '${status}', ${when}, 0, ${now}, ${now})`
 	);
+	const approval = await page.request.post(`/api/drafts/${draftId}/approval`);
+	expect(approval.ok()).toBe(true);
 	seeded.push({ draftId, connId });
 	return { draftId, connId };
 }
@@ -166,7 +168,6 @@ test('(4) a new composer keeps the one-hour default', async ({ page }) => {
 test('(5) a schedule picked while the draft loads is not overwritten', async ({ page }) => {
 	const body = `schedule race ${randomUUID().slice(0, 8)}`;
 	const { draftId, connId } = await seedScheduledDraft(page, body, STORED_ISO);
-	const sent = await captureSchedule(page, draftId);
 	// Make this draft unavailable to compose's SSR loader so the editor must
 	// use its client fallback, the path whose in-flight response is under test.
 	d1(
@@ -205,8 +206,7 @@ test('(5) a schedule picked while the draft loads is not overwritten', async ({ 
 	await expect(page.getByTestId('schedule-date')).toHaveValue('2030-06-20');
 	await expect(page.getByTestId('schedule-time')).toHaveValue('16:45');
 
-	await page.getByTestId('schedule-confirm').click();
-	await expect.poll(() => sent.length, { timeout: 20000 }).toBe(1);
-	// 16:45 EDT.
-	expect(sent[0].runAt).toBe('2030-06-20T20:45:00.000Z');
+	// The loading race preserves the date, while the now-missing draft cannot be
+	// scheduled without a fresh saved approval.
+	await expect(page.getByTestId('schedule-confirm')).toBeDisabled();
 });

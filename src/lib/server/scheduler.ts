@@ -24,12 +24,13 @@ import {
 	drafts,
 	notificationState,
 	oauthPending,
+	publishAttempts,
 	publishTargets,
 	schedulerHeartbeats
 } from './db/schema';
 import type { AppEnv } from './env';
 import type { MediaStore } from './media';
-import { PUBLISH_RESERVE_CALLS, publishTarget } from './publish';
+import { PUBLISH_RESERVE_CALLS, publishTarget, refreshDraftStatuses } from './publish';
 import type { SubrequestBudget } from './budget';
 import { purgeExpiredMfaChallenges } from './totp';
 import { purgeExpiredSessions } from './auth';
@@ -216,7 +217,7 @@ export async function maybeSendFailureDigest(
 		.leftJoin(connections, eq(publishTargets.connectionId, connections.id))
 		.where(
 			and(
-				eq(publishTargets.status, 'failed'),
+				inArray(publishTargets.status, ['failed', 'uncertain']),
 				isNull(publishTargets.remotePostId),
 				gt(publishTargets.updatedAt, cutoff)
 			)
@@ -255,7 +256,7 @@ export async function maybeSendFailureDigest(
 		const body = draftExcerpt(f.baseBody || f.draftTitle || '(no text)', 90);
 		return { where, body, error: humanizeError(f.errorMessage) };
 	});
-	const subject = `CogSend: ${failures.length} post${failures.length === 1 ? '' : 's'} failed to publish`;
+	const subject = `Fleet Social: ${failures.length} post${failures.length === 1 ? '' : 's'} failed to publish`;
 	const text = [
 		`${failures.length} post${failures.length === 1 ? '' : 's'} failed to publish:`,
 		'',
@@ -321,6 +322,31 @@ export async function maybeSendFailureDigest(
  */
 export async function recoverStalePublishing(db: AppDb, now: Date = new Date()) {
 	const staleBefore = new Date(now.getTime() - STALE_CLAIM_MS);
+	const uncertain = await db
+		.update(publishTargets)
+		.set({
+			status: 'uncertain',
+			jobId: null,
+			errorMessage:
+				'The worker stopped during a provider request. Check the social account before retrying.',
+			updatedAt: now
+		})
+		.where(
+			and(
+				eq(publishTargets.status, 'publishing'),
+				isNull(publishTargets.remotePostId),
+				lte(publishTargets.updatedAt, staleBefore),
+				inArray(
+					publishTargets.id,
+					db.select({ id: publishAttempts.publishTargetId }).from(publishAttempts)
+				)
+			)
+		)
+		.returning({ draftId: publishTargets.draftId });
+	await refreshDraftStatuses(
+		db,
+		uncertain.map((row) => row.draftId)
+	);
 	await db
 		.update(publishTargets)
 		.set({ status: 'pending', scheduledFor: null, jobId: null, updatedAt: now })

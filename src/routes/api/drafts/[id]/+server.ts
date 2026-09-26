@@ -1,5 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { isFleetProjectId } from '$lib/domain/fleet-projects';
 import { parseDraftBody, parseDraftTitle } from '$lib/domain/validation/draft-fields';
 import { first } from '$lib/server/db/client';
 import { draftMedia, drafts, publishTargets } from '$lib/server/db/schema';
@@ -46,7 +47,14 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		if (!selection.ok) return fail(selection.error, 400);
 		// Validate before the UPDATE: a non-string reaches the driver as a 500,
 		// and an unbounded string is stored as-is.
-		const patch: { title?: string | null; baseBody?: string; selectedConnectionIds?: string } = {};
+		const patch: {
+			title?: string | null;
+			baseBody?: string;
+			selectedConnectionIds?: string;
+			projectId?: string;
+			approvalHash?: null;
+			approvedAt?: null;
+		} = {};
 		if (body.title !== undefined) {
 			const title = parseDraftTitle(body.title);
 			if (!title.ok) return fail(title.error, 400);
@@ -58,6 +66,20 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 			patch.baseBody = text.value;
 		}
 		if (selection.value !== undefined) patch.selectedConnectionIds = selection.value;
+		if (body.projectId !== undefined) {
+			if (!isFleetProjectId(body.projectId)) return fail('Choose an active Fleet project', 400);
+			patch.projectId = body.projectId;
+		}
+		if (
+			(patch.title !== undefined && patch.title !== existing.title) ||
+			(patch.baseBody !== undefined && patch.baseBody !== existing.baseBody) ||
+			(patch.selectedConnectionIds !== undefined &&
+				patch.selectedConnectionIds !== existing.selectedConnectionIds) ||
+			(patch.projectId !== undefined && patch.projectId !== existing.projectId)
+		) {
+			patch.approvalHash = null;
+			patch.approvedAt = null;
+		}
 		await locals.db
 			.update(drafts)
 			.set({

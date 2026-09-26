@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, sql, type InferSelectModel } from 'drizzle-orm';
-import { batchQueries, chunkIds, type AppDb } from './db/client';
-import { connections, draftMedia, drafts, publishTargets } from './db/schema';
+import { batchQueries, chunkIds, parseJson, type AppDb } from './db/client';
+import { connections, draftMedia, drafts, publishAttempts, publishTargets } from './db/schema';
 import { serializeMedia } from './serialize';
 
 export const DRAFTS_LIST_LIMIT = 200;
@@ -28,6 +28,7 @@ export async function loadDraftSummaries(db: AppDb, userId: string, limit = DRAF
 			id: drafts.id,
 			title: drafts.title,
 			baseBody: drafts.baseBody,
+			projectId: drafts.projectId,
 			status: drafts.status,
 			updatedAt: drafts.updatedAt
 		})
@@ -157,6 +158,7 @@ export async function loadQueueList(db: AppDb, userId: string, limit = QUEUE_LIS
 					'scheduled',
 					'pending',
 					'publishing',
+					'uncertain',
 					'failed',
 					'published'
 				])
@@ -174,7 +176,13 @@ export async function loadQueueList(db: AppDb, userId: string, limit = QUEUE_LIS
 		InferSelectModel<typeof connections>,
 		'id' | 'platform' | 'handle' | 'displayName' | 'avatarUrl' | 'status'
 	>;
-	type DraftLite = { id: string; title: string | null; baseBody: string; status: string };
+	type DraftLite = {
+		id: string;
+		title: string | null;
+		baseBody: string;
+		status: string;
+		projectId: string | null;
+	};
 	type MediaRow = InferSelectModel<typeof draftMedia>;
 	const [allTargetRows, allConns] = (await batchQueries(db, [
 		targetsQuery,
@@ -194,6 +202,27 @@ export async function loadQueueList(db: AppDb, userId: string, limit = QUEUE_LIS
 	const hasMore = allTargetRows.length > limit;
 	const targetRows = hasMore ? allTargetRows.slice(0, limit) : allTargetRows;
 	const connById = new Map(allConns.map((c) => [c.id, c]));
+	const youtubeIds = targetRows
+		.filter((t) => t.status === 'published' && connById.get(t.connectionId)?.platform === 'youtube')
+		.map((t) => t.id);
+	const youtubeVisibility = new Map<string, string>();
+	for (const chunk of chunkIds(youtubeIds)) {
+		const attempts = await db
+			.select({
+				targetId: publishAttempts.publishTargetId,
+				responseSummary: publishAttempts.responseSummary
+			})
+			.from(publishAttempts)
+			.where(
+				and(inArray(publishAttempts.publishTargetId, chunk), eq(publishAttempts.success, true))
+			)
+			.orderBy(desc(publishAttempts.startedAt));
+		for (const attempt of attempts) {
+			if (youtubeVisibility.has(attempt.targetId)) continue;
+			const summary = parseJson<{ visibility?: string }>(attempt.responseSummary, {});
+			if (summary.visibility) youtubeVisibility.set(attempt.targetId, summary.visibility);
+		}
+	}
 	const queuedDraftIds = [...new Set(targetRows.map((t) => t.draftId))];
 	const draftRows: DraftLite[] = [];
 	for (const chunk of chunkIds(queuedDraftIds)) {
@@ -203,7 +232,8 @@ export async function loadQueueList(db: AppDb, userId: string, limit = QUEUE_LIS
 					id: drafts.id,
 					title: drafts.title,
 					baseBody: drafts.baseBody,
-					status: drafts.status
+					status: drafts.status,
+					projectId: drafts.projectId
 				})
 				.from(drafts)
 				.where(and(eq(drafts.userId, userId), inArray(drafts.id, chunk))))
@@ -233,19 +263,28 @@ export async function loadQueueList(db: AppDb, userId: string, limit = QUEUE_LIS
 		const connection = connById.get(t.connectionId);
 		const draft = draftById.get(t.draftId);
 		if (!connection || !draft) continue;
-		if (connection.status === 'disconnected' && !t.remotePostId) continue;
+		if (
+			connection.status === 'disconnected' &&
+			!t.remotePostId &&
+			t.status !== 'published' &&
+			t.status !== 'uncertain'
+		)
+			continue;
 		targets.push({
 			id: t.id,
 			status: t.status,
 			scheduledFor: t.scheduledFor,
 			updatedAt: t.updatedAt,
 			remoteUrl: t.remoteUrl,
+			remotePostId: t.remotePostId,
+			visibility: youtubeVisibility.get(t.id) ?? null,
 			errorMessage: t.errorMessage,
 			draft: {
 				id: draft.id,
 				title: draft.title,
 				baseBody: draft.baseBody,
 				status: draft.status,
+				projectId: draft.projectId,
 				media: mediaByDraft.get(draft.id) ?? []
 			},
 			connection: {
