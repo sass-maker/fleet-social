@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		console.error('[accounts] list failed', err);
 		return {
 			connections: [],
-			configured: { linkedin: false, threads: false, x: false },
+			configured: { linkedin: false, threads: false, x: false, youtube: false },
 			secrets: {},
 			appUrl: locals.env.APP_URL,
 			loadFailed: true

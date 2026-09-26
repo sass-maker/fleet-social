@@ -66,7 +66,7 @@ the `wrangler login` that `setup` starts.
    The first sign-in asks for an authenticator app: scan the QR and save the
    backup codes it shows.
 2. Connect accounts under **Accounts**. Mastodon and Bluesky work immediately;
-   LinkedIn, Threads and X need an OAuth app each, with the redirect URI built
+   YouTube, LinkedIn, Threads and X need an OAuth app each, with the redirect URI built
    from your deployed URL ([OAuth apps](oauth-apps.md)).
 3. Scheduled posts publish themselves through the cron trigger in
    `wrangler.jsonc`. Nothing to set up — unless the account had no trigger slot

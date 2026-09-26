@@ -9,6 +9,7 @@ import {
 	getProvider,
 	linkedinVerify,
 	threadsVerify,
+	youtubeChannel,
 	xVerify,
 	type ConnectionCredentials
 } from '$lib/server/providers';
@@ -220,6 +221,26 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 								)
 							}
 						: {}),
+					updatedAt: new Date()
+				})
+				.where(owned);
+		} else if (conn.platform === 'youtube') {
+			const refreshed = await getProvider('youtube').refreshIfNeeded!(creds);
+			const channel = await youtubeChannel(refreshed);
+			if (creds.youtubeChannelId && channel.id !== creds.youtubeChannelId) {
+				return fail('YouTube channel changed — reconnect the original channel', 409);
+			}
+			await locals.db
+				.update(connections)
+				.set({
+					status: 'active',
+					displayName: channel.title,
+					handle: channel.id,
+					avatarUrl: channel.avatarUrl || conn.avatarUrl,
+					credentialsEncrypted: await encryptJson(
+						{ ...refreshed, youtubeChannelId: channel.id },
+						locals.env.APP_ENCRYPTION_KEY
+					),
 					updatedAt: new Date()
 				})
 				.where(owned);

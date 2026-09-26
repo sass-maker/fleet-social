@@ -11,12 +11,13 @@ import {
 } from '$lib/domain/platforms';
 
 describe('platforms', () => {
-	it('recognizes the five platform ids', () => {
+	it('recognizes the six platform ids', () => {
 		expect(isPlatformId('mastodon')).toBe(true);
 		expect(isPlatformId('bluesky')).toBe(true);
 		expect(isPlatformId('linkedin')).toBe(true);
 		expect(isPlatformId('threads')).toBe(true);
 		expect(isPlatformId('x')).toBe(true);
+		expect(isPlatformId('youtube')).toBe(true);
 		expect(isPlatformId('twitter')).toBe(false);
 	});
 
@@ -26,6 +27,7 @@ describe('platforms', () => {
 		expect(supportsThreads('x')).toBe(true);
 		expect(supportsThreads('threads')).toBe(true);
 		expect(supportsThreads('linkedin')).toBe(false);
+		expect(supportsThreads('youtube')).toBe(false);
 	});
 
 	it('preview priority covers every platform exactly once', () => {
@@ -34,14 +36,23 @@ describe('platforms', () => {
 			'linkedin',
 			'mastodon',
 			'threads',
-			'x'
+			'x',
+			'youtube'
 		]);
 	});
 
-	it('orders X first, then threads, linkedin, mastodon, bluesky', () => {
-		expect([...PLATFORM_ORDER]).toEqual(['x', 'threads', 'linkedin', 'mastodon', 'bluesky']);
-		expect(platformRank('x')).toBe(0);
-		expect(platformRank('bluesky')).toBe(4);
+	it('orders YouTube first, then existing platforms', () => {
+		expect([...PLATFORM_ORDER]).toEqual([
+			'youtube',
+			'x',
+			'threads',
+			'linkedin',
+			'mastodon',
+			'bluesky'
+		]);
+		expect(platformRank('youtube')).toBe(0);
+		expect(platformRank('x')).toBe(1);
+		expect(platformRank('bluesky')).toBe(5);
 		expect(platformRank('unknown')).toBe(99);
 	});
 });

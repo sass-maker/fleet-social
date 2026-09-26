@@ -84,6 +84,8 @@
 		scheduledFor: string | Date | null;
 		updatedAt?: string | Date | null;
 		remoteUrl: string | null;
+		remotePostId?: string | null;
+		visibility?: string | null;
 		errorMessage: string | null;
 		draft: {
 			id: string;
@@ -117,6 +119,8 @@
 			connectionId?: string;
 			displayName?: string | null;
 			remoteUrl?: string | null;
+			remotePostId?: string | null;
+			visibility?: string | null;
 			error?: string | null;
 			status?: string;
 			targetId?: string;
@@ -394,6 +398,8 @@
 					connectionId: t.connection.id,
 					displayName: t.connection.displayName,
 					remoteUrl: t.remoteUrl,
+					remotePostId: t.remotePostId,
+					visibility: t.visibility,
 					error: t.errorMessage,
 					status: t.status,
 					targetId: t.id,
@@ -1318,7 +1324,17 @@
 				{:else if card.error}
 					<p class="mb-4 text-xs text-red-600">{humanizeError(card.error)}</p>
 				{/if}
-				<!-- remoteUrl removed in favor of clickable platform icons -->
+				{#each card.platforms.filter((platform) => platform.name === 'youtube' && platform.status === 'published' && platform.remotePostId) as video (video.targetId)}
+					<p class="mb-4 text-xs font-medium text-stone-600">
+						YouTube receipt · {video.visibility || 'Visibility unknown'} · Video ID
+						<a
+							href={video.remoteUrl || undefined}
+							target="_blank"
+							rel="noreferrer"
+							class="font-bold text-stone-900 underline">{video.remotePostId}</a
+						>
+					</p>
+				{/each}
 
 				<!-- Post Footer -->
 				<div

@@ -70,7 +70,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		settings: parseProfileSettings(userRows[0]?.settingsJson ?? null),
 		displayName: userRows[0]?.displayName ?? user.displayName ?? null,
 		// In-progress feature flag; the editor only mirrors it for the picker.
-		videoEnabled: locals.env.videoUploadEnabled,
+		videoEnabled: locals.env.videoUploadEnabled || locals.env.youtubeUploadEnabled,
 		draft
 	};
 };

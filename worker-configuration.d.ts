@@ -62,6 +62,10 @@ interface Env {
 	/** Instance display name shown in the UI, when not overridden in
 	 *  Settings → Instance (which is stored in D1). Defaults to "CogSend". */
 	APP_NAME?: string;
+	/** Cloudflare Access team hostname and this application's audience tag.
+	 * Both must be set before an Access assertion can log in. */
+	ACCESS_TEAM_DOMAIN?: string;
+	ACCESS_AUD?: string;
 	/** The only secret a deployment must bring: it encrypts the stored provider
 	 *  tokens, and AUTH_SECRET/SCHEDULER_SECRET are derived from it. */
 	APP_ENCRYPTION_KEY: string;
@@ -77,6 +81,8 @@ interface Env {
 	MEDIA_PUBLIC_BASE_URL?: string;
 	LINKEDIN_CLIENT_ID?: string;
 	LINKEDIN_CLIENT_SECRET?: string;
+	YOUTUBE_CLIENT_ID?: string;
+	YOUTUBE_CLIENT_SECRET?: string;
 	THREADS_APP_ID?: string;
 	THREADS_APP_SECRET?: string;
 	X_CLIENT_ID?: string;

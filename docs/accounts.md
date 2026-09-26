@@ -13,6 +13,12 @@ These two connect with what you already have:
   Bluesky under Settings → Privacy and security → App passwords. Never use your
   main password.
 
+## YouTube
+
+YouTube needs a [Google OAuth app and YouTube Data API setup](oauth-apps.md#youtube) on the Worker. Once configured, choose **Accounts → Connect new → YouTube**, select the Google account that owns the channel, and grant upload and account-read access. The connected channel name and ID appear on Accounts. The app stores the refresh token encrypted and uploads an approved MP4 as a private video. YouTube decides whether a qualifying video is a Short; there is no separate Shorts connection.
+
+The first connection should be tested with a private video. The Posts receipt links to the YouTube video and reports its returned visibility and video ID. Reconnect if Google revokes the grant or the refresh token expires.
+
 ## LinkedIn, Threads and X
 
 These three need a developer app of your own before they can connect, because the

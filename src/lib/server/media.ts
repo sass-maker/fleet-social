@@ -23,6 +23,9 @@ export function memoryMediaStore(
 		async put(key, bytes, mime) {
 			map.set(key, { bytes, mime });
 		},
+		async putBlob(key, blob, mime) {
+			map.set(key, { bytes: new Uint8Array(await blob.arrayBuffer()), mime });
+		},
 		async delete(key) {
 			map.delete(key);
 		},
@@ -54,6 +57,9 @@ export function r2MediaStore(bucket: R2Bucket): MediaStore {
 		},
 		async put(key, bytes, mime) {
 			await bucket.put(key, bytes, { httpMetadata: { contentType: mime } });
+		},
+		async putBlob(key, blob, mime) {
+			await bucket.put(key, blob, { httpMetadata: { contentType: mime } });
 		},
 		async delete(key) {
 			await bucket.delete(key);
@@ -115,6 +121,22 @@ export async function saveMediaBytes(
 		}
 	}
 	return { storageKey, size: file.bytes.length, mime: check.mime, width, height };
+}
+
+export async function saveVideoFile(
+	store: MediaStore,
+	file: File
+): Promise<{ storageKey: string; size: number; mime: string; width: null; height: null }> {
+	const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+	const check = validateVideoUpload({ mime: file.type, size: file.size, bytes: header });
+	if (!check.ok) throw Object.assign(new Error(check.message), { status: 400 });
+	const storageKey = `${Date.now()}-${randomHex(8)}.mp4`;
+	if (store.putBlob) {
+		await store.putBlob(storageKey, file, check.mime);
+	} else {
+		await store.put(storageKey, new Uint8Array(await file.arrayBuffer()), check.mime);
+	}
+	return { storageKey, size: file.size, mime: check.mime, width: null, height: null };
 }
 
 // Keys are always minted by saveMediaBytes (`<ms>-<16 hex>.<ext>`): enforce

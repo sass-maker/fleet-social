@@ -51,6 +51,10 @@
 		try {
 			const res = await fetch('/api/auth/logout', { method: 'POST' });
 			if (!res.ok) throw new Error(`Logout failed (${res.status})`);
+			if (data.authMethod === 'access') {
+				window.location.assign('/cdn-cgi/access/logout');
+				return;
+			}
 			await invalidateAll();
 			await goto('/login');
 		} catch (err) {

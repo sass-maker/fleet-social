@@ -898,6 +898,37 @@ describe('buildNormalizedPost per-segment media', () => {
 		expect(post.media?.length).toBe(1);
 		expect(post.media![0].storageKey).toBe(key);
 	});
+
+	it('flattens a YouTube description and preserves its video across segments', async () => {
+		const now = new Date();
+		const draftId = newId();
+		const key = `test-youtube-${Date.now()}.mp4`;
+		await db.insert(drafts).values({
+			id: draftId,
+			userId,
+			baseBody: 'first line\n---\nsecond line',
+			title: 'Private canary',
+			status: 'draft',
+			createdAt: now,
+			updatedAt: now
+		});
+		await db.insert(draftMedia).values({
+			id: newId(),
+			draftId,
+			storageKey: key,
+			mime: 'video/mp4',
+			size: 128,
+			segmentIndex: 1,
+			sortOrder: 0,
+			createdAt: now
+		});
+		const post = await buildNormalizedPost(db, draftId, 'youtube');
+		expect(post.title).toBe('Private canary');
+		expect(post.text).toBe('first line\n\nsecond line');
+		expect(post.thread).toBeUndefined();
+		expect(post.media?.map((item) => item.storageKey)).toEqual([key]);
+		expect(post.options?.visibility).toBe('private');
+	});
 });
 
 describe('retry backoff', () => {

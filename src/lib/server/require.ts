@@ -13,12 +13,14 @@ export function requireUser(user: SessionUser | null): SessionUser {
 /** Session-only: rejects bearer credentials (API_TOKEN machine user, API
  *  keys). Use for credential/key management — connection OAuth flows,
  *  disconnects, key rotation — which must never be reachable by a leaked
- *  token that already impersonates the user. */
+ *  token that already impersonates the user. Cloudflare Access assertions
+ *  count as interactive sessions after signature and audience verification. */
 export function requireSession(
 	user: SessionUser | null,
-	authMethod: 'session' | 'bearer' | null
+	authMethod: 'session' | 'access' | 'bearer' | null
 ): SessionUser {
-	if (authMethod !== 'session' || !isFullyVerified(user)) unauthorized();
+	if ((authMethod !== 'session' && authMethod !== 'access') || !isFullyVerified(user))
+		unauthorized();
 	return user!;
 }
 

@@ -9,7 +9,7 @@ import { platformName } from '$lib/domain/platforms';
  * Mastodon is absent on purpose — it registers its app on the instance itself —
  * and Bluesky takes an app password, so both are self-serve.
  */
-export type OAuthPlatformId = 'linkedin' | 'threads' | 'x';
+export type OAuthPlatformId = 'linkedin' | 'threads' | 'x' | 'youtube';
 
 export type PlatformSetup = {
 	/** Worker secrets the connect route requires: it answers "not enabled"
@@ -39,6 +39,17 @@ export type PlatformSetup = {
 };
 
 export const PLATFORM_SETUP: Record<OAuthPlatformId, PlatformSetup> = {
+	youtube: {
+		secrets: ['YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET'],
+		callbackPath: '/api/connections/youtube/callback',
+		consoleUrl: 'https://console.cloud.google.com/auth/clients',
+		consoleName: 'Google Cloud Console',
+		consoleRequirement:
+			'Create a Web application OAuth client, enable YouTube Data API v3, and allow the channel owner on the OAuth consent screen.',
+		redirectField: 'Authorized redirect URIs',
+		docsAnchor: 'youtube',
+		note: 'New, unverified Google API projects can upload private videos only. The channel owner grants YouTube upload and read access.'
+	},
 	linkedin: {
 		secrets: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
 		callbackPath: '/api/connections/linkedin/callback',
@@ -85,6 +96,8 @@ export const SETUP_GUIDE_URL = `${SETUP_GUIDE_BASE}#oauth-app-setup`;
 /** That platform's own section of the guide: what the dialog links to, so a
  *  reader lands on its steps instead of the whole page. */
 export function setupGuideUrl(id: OAuthPlatformId): string {
+	if (id === 'youtube')
+		return 'https://developers.google.com/youtube/v3/guides/auth/server-side-web-apps';
 	return `${SETUP_GUIDE_BASE}#${PLATFORM_SETUP[id].docsAnchor}`;
 }
 
@@ -158,7 +171,7 @@ export function callbackUri(id: OAuthPlatformId, appUrl: string): string {
  * Self-serve platforms first, then the ones that may need server setup — the
  * order the accounts empty state lists them in.
  */
-const CONNECT_ORDER = ['bluesky', 'mastodon', 'linkedin', 'threads', 'x'] as const;
+const CONNECT_ORDER = ['bluesky', 'mastodon', 'youtube', 'linkedin', 'threads', 'x'] as const;
 
 /** "Bluesky", "Bluesky or Mastodon", "Bluesky, Mastodon, or LinkedIn". */
 export function joinPlatformNames(names: readonly string[]): string {

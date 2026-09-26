@@ -24,7 +24,7 @@ Each card is one post, with its own character counter and its own images.
   lines of their own and it splits on those instead.
 - **Alt + ↑ / ↓** moves the card you are typing in up or down the thread.
 
-LinkedIn has no threads: a thread sent there is flattened into one post. The
+LinkedIn and YouTube have no threads: text sent there is flattened into one post or video description. The
 limits for every platform are in [OAuth apps → Platforms](oauth-apps.md#platforms).
 
 ## Images and alt text
@@ -46,6 +46,8 @@ reset button re-syncs it to the Global text.
 
 With a Mastodon account selected, **Mastodon Options** sets the visibility
 (Public, Unlisted, Followers, Direct) and an optional content warning.
+
+With a YouTube channel selected, enter the video title and attach one MP4. The post text becomes the video description. Fleet Social currently uploads it as **Private**. Choose the Fleet project, save the exact draft, and use **Approve draft** before publishing or scheduling. Edits to the approved content, media, or destination require a fresh approval. After upload, **Posts** shows the YouTube video ID, visibility, and link.
 
 ## Choosing destinations
 

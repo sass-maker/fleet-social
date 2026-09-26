@@ -2,9 +2,9 @@
 
 Private Fleet publishing hub based on [CogSend](https://github.com/deepakness/cogsend) (MIT). Fleet product feeds can create project-attributed drafts with a draft-intake key. The owner reviews the saved content and destinations before scheduling or publishing. Each account keeps its own delivery outcome; an ambiguous provider response waits for owner reconciliation in Posts.
 
-This fork passed local tests, lint, Svelte checks, and build. It has **not** been deployed to Fleet Cloudflare resources or proven with a live social account. See [PROJECT_STATUS.md](PROJECT_STATUS.md) and [issue #1](https://github.com/sass-maker/fleet-social/issues/1) for the rollout gates.
+The private Fleet Worker is deployed with isolated D1 and R2. Cloudflare Access, GitHub and Google sign-in, and one owner-connected YouTube channel are live. A private YouTube canary was published and verified on both Fleet Social and YouTube; public YouTube posting remains disabled. See [PROJECT_STATUS.md](PROJECT_STATUS.md), [issue #1](https://github.com/sass-maker/fleet-social/issues/1), and [issue #3](https://github.com/sass-maker/fleet-social/issues/3) for the rollout state.
 
-For local code qualification, use `npm ci`, `node scripts/sync-fleet-projects.mjs` when the canonical Fleet catalog changes, then `npm test`, `npm run check`, `npm run lint`, and `npm run build`. The CogSend install and release instructions below document the upstream foundation; Fleet needs distinct Worker, D1, and R2 resources before those deployment commands are used.
+For local code qualification, use `npm ci`, `node scripts/sync-fleet-projects.mjs` when the canonical Fleet catalog changes, then `npm test`, `npm run check`, `npm run lint`, and `npm run build`. The CogSend install and release instructions below document the upstream foundation. Fleet's instance uses its own Worker, D1, R2, and Google OAuth project; do not run the upstream setup commands against Fleet resources.
 
 ## Upstream CogSend reference
 
@@ -98,13 +98,13 @@ release tags and rolling back.
 
 ## Documentation
 
-Also published, with search, at [cogsend.com/docs](https://cogsend.com/docs/).
+The upstream CogSend docs are also published, with search, at [cogsend.com/docs](https://cogsend.com/docs/). Fleet-specific additions in this fork remain in this repository.
 
 | Page                                       | What is in it                                                                                                 |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | [Deploying](docs/deploy.md)                | the install and its flags, checking it worked, updating and rolling back, deploying by hand                   |
 | [Configuration](docs/configuration.md)     | secrets, the instance name, `APP_URL`, keeping your deployment separate from upstream, the login and recovery |
-| [OAuth apps](docs/oauth-apps.md)           | LinkedIn, Threads and X app setup, and what each platform allows                                              |
+| [OAuth apps](docs/oauth-apps.md)           | YouTube, LinkedIn, Threads and X app setup, and what each platform allows                                     |
 | [Cloudflare Access](docs/access.md)        | putting an extra gate in front of an instance                                                                 |
 | [Domains and URLs](docs/domains.md)        | the workers.dev URL, a custom domain, and what to update when the hostname changes                            |
 | [Writing and publishing](docs/composer.md) | the composer: threads, overrides, images and alt text, publishing and scheduling                              |

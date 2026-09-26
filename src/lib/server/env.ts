@@ -31,6 +31,8 @@ const envSchema = z.object({
 	ENABLE_VIDEO_UPLOAD: z.string().optional(),
 	LINKEDIN_CLIENT_ID: z.string().min(1).optional(),
 	LINKEDIN_CLIENT_SECRET: z.string().min(1).optional(),
+	YOUTUBE_CLIENT_ID: z.string().min(1).optional(),
+	YOUTUBE_CLIENT_SECRET: z.string().min(1).optional(),
 	THREADS_APP_ID: z.string().min(1).optional(),
 	THREADS_APP_SECRET: z.string().min(1).optional(),
 	X_CLIENT_ID: z.string().min(1).optional(),
@@ -62,6 +64,8 @@ export type AppEnv = z.infer<typeof envSchema> & {
 	skipTotp: boolean;
 	/** In-progress LinkedIn video uploads; off unless explicitly enabled. */
 	videoUploadEnabled: boolean;
+	/** YouTube uploads are available when its dedicated OAuth client is configured. */
+	youtubeUploadEnabled: boolean;
 };
 
 /** Example values that must never reach a real deployment. Exported so
@@ -120,7 +124,10 @@ export function readAppEnv(
 		AUTH_SECRET: parsed.data.AUTH_SECRET ?? '',
 		appUrlSource,
 		skipTotp,
-		videoUploadEnabled
+		videoUploadEnabled,
+		youtubeUploadEnabled: Boolean(
+			parsed.data.YOUTUBE_CLIENT_ID && parsed.data.YOUTUBE_CLIENT_SECRET
+		)
 	};
 }
 
@@ -161,6 +168,9 @@ export async function envFromPlatform(
 		LINKEDIN_CLIENT_ID: asString(platformEnv?.LINKEDIN_CLIENT_ID) ?? fallback.LINKEDIN_CLIENT_ID,
 		LINKEDIN_CLIENT_SECRET:
 			asString(platformEnv?.LINKEDIN_CLIENT_SECRET) ?? fallback.LINKEDIN_CLIENT_SECRET,
+		YOUTUBE_CLIENT_ID: asString(platformEnv?.YOUTUBE_CLIENT_ID) ?? fallback.YOUTUBE_CLIENT_ID,
+		YOUTUBE_CLIENT_SECRET:
+			asString(platformEnv?.YOUTUBE_CLIENT_SECRET) ?? fallback.YOUTUBE_CLIENT_SECRET,
 		THREADS_APP_ID: asString(platformEnv?.THREADS_APP_ID) ?? fallback.THREADS_APP_ID,
 		THREADS_APP_SECRET: asString(platformEnv?.THREADS_APP_SECRET) ?? fallback.THREADS_APP_SECRET,
 		X_CLIENT_ID: asString(platformEnv?.X_CLIENT_ID) ?? fallback.X_CLIENT_ID,

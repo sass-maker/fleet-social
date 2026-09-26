@@ -44,11 +44,12 @@
 		)
 	);
 	// svelte-ignore state_referenced_locally
-	let configured = $state<{ linkedin: boolean; threads: boolean; x: boolean }>(
+	let configured = $state<{ linkedin: boolean; threads: boolean; x: boolean; youtube: boolean }>(
 		data.configured ?? {
 			linkedin: true,
 			threads: true,
-			x: true
+			x: true,
+			youtube: true
 		}
 	);
 	// Per-secret presence from the API. The panel names the missing half of a
@@ -84,6 +85,12 @@
 	let connectCloseBtn: HTMLButtonElement | null = $state(null);
 
 	const availablePlatforms = [
+		{
+			id: 'youtube',
+			name: 'YouTube',
+			description: 'Connect your channel for private Shorts and videos',
+			form: null
+		},
 		{
 			id: 'x',
 			name: 'X',
@@ -140,7 +147,8 @@
 				configured = {
 					linkedin: payload.configured.linkedin !== false,
 					threads: payload.configured.threads !== false,
-					x: payload.configured.x !== false
+					x: payload.configured.x !== false,
+					youtube: payload.configured.youtube !== false
 				};
 			}
 			if (payload.secrets && typeof payload.secrets === 'object') {
@@ -179,7 +187,7 @@
 	}
 
 	async function connectOAuth(
-		platform: 'mastodon' | 'linkedin' | 'threads' | 'x',
+		platform: 'mastodon' | 'linkedin' | 'threads' | 'x' | 'youtube',
 		body: Record<string, string>
 	) {
 		loading = true;
@@ -311,7 +319,8 @@
 		if (
 			account.platform === 'linkedin' ||
 			account.platform === 'threads' ||
-			account.platform === 'x'
+			account.platform === 'x' ||
+			account.platform === 'youtube'
 		) {
 			if (needsSetup(account.platform, configured)) {
 				showSetupPanel(account.platform);

@@ -10,7 +10,7 @@ export const X_MAX_IMAGE_BYTES = 5_000_000;
 export const X_MAX_GIF_BYTES = 15_000_000;
 export const MAX_IMAGES_PER_SEGMENT = 4;
 
-// LinkedIn video posts: single mp4 per post. 95MB keeps uploads under the
+// Video posts: single mp4 per post. 95MB keeps uploads under the
 // Worker request body limit.
 export const MAX_VIDEO_BYTES = 95_000_000;
 
