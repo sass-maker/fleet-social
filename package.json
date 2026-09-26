@@ -42,7 +42,7 @@
 		"test:e2e:totp": "node scripts/e2e-totp.mjs",
 		"setup": "node scripts/setup.mjs",
 		"admin:reset": "node scripts/admin-reset.mjs",
-		"deploy": "node scripts/wrangler.mjs deploy",
+		"deploy": "node scripts/wrangler.mjs deploy --tag $(git rev-parse HEAD)",
 		"deploy:release": "node scripts/deploy.mjs",
 		"secrets:put": "node scripts/put-secrets.mjs",
 		"db:migrate:local": "node scripts/migrate-remote.mjs --local",
