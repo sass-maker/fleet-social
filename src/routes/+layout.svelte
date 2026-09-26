@@ -92,6 +92,7 @@
 	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<link rel="icon" href={faviconDark} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<link rel="canonical" href={page.url.origin + page.url.pathname} />
 </svelte:head>
 
 <svelte:window onclick={handleOutsideClick} onkeydown={handleMenuKeydown} />
