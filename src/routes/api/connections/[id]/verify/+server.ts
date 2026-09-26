@@ -15,6 +15,7 @@ import {
 } from '$lib/server/providers';
 import { sanitizeMastodonInstanceUrl } from '$lib/server/providers/mastodon';
 import { requireSession } from '$lib/server/require';
+import { hasCurrentYouTubeConsent } from '$lib/server/youtube-consent';
 
 export const POST: RequestHandler = async ({ params, locals }) => {
 	const { id } = params;
@@ -42,6 +43,9 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	// verify must go through a fresh connect (which revives the row).
 	if (conn.status === 'disconnected') {
 		return fail('Account disconnected — reconnect to verify', 409);
+	}
+	if (conn.platform === 'youtube' && !(await hasCurrentYouTubeConsent(locals.db, conn.userId))) {
+		return fail('Agree to the current privacy policy in Accounts before checking YouTube', 409);
 	}
 	// Ownership is proven above, so every write carries the owner filter too.
 	const owned = and(eq(connections.id, id), eq(connections.userId, conn.userId));

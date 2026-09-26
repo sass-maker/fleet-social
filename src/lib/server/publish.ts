@@ -41,6 +41,7 @@ import {
 import { providerFetch } from './providers/timed-fetch';
 import { countingFetch, type SubrequestBudget } from './budget';
 import { approvalProblem } from './draft-approval';
+import { hasCurrentYouTubeConsent } from './youtube-consent';
 
 /** Scheduler stops auto-retrying a target after this many claims; manual retry stays available. */
 export const MAX_PUBLISH_ATTEMPTS = 5;
@@ -618,6 +619,11 @@ export async function publishTarget(
 	};
 
 	try {
+		if (conn.platform === 'youtube' && !(await hasCurrentYouTubeConsent(db, conn.userId))) {
+			throw new Error(
+				'Agree to the current privacy policy in Accounts before uploading to YouTube'
+			);
+		}
 		const creds = await decryptJson<ConnectionCredentials>(
 			conn.credentialsEncrypted,
 			env.APP_ENCRYPTION_KEY

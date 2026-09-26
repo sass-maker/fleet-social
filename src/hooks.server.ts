@@ -44,6 +44,7 @@ import {
 } from '$lib/server/rate-limit';
 
 export function isPublicPath(path: string): boolean {
+	if (path === '/about' || path === '/privacy' || path === '/terms') return true;
 	if (path === '/login' || path === '/login/setup-2fa' || path === '/login/verify') return true;
 	if (
 		path === '/api/health' ||

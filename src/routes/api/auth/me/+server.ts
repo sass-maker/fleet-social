@@ -18,6 +18,7 @@ import { rateLimitKey } from '$lib/server/rate-limit';
 import { checkUserCode } from '$lib/server/totp';
 import { verifyPassword } from '$lib/server/crypto';
 import { deleteMediaObjects } from '$lib/server/media';
+import { deleteYouTubeConsent } from '$lib/server/youtube-consent';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const user = locals.user;
@@ -147,6 +148,7 @@ export const DELETE: RequestHandler = async ({ request, locals, cookies, url }) 
 				202
 			);
 		}
+		await deleteYouTubeConsent(locals.db, user.id);
 		await locals.db.delete(users).where(eq(users.id, user.id));
 		clearSessionCookie(cookies, locals.env, url.host);
 		clearMfaCookie(cookies, locals.env, url.host);

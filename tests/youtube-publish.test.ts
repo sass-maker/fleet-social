@@ -13,6 +13,7 @@ import {
 } from '$lib/server/db/schema';
 import { publishTarget } from '$lib/server/publish';
 import { approveTestTarget } from './fleet-approval';
+import { recordYouTubeConsent } from '$lib/server/youtube-consent';
 
 describe('YouTube publish receipt', () => {
 	it('resumes an interrupted upload from its encrypted session and stores one remote video ID', async () => {
@@ -33,6 +34,7 @@ describe('YouTube publish receipt', () => {
 				createdAt: now,
 				updatedAt: now
 			});
+			await recordYouTubeConsent(db, userId);
 			await db.insert(drafts).values({
 				id: draftId,
 				userId,

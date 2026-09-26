@@ -12,6 +12,7 @@ import { POST as youtubePOST } from '../src/routes/api/connections/youtube/+serv
 import { platformName } from '$lib/domain/platforms';
 import { PLATFORM_SECRET_NAMES, PLATFORM_SETUP } from '$lib/domain/platform-setup';
 import { OAUTH_PENDING_TTL_MS } from '$lib/domain/oauth-pending';
+import { recordYouTubeConsent } from '$lib/server/youtube-consent';
 
 /**
  * The four connect entry points. They were untested: a regression here (a
@@ -77,6 +78,7 @@ describe('connect routes', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await recordYouTubeConsent(db, userId);
 	});
 	afterAll(() => close());
 	afterEach(() => vi.unstubAllGlobals());
