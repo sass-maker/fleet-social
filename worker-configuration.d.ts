@@ -73,6 +73,10 @@ interface Env {
 	API_TOKEN?: string;
 	RESEND_API_KEY?: string;
 	NOTIFY_EMAIL?: string;
+	/** Optional App Health ingest key for application logs (post.published,
+	 *  post.publish_failed). Unset = logging is a silent no-op. */
+	APP_HEALTH_INGEST_KEY?: string;
+	APP_HEALTH_ENVIRONMENT?: string;
 	NOTIFY_FROM?: string;
 	MEDIA_PUBLIC_BASE_URL?: string;
 	LINKEDIN_CLIENT_ID?: string;

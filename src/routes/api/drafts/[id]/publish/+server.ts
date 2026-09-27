@@ -5,6 +5,7 @@ import { connections, drafts, publishTargets } from '$lib/server/db/schema';
 import { fail, handleError, ok } from '$lib/server/http';
 import { classifyConnections, ensureTargets } from '$lib/server/publish-plan';
 import { humanizedCause } from '$lib/domain/human-error';
+import { createPing } from '$lib/server/ping';
 import { publishTarget } from '$lib/server/publish';
 import { requireScope, requireUser } from '$lib/server/require';
 import { serializeDraft } from '$lib/server/serialize';
@@ -172,6 +173,23 @@ export const POST: RequestHandler = async ({ params, request, locals, platform }
 			.select()
 			.from(publishTargets)
 			.where(eq(publishTargets.draftId, params.id));
+		const publishedCount = results.filter(
+			(r) => r.status === 'published' && !r.skipped
+		).length;
+		const failedCount = results.filter((r) => r.status === 'failed').length;
+		const ping = createPing({
+			...(platform?.env?.APP_HEALTH_INGEST_KEY
+				? { key: platform.env.APP_HEALTH_INGEST_KEY }
+				: {}),
+			environment: platform?.env?.APP_HEALTH_ENVIRONMENT
+		});
+		platform?.ctx?.waitUntil(
+			ping(failedCount > 0 || stopped !== null ? 'post.publish_failed' : 'post.published', {
+				level: failedCount > 0 || stopped !== null ? 'warn' : 'info',
+				title: `draft ${params.id}: ${publishedCount} published, ${failedCount} failed`,
+				props: { draftId: params.id, published: publishedCount, failed: failedCount }
+			}).catch(() => undefined)
+		);
 		return ok({
 			results,
 			// Only when the batch was cut short: `results` is what happened, and
