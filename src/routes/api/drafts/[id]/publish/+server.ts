@@ -173,14 +173,10 @@ export const POST: RequestHandler = async ({ params, request, locals, platform }
 			.select()
 			.from(publishTargets)
 			.where(eq(publishTargets.draftId, params.id));
-		const publishedCount = results.filter(
-			(r) => r.status === 'published' && !r.skipped
-		).length;
+		const publishedCount = results.filter((r) => r.status === 'published' && !r.skipped).length;
 		const failedCount = results.filter((r) => r.status === 'failed').length;
 		const ping = createPing({
-			...(platform?.env?.APP_HEALTH_INGEST_KEY
-				? { key: platform.env.APP_HEALTH_INGEST_KEY }
-				: {}),
+			...(platform?.env?.APP_HEALTH_INGEST_KEY ? { key: platform.env.APP_HEALTH_INGEST_KEY } : {}),
 			environment: platform?.env?.APP_HEALTH_ENVIRONMENT
 		});
 		platform?.ctx?.waitUntil(
