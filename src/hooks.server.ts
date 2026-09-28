@@ -41,6 +41,7 @@ import {
 	rateLimitProblem,
 	type RateLimiter
 } from '$lib/server/rate-limit';
+import { recordEndpointRequest } from '$lib/server/endpoint-telemetry';
 
 export function isPublicPath(path: string): boolean {
 	if (path === '/login' || path === '/login/setup-2fa' || path === '/login/verify') return true;
@@ -83,7 +84,7 @@ let lastLocalTickAt = 0;
 // Module scope, so the missing-binding notice is not repeated per request.
 let warnedMissingMedia = false;
 
-export const handle: Handle = async ({ event, resolve }) => {
+const handleRequest: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
 	const secureRequest = event.url.protocol === 'https:';
 	if (event.request.method === 'OPTIONS' && path.startsWith('/api/')) {
@@ -334,4 +335,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	return withPageSecurity(path, await resolve(event), secureRequest);
+};
+
+export const handle: Handle = async (input) => {
+	const startedAt = performance.now();
+	let response: Response;
+	try {
+		response = await handleRequest(input);
+	} catch (error) {
+		recordEndpointRequest(input.event, 500, performance.now() - startedAt);
+		throw error;
+	}
+	recordEndpointRequest(input.event, response.status, performance.now() - startedAt);
+	return response;
 };
