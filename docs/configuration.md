@@ -32,6 +32,13 @@ cannot reach anything except the tick (see [Scheduling](scheduling.md)).
 | `MEDIA_PUBLIC_BASE_URL`                         | serving Meta's crawler from a public media origin (see below) |
 | `ENABLE_VIDEO_UPLOAD`                           | LinkedIn video, wired but unverified                          |
 | `SUBREQUEST_LIMIT`                              | publishing more per tick on a paid Workers plan (see below)   |
+| `APP_HEALTH_INGEST_KEY`                         | App Health logs and endpoint telemetry; unset = off           |
+
+`APP_HEALTH_ENVIRONMENT` is an optional plain Worker variable that labels App
+Health data; it defaults to `production`. With the ingest key set, request
+telemetry records only the HTTP method, matched route template, final status,
+duration, and application release. It does not record request content, identity,
+headers, cookies, query values, or concrete route parameters.
 
 `MEDIA_PUBLIC_BASE_URL` is a trade-off: it serves media from a public origin
 with no signature and no expiry, protected only by the randomness in the object
