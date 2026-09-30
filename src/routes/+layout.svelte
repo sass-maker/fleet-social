@@ -93,6 +93,14 @@
 	<link rel="icon" href={faviconDark} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<link rel="canonical" href={page.url.origin + page.url.pathname} />
+	{#if !isLoginRoute && userEmail && data.studioProjectId}
+		<script
+			src="https://sassmaker.com/project-strip.js"
+			data-project={data.studioProjectId}
+			defer
+		></script>
+		<script src="https://sassmaker.com/ai-chat-footer.js" data-name={data.appName} defer></script>
+	{/if}
 </svelte:head>
 
 <svelte:window onclick={handleOutsideClick} onkeydown={handleMenuKeydown} />
