@@ -14,6 +14,12 @@ const config = {
 			mode: 'auto',
 			directives: {
 				'default-src': ['self'],
+				'script-src': [
+					'self',
+					'https://sassmaker.com/project-strip.js',
+					'https://sassmaker.com/ai-chat-footer.js',
+					'https://sassmaker.com/feedback-launcher.js'
+				],
 				'base-uri': ['self'],
 				'object-src': ['none'],
 				'frame-ancestors': ['none'],
@@ -27,8 +33,13 @@ const config = {
 				// than enumerated.
 				'img-src': ['self', 'data:', 'blob:', 'https:'],
 				'media-src': ['self', 'blob:', 'https:'],
-				// Every fetch the app makes goes to its own origin.
-				'connect-src': ['self'],
+				// Path restrictions keep unrelated collection endpoints outside the feedback boundary.
+				'connect-src': [
+					'self',
+					'https://sassmaker.com/projects.json',
+					'https://api.sassmaker.com/v1/capture-config/',
+					'https://api.sassmaker.com/v1/feedback'
+				],
 				'font-src': ['self', 'data:'],
 				'manifest-src': ['self']
 			}
