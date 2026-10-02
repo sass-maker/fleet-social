@@ -99,7 +99,12 @@
 			data-project={data.studioProjectId}
 			defer
 		></script>
-		<script src="https://sassmaker.com/ai-chat-footer.js" data-name={data.appName} defer></script>
+		<script
+			src="https://sassmaker.com/ai-chat-footer.js"
+			data-name={data.appName}
+			data-capture="false"
+			defer
+		></script>
 	{/if}
 </svelte:head>
 

@@ -22,7 +22,12 @@ export function createEndpointTelemetry(
 			disableTimer: true,
 			fetch: fetchImpl
 		});
-		return (event: { method: string; route: string; status_code: number; duration_ms: number }) => {
+		return async (event: {
+			method: string;
+			route: string;
+			status_code: number;
+			duration_ms: number;
+		}) => {
 			client.record(event);
 			return client.flush();
 		};
