@@ -148,6 +148,7 @@
 	let keyRevealed = $state<string | null>(null);
 	let keyCopied = $state(false);
 	let keyConfirm: 'rotate' | 'revoke' | null = $state(null);
+	let keyScope = $state<'intake' | 'full'>('intake');
 	let keyJustRotated = $state(false);
 	// The form stays disabled until the first load resolves: applying slow
 	// fetch results over user edits (and then saving them) would silently
@@ -539,7 +540,11 @@
 		keyBusy = true;
 		err = null;
 		try {
-			const res = await fetch('/api/key', { method: 'POST' });
+			const res = await fetch('/api/key', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ scopes: keyScope === 'intake' ? ['intake'] : ['read', 'write'] })
+			});
 			const payload = await res.json();
 			if (!res.ok) throw new Error(payload.error || 'Could not create key');
 			// The raw key exists only in this response — show it once.
@@ -970,15 +975,27 @@
 		>
 			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">API access</h2>
 			<p class="mb-6 max-w-md text-[13px] leading-relaxed font-medium text-stone-500">
-				Use this personal API key for scripts, Shortcuts, and cron jobs. It grants full programmatic
-				access to manage your drafts, publish posts, and view your queue. For security, it cannot be
-				used to manage social accounts, change credentials, or generate new API keys. See the
+				Choose draft intake for Fleet product feeds. That key can submit project-attributed drafts
+				but cannot review or publish them. A full key can manage posts. Generating a replacement
+				revokes the current key. See the
 				<a
 					href="/api"
 					class="font-bold text-stone-900 underline underline-offset-2 hover:text-stone-700"
 					>API reference</a
 				> for full details.
 			</p>
+			{#if !keyRevealed}
+				<label class="mb-4 flex max-w-sm flex-col gap-2 text-xs font-bold text-stone-700">
+					New key access
+					<select
+						bind:value={keyScope}
+						class="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900"
+					>
+						<option value="intake">Fleet draft intake only</option>
+						<option value="full">Full API access</option>
+					</select>
+				</label>
+			{/if}
 			{#if keyLoading}
 				<p class="text-sm font-medium text-stone-500">Loading…</p>
 			{:else if keyRevealed}
@@ -1030,9 +1047,11 @@
 							Created {keyDate(keyActive.createdAt)} · Last used {keyDate(keyActive.lastUsedAt)}
 						</p>
 						<p class="mt-1 text-[11px] font-medium text-stone-500">
-							Scope: {(keyActive.scopes ?? ['read', 'write']).includes('write')
-								? 'Read + write'
-								: 'Read-only'}
+							Scope: {(keyActive.scopes ?? ['read', 'write']).includes('intake')
+								? 'Draft intake only'
+								: (keyActive.scopes ?? ['read', 'write']).includes('write')
+									? 'Read + write'
+									: 'Read-only'}
 						</p>
 					</div>
 				</div>

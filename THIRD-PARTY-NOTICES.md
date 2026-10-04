@@ -14,8 +14,11 @@ Bundled into the Worker
 
 Apache-2.0             1 package
 ISC                    1 package
-MIT                    10 packages
+MIT                    14 packages
 
+- @fullcalendar/core 6.1.21 — MIT — https://github.com/fullcalendar/fullcalendar
+- @fullcalendar/daygrid 6.1.21 — MIT — https://github.com/fullcalendar/fullcalendar
+- @fullcalendar/timegrid 6.1.21 — MIT — https://github.com/fullcalendar/fullcalendar
 - @lucide/svelte 1.45.0 — ISC — https://github.com/lucide-icons/lucide
 - @sveltejs/kit 2.70.3 — MIT — https://github.com/sveltejs/kit
 - clsx 2.1.1 — MIT — https://github.com/lukeed/clsx
@@ -24,6 +27,7 @@ MIT                    10 packages
 - devalue 5.9.4 — MIT — https://github.com/sveltejs/devalue
 - drizzle-orm 0.45.2 — Apache-2.0 — https://github.com/drizzle-team/drizzle-orm
 - esm-env 1.2.2 — MIT — https://github.com/benmccann/esm-env
+- preact 10.12.1 — MIT — https://github.com/preactjs/preact
 - set-cookie-parser 3.1.2 — MIT — https://github.com/nfriedly/set-cookie-parser
 - svelte 5.57.0 — MIT — https://github.com/sveltejs/svelte
 - uqr 0.1.3 — MIT — https://github.com/unjs/uqr

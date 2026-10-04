@@ -22,17 +22,19 @@ cannot reach anything except the tick (see [Scheduling](scheduling.md)).
 
 **Optional.**
 
-| Secret                                          | What it enables                                               |
-| ----------------------------------------------- | ------------------------------------------------------------- |
-| `API_TOKEN`                                     | a machine bearer for the API — prefer a personal key instead  |
-| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | LinkedIn ([OAuth apps](oauth-apps.md))                        |
-| `THREADS_APP_ID` / `THREADS_APP_SECRET`         | Threads                                                       |
-| `X_CLIENT_ID` / `X_CLIENT_SECRET`               | X                                                             |
-| `RESEND_API_KEY`, `NOTIFY_EMAIL`, `NOTIFY_FROM` | failure digests by email                                      |
-| `MEDIA_PUBLIC_BASE_URL`                         | serving Meta's crawler from a public media origin (see below) |
-| `ENABLE_VIDEO_UPLOAD`                           | LinkedIn video, wired but unverified                          |
-| `SUBREQUEST_LIMIT`                              | publishing more per tick on a paid Workers plan (see below)   |
-| `APP_HEALTH_INGEST_KEY`                         | App Health logs and endpoint telemetry; unset = off           |
+| Secret                                          | What it enables                                                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `API_TOKEN`                                     | a machine bearer for the API — prefer a personal key instead                                                                          |
+| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | LinkedIn ([OAuth apps](oauth-apps.md))                                                                                                |
+| `THREADS_APP_ID` / `THREADS_APP_SECRET`         | Threads                                                                                                                               |
+| `X_CLIENT_ID` / `X_CLIENT_SECRET`               | X                                                                                                                                     |
+| `INSTAGRAM_APP_ID`, `INSTAGRAM_APP_SECRET`      | Instagram API with Instagram Login app credentials for professional-account Reels. Optional; Accounts shows setup steps when missing. |
+| `YOUTUBE_CLIENT_ID` / `YOUTUBE_CLIENT_SECRET`   | YouTube private video uploads ([OAuth apps](oauth-apps.md#youtube))                                                                   |
+| `RESEND_API_KEY`, `NOTIFY_EMAIL`, `NOTIFY_FROM` | failure digests by email                                                                                                              |
+| `MEDIA_PUBLIC_BASE_URL`                         | serving Meta's crawler from a public media origin (see below)                                                                         |
+| `ENABLE_VIDEO_UPLOAD`                           | LinkedIn video, wired but unverified                                                                                                  |
+| `SUBREQUEST_LIMIT`                              | publishing more per tick on a paid Workers plan (see below)                                                                           |
+| `APP_HEALTH_INGEST_KEY`                         | App Health logs and endpoint telemetry; unset = off                                                                                   |
 
 `APP_HEALTH_ENVIRONMENT` is an optional plain Worker variable that labels App
 Health data; it defaults to `production`. With the ingest key set, request

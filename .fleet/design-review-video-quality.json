@@ -1,0 +1,216 @@
+{
+	"$schema": "fleet.design-review.v2",
+	"version": 2,
+	"project": "fleet-social",
+	"target": "Local Mashup output quality: readable product scenes, original soundtrack and caption-bounded source cuts",
+	"surfaceMode": "operate",
+	"mode": "preserve",
+	"register": "product",
+	"context": { "product": "PRODUCT.md", "design": "DESIGN.md" },
+	"direction": {
+		"productSurfaces": {
+			"scope": "standalone",
+			"landing": "",
+			"app": ".fleet-local/directions/index.html",
+			"reason": "Private single-operator scheduler. The about/privacy/terms pages are product disclosures, not a separate marketing landing or acquisition funnel."
+		},
+		"pairedPreview": { "landing": "", "app": "" },
+		"source": "existing",
+		"references": [
+			"Postiz calendar: month planning and destination-specific scheduling, https://postiz.com/",
+			"CogSend editor: compact account selection and focused composer, https://cogsend.com/; Preline free card and sidebar patterns: structural grouping and navigation, https://preline.co/docs/components/card.html and https://preline.co/docs/components/sidebar.html",
+			"Anti-reference: the existing narrow chronological feed hides month planning and makes actual video review secondary."
+		],
+		"probes": [],
+		"selected": "editorial",
+		"approval": "approved",
+		"ownerEvidence": {
+			"path": ".fleet-local/directions/owner-selection.md",
+			"quote": "Editorial Planner — spacious calendar and focused video review (recommended)"
+		},
+		"supplied": "",
+		"before": ".fleet-local/rehearsal/jobs/8aaa9266-e84c-49ea-919f-cff5ad74afc7/poster.jpg",
+		"library": {
+			"strategy": "upstream-first",
+			"primary": "existing-project-system",
+			"sources": [],
+			"runtime": "existing",
+			"customReplacement": {
+				"used": false,
+				"authorization": "not-required",
+				"reason": "Preserve canonical Mashup rendering and existing app/template composition; improve source quality and finishing with installed FFmpeg."
+			}
+		},
+		"contract": {
+			"purpose": "Fleet Social is the private review and scheduling surface for Fleet product drafts, with exact saved-revision approval before delivery.",
+			"purposeSource": "PRODUCT.md",
+			"canonicalPurpose": "Fleet Social is the private review and scheduling surface for Fleet product drafts, with exact saved-revision approval before delivery.",
+			"purposeAlignment": "match",
+			"driftNote": "",
+			"audience": "Owner/operator reviewing product and creator videos, including an interview demo audience.",
+			"job": "See a month of proposals, play real pending videos, approve the exact saved revision, schedule or deliver to selected connected accounts.",
+			"thesis": "Preserve the existing green product story and Editorial Planner while making the actual exported videos clearer and more coherent.",
+			"system": "Warm neutral paper, deep green action and identity, amber review status. Wide monthly calendar, compact approval rail, restrained top navigation; dedicated vertical player and saved revision detail. Mobile becomes an agenda. Georgia display and brand with native system sans controls and body.",
+			"signature": "The saved video stays the exact object approved and scheduled; prepared and newly rendered artifacts remain distinct.",
+			"risk": "Caption availability and source quality limit automatic excerpt choice. No synthetic speech or photoreal footage is added.",
+			"qualityBar": "Native 1080x1920 text scenes within safe margins; no black flashes between product scenes; reading-length timing; quiet original soundtrack; public source captions drive complete excerpts when available, with honest ten-second fallback."
+		}
+	},
+	"evidence": {
+		"platform": "web",
+		"productContinuity": {
+			"status": "not-applicable",
+			"reason": "Private single-operator scheduler. The about/privacy/terms pages are product disclosures, not a separate marketing landing or acquisition funnel.",
+			"reviewer": "codex",
+			"report": "artifacts/video-quality/review.md",
+			"surfaces": { "landing": "", "app": "http://127.0.0.1:5187/" },
+			"checks": {
+				"designSystem": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"identity": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"vocabulary": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"productTruth": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"handoff": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				}
+			}
+		},
+		"slopScale": {
+			"platform": "web",
+			"posture": "advisory",
+			"reason": "",
+			"checkpoints": [
+				{
+					"stage": "iteration",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs <recorded Create/Product/Links URLs> --json",
+					"report": ".fleet-local/video-quality/iteration-slop.json",
+					"findingsReview": "Create 11: icon_card_grid matches the functional workflow rail; cream_default_bg is intentional Editorial Planner paper. Both review pages 7: intentional cream surface. Video/audio checked independently. Initial draft files retained for iteration comparison; final targets corrected outputs."
+				},
+				{
+					"stage": "final",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs <recorded Create/Product/Links URLs> --json",
+					"report": ".fleet-local/video-quality/final-slop.json",
+					"findingsReview": "Create 11: icon_card_grid matches the functional workflow rail; cream_default_bg is intentional Editorial Planner paper. Both review pages 7: intentional cream surface. Video/audio checked independently. Initial draft files retained for iteration comparison; final targets corrected outputs."
+				}
+			]
+		},
+		"visualReview": {
+			"status": "pass",
+			"reviewer": "Codex implementation self-review; finished result not yet owner-reviewed",
+			"direction": "editorial",
+			"report": "artifacts/video-quality/review.md",
+			"checks": {
+				"hierarchy": {
+					"status": "pass",
+					"observation": "Fresh product and link review prioritize the actual vertical player, caption, destinations and exact saved approval. Create retains one input lane with a three-step rail."
+				},
+				"typography": {
+					"status": "pass",
+					"observation": "Measured native 1080x1920 product text remains within 850px safe width. Existing Georgia app headings and native sans controls remain coherent with the selected direction."
+				},
+				"composition": {
+					"status": "pass",
+					"observation": "Inspected actual middle product frame, source frames and review captures. Text is stable; prepared sources keep one title/caption treatment after duplicate decoration was removed."
+				},
+				"identity": {
+					"status": "pass",
+					"observation": "Editorial paper/green/amber app system and existing green product story preserved. Licensed source styles and credits retained honestly."
+				},
+				"interaction": {
+					"status": "pass",
+					"observation": "Both new MP4s played in Chrome at readyState 4. Repeat product render returned labeled verified cache and a new unapproved draft; no provider request or publication."
+				},
+				"responsive": {
+					"status": "pass",
+					"observation": "Nine fresh Create/Product/Links captures fit 390/768/1440 without document overflow; phone review stacks its player and approval controls."
+				}
+			}
+		},
+		"screenshots": [
+			{ "width": 390, "path": "artifacts/video-quality/create-390.jpg" },
+			{ "width": 390, "path": "artifacts/video-quality/product-390.jpg" },
+			{ "width": 390, "path": "artifacts/video-quality/links-390.jpg" },
+			{ "width": 768, "path": "artifacts/video-quality/create-768.jpg" },
+			{ "width": 768, "path": "artifacts/video-quality/product-768.jpg" },
+			{ "width": 768, "path": "artifacts/video-quality/links-768.jpg" },
+			{ "width": 1440, "path": "artifacts/video-quality/create-1440.jpg" },
+			{ "width": 1440, "path": "artifacts/video-quality/product-1440.jpg" },
+			{ "width": 1440, "path": "artifacts/video-quality/links-1440.jpg" },
+			{ "width": 1440, "path": "artifacts/video-quality/product-settled-1440.jpg" }
+		],
+		"projectCheck": {
+			"command": ".fleet-local/mashup-runtime/bin/python -m unittest discover -s tests -p mashup_quality_test.py; npm test -- --maxWorkers=2; npm run check; npm run lint; npm run build; actual canonical product/link renders and media proof",
+			"status": "pass"
+		},
+		"critique": {
+			"score": 35,
+			"maximum": 40,
+			"dimensions": {
+				"hierarchy": 7,
+				"typography": 7,
+				"composition": 7,
+				"identity": 7,
+				"interaction": 4,
+				"responsive": 3
+			}
+		},
+		"audit": {
+			"score": 18,
+			"maximum": 20,
+			"dimensions": {
+				"purpose": 4,
+				"accessibility": 5,
+				"behavior": 4,
+				"responsive": 3,
+				"performance": 2
+			}
+		},
+		"unresolved": { "p0": 0, "p1": 0 },
+		"detector": {
+			"posture": "advisory",
+			"findings": [
+				"Create score 11: intentional paper and functional workflow icons. Product/Links review score 7: intentional paper. Scanner does not evaluate video/audio quality."
+			]
+		},
+		"comprehension": {
+			"status": "not-applicable",
+			"reviewer": "",
+			"answers": {
+				"product": "",
+				"audience": "",
+				"value": "",
+				"mechanism": "",
+				"proof": "",
+				"nextAction": ""
+			},
+			"purposeScore": {
+				"product": 0,
+				"audience": 0,
+				"value": 0,
+				"mechanism": 0,
+				"proof": 0,
+				"nextAction": 0,
+				"total": 0
+			},
+			"mismatches": []
+		}
+	},
+	"ownerFeedback": {
+		"decision": "not-required",
+		"note": "Bounded preserve pass on the existing approved Editorial Planner and existing product video template; no new app surface or visual direction."
+	}
+}

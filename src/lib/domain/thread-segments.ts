@@ -33,7 +33,7 @@ export function joinThreadSegments(segments: string[]): string {
 }
 
 /**
- * Flatten segment texts into one post (LinkedIn has no threads): trimmed,
+ * Flatten segment texts into one post (LinkedIn and YouTube have no threads): trimmed,
  * non-empty texts joined by a blank line, matching the composer preview.
  */
 export function joinThreadTexts(texts: Array<string | null | undefined>): string {

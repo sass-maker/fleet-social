@@ -10,7 +10,7 @@ import {
 import { decodeImageDimensions } from './image-dimensions';
 import { parsePollConfig } from '$lib/domain/poll';
 import { signPublicMediaUrl } from './public-media';
-import { resolvePublishSegments } from '$lib/domain/thread-segments';
+import { joinThreadTexts, resolvePublishSegments } from '$lib/domain/thread-segments';
 import { targetRecordKey } from '$lib/domain/tid';
 import { decryptJson, encryptJson } from './crypto';
 import { chunkIds, first, newId, parseJson, type AppDb } from './db/client';
@@ -33,10 +33,18 @@ import {
 	type PublishCheckpoint,
 	type MediaStore,
 	type NormalizedPost,
-	type PlatformId
+	type PlatformId,
+	type YoutubeUploadState,
+	YoutubeUploadInterrupted,
+	YoutubeUploadUncertain,
+	InstagramProcessingPending,
+	InstagramUploadUncertain,
+	type InstagramUploadState
 } from './providers';
 import { providerFetch } from './providers/timed-fetch';
 import { countingFetch, type SubrequestBudget } from './budget';
+import { approvalProblem } from './draft-approval';
+import { hasCurrentYouTubeConsent } from './youtube-consent';
 
 /** Scheduler stops auto-retrying a target after this many claims; manual retry stays available. */
 export const MAX_PUBLISH_ATTEMPTS = 5;
@@ -121,6 +129,7 @@ export async function buildNormalizedPost(
 
 	const variant = variants.find((v) => v.platform === platform);
 	const body = variant?.body ?? draft.baseBody;
+	const videoTitle = platform === 'youtube' ? { title: draft.title ?? undefined } : {};
 	const options = parseJson<Record<string, unknown>>(variant?.optionsJson, {});
 
 	const toAttachment = (m: (typeof media)[number]) => ({
@@ -144,19 +153,35 @@ export async function buildNormalizedPost(
 			options.visibility === 'direct' ||
 			options.visibility === 'public'
 				? options.visibility
-				: 'public',
+				: platform === 'youtube'
+					? 'private'
+					: 'public',
 		spoilerText: typeof options.spoilerText === 'string' ? options.spoilerText : undefined,
 		langs: Array.isArray(options.langs) ? (options.langs as string[]) : undefined,
 		poll: parsePollConfig(options.poll) ?? undefined
 	};
 
 	const segmentsOpt = options.threadSegments as string[] | undefined;
+	if (platform === 'youtube' || platform === 'instagram') {
+		const description = joinThreadTexts(
+			segmentsOpt?.length
+				? segmentsOpt
+				: resolvePublishSegments(body, segmentHasMedia).map((s) => s.text)
+		);
+		return {
+			...videoTitle,
+			text: description,
+			media: media.length ? media.map(toAttachment) : undefined,
+			options: postOptions
+		};
+	}
 	if (segmentsOpt && segmentsOpt.length > 1) {
 		const thread = segmentsOpt.map((text, i) => {
 			const segMedia = mediaForSegment(i);
 			return { text, media: segMedia.length ? segMedia : undefined, options: postOptions };
 		});
 		return {
+			...videoTitle,
 			text: segmentsOpt[0] || '',
 			media: mediaForSegment(0).length ? mediaForSegment(0) : undefined,
 			thread,
@@ -172,6 +197,7 @@ export async function buildNormalizedPost(
 		});
 		const firstMedia = mediaForSegment(resolved[0].segmentIndex);
 		return {
+			...videoTitle,
 			text: resolved[0].text,
 			media: firstMedia.length ? firstMedia : undefined,
 			thread,
@@ -182,6 +208,7 @@ export async function buildNormalizedPost(
 	const only = resolved[0];
 	const singleMedia = mediaForSegment(only.segmentIndex);
 	return {
+		...videoTitle,
 		text: only.text,
 		media: singleMedia.length ? singleMedia : undefined,
 		options: postOptions
@@ -266,7 +293,7 @@ export function publishCallEstimate(platform: string, content: NormalizedPost): 
 	// Claim, connection, attempt row, resume lookup, success, attempt summary
 	// and draft status, a checkpoint per segment, and one more for whichever of
 	// a credential write, a lease renewal or a connection-status fix happens.
-	const database = 8 + segments.length;
+	const database = 12 + segments.length;
 	const storage = media.length;
 	let platformCalls = 1;
 	switch (platform) {
@@ -294,6 +321,10 @@ export function publishCallEstimate(platform: string, content: NormalizedPost): 
 				platformCalls += 2 + Math.max(1, Math.ceil((v.size ?? v.bytes?.length ?? 0) / 4_194_304));
 			}
 			if (!media.length && hasLink(content)) platformCalls += 5;
+			break;
+		case 'youtube':
+			platformCalls +=
+				3 + videos.reduce((sum, v) => sum + Math.ceil((v.size ?? 0) / 16_777_216) * 3, 0);
 			break;
 		case 'threads':
 			// Container, a couple of status polls and the publish per post; a
@@ -349,12 +380,79 @@ export async function publishTarget(
 	if (target.status === 'cancelled') {
 		return { status: 'cancelled', error: 'Target cancelled' };
 	}
+	if (target.status === 'uncertain') {
+		return {
+			status: 'uncertain',
+			error: 'Check the social account before retrying',
+			skipped: true
+		};
+	}
+	if (
+		target.status === 'publishing' &&
+		target.updatedAt <= new Date(now.getTime() - STALE_CLAIM_MS)
+	) {
+		const unfinished = await first(
+			db
+				.select({ id: publishAttempts.id })
+				.from(publishAttempts)
+				.where(
+					and(eq(publishAttempts.publishTargetId, targetId), isNull(publishAttempts.finishedAt))
+				)
+		);
+		if (unfinished) {
+			const parked = await db
+				.update(publishTargets)
+				.set({
+					status: 'uncertain',
+					jobId: null,
+					errorMessage:
+						'The worker stopped during a provider request. Check the social account before retrying.',
+					updatedAt: now
+				})
+				.where(
+					and(
+						eq(publishTargets.id, targetId),
+						eq(publishTargets.status, 'publishing'),
+						eq(publishTargets.attemptCount, target.attemptCount),
+						lte(publishTargets.updatedAt, new Date(now.getTime() - STALE_CLAIM_MS))
+					)
+				)
+				.returning({ id: publishTargets.id });
+			if (parked.length) await refreshDraftStatus(db, target.draftId);
+			return {
+				status: 'uncertain',
+				error: 'Check the social account before retrying',
+				skipped: true
+			};
+		}
+	}
+	const reviewProblem = await approvalProblem(db, target.draftId, [target.connectionId], 'subset');
+	if (reviewProblem) {
+		const parked = await db
+			.update(publishTargets)
+			.set({ status: 'failed', errorMessage: reviewProblem, jobId: null, updatedAt: now })
+			.where(
+				and(
+					eq(publishTargets.id, targetId),
+					isNull(publishTargets.remotePostId),
+					inArray(publishTargets.status, ['pending', 'scheduled', 'failed'])
+				)
+			)
+			.returning({ id: publishTargets.id });
+		if (parked.length) await refreshDraftStatus(db, target.draftId);
+		return {
+			status: parked.length ? 'failed' : target.status,
+			error: reviewProblem,
+			skipped: true
+		};
+	}
 
 	// Fail fast when the stored credential cannot possibly work (expired
 	// token with no refresh path): mark the connection expired and park the
 	// target WITHOUT burning an attempt. The WHERE excludes scheduled rows
 	// so future schedules are never touched here.
 	let knownPlatform: string | null = null;
+	let providerStarted = false;
 	try {
 		const preConn = await first(
 			db.select().from(connections).where(eq(connections.id, target.connectionId))
@@ -469,6 +567,8 @@ export async function publishTarget(
 		startedAt: new Date(),
 		success: false
 	});
+	let youtubeUploadStateEnc: string | null = null;
+	let instagramUploadStateEnc: string | null = null;
 
 	// Segment-level checkpoint: a Worker abort mid-thread leaves the target
 	// claimed with no attempt summary, and the stale-claim reclaim would then
@@ -523,19 +623,30 @@ export async function publishTarget(
 	};
 
 	try {
+		if (conn.platform === 'youtube' && !(await hasCurrentYouTubeConsent(db, conn.userId))) {
+			throw new Error(
+				'Agree to the current privacy policy in Accounts before uploading to YouTube'
+			);
+		}
 		const creds = await decryptJson<ConnectionCredentials>(
 			conn.credentialsEncrypted,
 			env.APP_ENCRYPTION_KEY
 		);
 		const meta = parseJson<{ maxCharacters?: number; handle?: string }>(conn.metaJson, {});
 		const provider = getProvider(conn.platform as PlatformId);
-		const content = await hydrateMedia(
-			prebuilt ?? (await buildNormalizedPost(db, target.draftId, conn.platform)),
-			store
-		);
+		const baseContent = prebuilt ?? (await buildNormalizedPost(db, target.draftId, conn.platform));
+		const content =
+			conn.platform === 'youtube' || conn.platform === 'instagram'
+				? baseContent
+				: await hydrateMedia(baseContent, store);
 		// A row uploaded before the feature was switched off (or on another
 		// instance) must fail with something a person can act on.
-		if (!env.videoUploadEnabled && (content.media ?? []).some(isVideoMedia)) {
+		if (
+			!env.videoUploadEnabled &&
+			!(conn.platform === 'youtube' && env.youtubeUploadEnabled) &&
+			!(conn.platform === 'instagram' && env.instagramUploadEnabled) &&
+			(content.media ?? []).some(isVideoMedia)
+		) {
 			throw new Error('Video uploads are not enabled on this instance');
 		}
 
@@ -590,6 +701,29 @@ export async function publishTarget(
 		}
 
 		const resumeFrom = await lastPartialResume(db, targetId);
+		const videoDraft =
+			conn.platform === 'youtube' || conn.platform === 'instagram'
+				? await first(
+						db
+							.select({ approvalHash: drafts.approvalHash })
+							.from(drafts)
+							.where(eq(drafts.id, target.draftId))
+					)
+				: null;
+		if (
+			(conn.platform === 'youtube' || conn.platform === 'instagram') &&
+			!videoDraft?.approvalHash
+		) {
+			throw new Error('Approve the video draft before upload');
+		}
+		const youtubeState =
+			conn.platform === 'youtube'
+				? await lastYoutubeUploadState(db, targetId, env.APP_ENCRYPTION_KEY)
+				: null;
+		const instagramState =
+			conn.platform === 'instagram'
+				? await lastInstagramUploadState(db, targetId, env.APP_ENCRYPTION_KEY)
+				: null;
 		// The upload-heavy part of a publish lives inside provider.publish; make
 		// sure the lease is current before handing over to it.
 		await renewLease();
@@ -605,6 +739,7 @@ export async function publishTarget(
 		);
 		let result: PublishResult;
 		try {
+			providerStarted = true;
 			result = await provider.publish(
 				content,
 				workingCreds,
@@ -614,6 +749,39 @@ export async function publishTarget(
 					resume: resumeFrom ?? undefined,
 					allowLocalHosts: isLocalAppUrl(env.APP_URL),
 					mediaUrlFor: (storageKey: string) => publicMediaUrlFor(env, storageKey),
+					...(conn.platform === 'youtube' && videoDraft?.approvalHash
+						? {
+								youtube: {
+									state: youtubeState,
+									approvalHash: videoDraft.approvalHash,
+									mediaStore: store,
+									async saveState(state: YoutubeUploadState) {
+										const encrypted = await encryptJson(state, env.APP_ENCRYPTION_KEY);
+										await db
+											.update(publishAttempts)
+											.set({ responseSummary: JSON.stringify({ youtubeUpload: encrypted }) })
+											.where(eq(publishAttempts.id, attemptId));
+										youtubeUploadStateEnc = encrypted;
+									}
+								}
+							}
+						: {}),
+					...(conn.platform === 'instagram' && videoDraft?.approvalHash
+						? {
+								instagram: {
+									state: instagramState,
+									approvalHash: videoDraft.approvalHash,
+									async saveState(state: InstagramUploadState) {
+										const encrypted = await encryptJson(state, env.APP_ENCRYPTION_KEY);
+										await db
+											.update(publishAttempts)
+											.set({ responseSummary: JSON.stringify({ instagramUpload: encrypted }) })
+											.where(eq(publishAttempts.id, attemptId));
+										instagramUploadStateEnc = encrypted;
+									}
+								}
+							}
+						: {}),
 					checkpoint,
 					// Deliberately not attempt-scoped: the whole point is that a
 					// retry of the same target and segment carries the same key, so
@@ -653,6 +821,7 @@ export async function publishTarget(
 				success: true,
 				responseSummary: JSON.stringify({
 					remotePostId: result.remotePostId,
+					visibility: result.visibility,
 					segmentIds: result.segmentIds,
 					segmentCids: result.segmentCids,
 					preempted: published.length === 0
@@ -686,8 +855,19 @@ export async function publishTarget(
 		}
 		const partial = err instanceof PublishPartialError ? err : null;
 		const errorDetail = err instanceof ProviderError ? (err.detail ?? null) : null;
+		const providerFailure = classifyProviderError(err);
 		// The returned status is what callers report to the UI: `scheduled`
 		// means "retrying automatically", `failed` means terminal.
+		const uncertain =
+			err instanceof YoutubeUploadUncertain ||
+			err instanceof InstagramUploadUncertain ||
+			(!(err instanceof YoutubeUploadInterrupted) &&
+				!(err instanceof InstagramProcessingPending) &&
+				providerStarted &&
+				(partial !== null ||
+					providerFailure.code === 'network' ||
+					(providerFailure.status !== undefined && providerFailure.status >= 500) ||
+					/^(Provider request timed out|fetch failed)/i.test(message)));
 		const nextStatus = await markFailed(
 			db,
 			targetId,
@@ -697,10 +877,17 @@ export async function publishTarget(
 			claimedGeneration,
 			{
 				scheduledFor: target.scheduledFor,
-				retryable: isFailureRetryable(err, message),
+				retryable:
+					err instanceof YoutubeUploadInterrupted ||
+					err instanceof InstagramProcessingPending ||
+					isFailureRetryable(err, message),
+				retryAfterMs: err instanceof InstagramProcessingPending ? 60_000 : undefined,
 				now,
 				partial,
-				errorDetail
+				errorDetail,
+				uncertain,
+				youtubeUploadStateEnc,
+				instagramUploadStateEnc
 			}
 		);
 		return { status: nextStatus, error: message };
@@ -769,6 +956,45 @@ async function lastPartialResume(db: AppDb, targetId: string) {
 	return null;
 }
 
+async function lastYoutubeUploadState(
+	db: AppDb,
+	targetId: string,
+	encryptionKey: string
+): Promise<YoutubeUploadState | null> {
+	const attempts = await db
+		.select({ responseSummary: publishAttempts.responseSummary })
+		.from(publishAttempts)
+		.where(eq(publishAttempts.publishTargetId, targetId))
+		.orderBy(desc(publishAttempts.startedAt))
+		.limit(20);
+	for (const attempt of attempts) {
+		const summary = parseJson<{ youtubeUpload?: string }>(attempt.responseSummary, {});
+		if (summary.youtubeUpload) {
+			return decryptJson<YoutubeUploadState>(summary.youtubeUpload, encryptionKey);
+		}
+	}
+	return null;
+}
+
+async function lastInstagramUploadState(
+	db: AppDb,
+	targetId: string,
+	encryptionKey: string
+): Promise<InstagramUploadState | null> {
+	const attempts = await db
+		.select({ responseSummary: publishAttempts.responseSummary })
+		.from(publishAttempts)
+		.where(eq(publishAttempts.publishTargetId, targetId))
+		.orderBy(desc(publishAttempts.startedAt))
+		.limit(20);
+	for (const attempt of attempts) {
+		const summary = parseJson<{ instagramUpload?: string }>(attempt.responseSummary, {});
+		if (summary.instagramUpload)
+			return decryptJson<InstagramUploadState>(summary.instagramUpload, encryptionKey);
+	}
+	return null;
+}
+
 async function markFailed(
 	db: AppDb,
 	targetId: string,
@@ -782,11 +1008,16 @@ async function markFailed(
 		now?: Date;
 		partial?: PublishPartialError | null;
 		errorDetail?: string | null;
+		uncertain?: boolean;
+		youtubeUploadStateEnc?: string | null;
+		instagramUploadStateEnc?: string | null;
+		retryAfterMs?: number;
 	} = {}
-): Promise<'scheduled' | 'failed' | 'published'> {
+): Promise<'scheduled' | 'failed' | 'published' | 'uncertain'> {
 	const now = opts.now ?? new Date();
-	const nextStatus =
-		claimedGeneration >= MAX_PUBLISH_ATTEMPTS
+	const nextStatus = opts.uncertain
+		? 'uncertain'
+		: claimedGeneration >= MAX_PUBLISH_ATTEMPTS
 			? 'failed'
 			: statusAfterFailedPublish({
 					retryable: Boolean(opts.retryable),
@@ -804,7 +1035,7 @@ async function markFailed(
 				: new Date(opts.scheduledFor).getTime()
 			: null;
 		if (when == null || Number.isNaN(when) || when <= now.getTime() + 5000) {
-			retryAt = new Date(now.getTime() + retryDelayMs(claimedGeneration));
+			retryAt = new Date(now.getTime() + (opts.retryAfterMs ?? retryDelayMs(claimedGeneration)));
 		}
 	}
 	const failed = await db
@@ -835,6 +1066,8 @@ async function markFailed(
 			summary.remoteUrl = opts.partial.remoteUrl ?? null;
 		}
 		if (opts.errorDetail) summary.errorDetail = opts.errorDetail;
+		if (opts.youtubeUploadStateEnc) summary.youtubeUpload = opts.youtubeUploadStateEnc;
+		if (opts.instagramUploadStateEnc) summary.instagramUpload = opts.instagramUploadStateEnc;
 		await db
 			.update(publishAttempts)
 			.set({
@@ -855,7 +1088,9 @@ async function markFailed(
 				.from(publishTargets)
 				.where(eq(publishTargets.id, targetId))
 		);
-		return latest?.status === 'published' || latest?.status === 'scheduled'
+		return latest?.status === 'published' ||
+			latest?.status === 'scheduled' ||
+			latest?.status === 'uncertain'
 			? latest.status
 			: 'failed';
 	}
@@ -884,7 +1119,7 @@ const DRAFT_STATUS_SQL = sql`(
 		SELECT
 			COUNT(CASE WHEN status <> 'cancelled' THEN 1 END) AS a,
 			COUNT(CASE WHEN status = 'published' THEN 1 END) AS p,
-			COUNT(CASE WHEN status = 'failed' THEN 1 END) AS f,
+			COUNT(CASE WHEN status IN ('failed', 'uncertain') THEN 1 END) AS f,
 			COUNT(CASE WHEN status IN ('scheduled', 'pending', 'publishing') THEN 1 END) AS s
 		FROM publish_targets
 		WHERE draft_id = drafts.id

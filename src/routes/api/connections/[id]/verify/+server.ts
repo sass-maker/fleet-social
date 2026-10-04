@@ -9,11 +9,14 @@ import {
 	getProvider,
 	linkedinVerify,
 	threadsVerify,
+	youtubeChannel,
+	instagramAccount,
 	xVerify,
 	type ConnectionCredentials
 } from '$lib/server/providers';
 import { sanitizeMastodonInstanceUrl } from '$lib/server/providers/mastodon';
 import { requireSession } from '$lib/server/require';
+import { hasCurrentYouTubeConsent } from '$lib/server/youtube-consent';
 
 export const POST: RequestHandler = async ({ params, locals }) => {
 	const { id } = params;
@@ -41,6 +44,9 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	// verify must go through a fresh connect (which revives the row).
 	if (conn.status === 'disconnected') {
 		return fail('Account disconnected — reconnect to verify', 409);
+	}
+	if (conn.platform === 'youtube' && !(await hasCurrentYouTubeConsent(locals.db, conn.userId))) {
+		return fail('Agree to the current privacy policy in Accounts before checking YouTube', 409);
 	}
 	// Ownership is proven above, so every write carries the owner filter too.
 	const owned = and(eq(connections.id, id), eq(connections.userId, conn.userId));
@@ -220,6 +226,44 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 								)
 							}
 						: {}),
+					updatedAt: new Date()
+				})
+				.where(owned);
+		} else if (conn.platform === 'instagram') {
+			const refreshed = await getProvider('instagram').refreshIfNeeded!(creds);
+			const account = await instagramAccount(refreshed);
+			if (creds.instagramUserId && account.id !== creds.instagramUserId)
+				return fail('Instagram account changed — reconnect the original account', 409);
+			await locals.db
+				.update(connections)
+				.set({
+					status: 'active',
+					displayName: account.username,
+					handle: `@${account.username}`,
+					credentialsEncrypted: await encryptJson(
+						{ ...refreshed, instagramUserId: account.id, instagramUsername: account.username },
+						locals.env.APP_ENCRYPTION_KEY
+					),
+					updatedAt: new Date()
+				})
+				.where(owned);
+		} else if (conn.platform === 'youtube') {
+			const refreshed = await getProvider('youtube').refreshIfNeeded!(creds);
+			const channel = await youtubeChannel(refreshed);
+			if (creds.youtubeChannelId && channel.id !== creds.youtubeChannelId) {
+				return fail('YouTube channel changed — reconnect the original channel', 409);
+			}
+			await locals.db
+				.update(connections)
+				.set({
+					status: 'active',
+					displayName: channel.title,
+					handle: channel.id,
+					avatarUrl: channel.avatarUrl || conn.avatarUrl,
+					credentialsEncrypted: await encryptJson(
+						{ ...refreshed, youtubeChannelId: channel.id },
+						locals.env.APP_ENCRYPTION_KEY
+					),
 					updatedAt: new Date()
 				})
 				.where(owned);

@@ -1,0 +1,56 @@
+[
+	{
+		"surface": "calendar",
+		"width": 390,
+		"overflow": 0,
+		"screenshot": "artifacts/design/calendar-390.jpg"
+	},
+	{
+		"surface": "create",
+		"width": 390,
+		"overflow": 0,
+		"screenshot": "artifacts/design/create-390.jpg"
+	},
+	{
+		"surface": "review",
+		"width": 390,
+		"overflow": 0,
+		"screenshot": "artifacts/design/review-390.jpg"
+	},
+	{
+		"surface": "calendar",
+		"width": 768,
+		"overflow": 0,
+		"screenshot": "artifacts/design/calendar-768.jpg"
+	},
+	{
+		"surface": "create",
+		"width": 768,
+		"overflow": 0,
+		"screenshot": "artifacts/design/create-768.jpg"
+	},
+	{
+		"surface": "review",
+		"width": 768,
+		"overflow": 0,
+		"screenshot": "artifacts/design/review-768.jpg"
+	},
+	{
+		"surface": "calendar",
+		"width": 1440,
+		"overflow": 0,
+		"screenshot": "artifacts/design/calendar-1440.jpg"
+	},
+	{
+		"surface": "create",
+		"width": 1440,
+		"overflow": 0,
+		"screenshot": "artifacts/design/create-1440.jpg"
+	},
+	{
+		"surface": "review",
+		"width": 1440,
+		"overflow": 0,
+		"screenshot": "artifacts/design/review-1440.jpg"
+	}
+]

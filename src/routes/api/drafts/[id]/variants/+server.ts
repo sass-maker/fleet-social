@@ -64,21 +64,29 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		if (!body || typeof body !== 'object') return fail('Invalid JSON body', 400);
 		const optionsError = validateVariantOptions(body.options);
 		if (optionsError) return fail(optionsError);
+		const platform = String(body.platform || '');
+		if (
+			platform === 'youtube' &&
+			body.options?.visibility !== undefined &&
+			body.options.visibility !== 'private'
+		) {
+			return fail('YouTube visibility must be private until the API project is audited', 400);
+		}
 		const segments = parseThreadSegments(body.options?.threadSegments ?? []);
 		if (!segments.ok) return fail(segments.error, 400);
 		if (body.body !== undefined) {
 			const text = parseSegmentBody(body.body);
 			if (!text.ok) return fail(text.error, 400);
 		}
-		const platform = String(body.platform || '');
 		if (
 			platform !== 'mastodon' &&
 			platform !== 'bluesky' &&
 			platform !== 'linkedin' &&
 			platform !== 'threads' &&
-			platform !== 'x'
+			platform !== 'x' &&
+			platform !== 'youtube'
 		) {
-			return fail('platform must be mastodon, bluesky, linkedin, threads, or x');
+			return fail('platform must be mastodon, bluesky, linkedin, threads, x, or youtube');
 		}
 		const existing = await first(
 			locals.db

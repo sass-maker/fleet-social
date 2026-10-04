@@ -166,7 +166,17 @@ export function satisfiedMigrations(state) {
 		['0014_notification_digest.sql', tables.has('notification_state')],
 		['0015_draft_selected_connections.sql', col('drafts', 'selected_connection_ids')],
 		['0016_mfa_challenges_expires_idx.sql', idx('mfa_challenges', 'mfa_challenges_expires_idx')],
-		['0017_app_settings.sql', tables.has('app_settings')]
+		['0017_app_settings.sql', tables.has('app_settings')],
+		[
+			'0018_fleet_drafts.sql',
+			all(
+				col('drafts', 'project_id'),
+				col('drafts', 'source_ref'),
+				col('drafts', 'approval_hash'),
+				col('drafts', 'approved_at'),
+				idx('drafts', 'drafts_project_source_uq')
+			)
+		]
 	]
 		.filter(([, ok]) => ok)
 		.map(([name]) => String(name));

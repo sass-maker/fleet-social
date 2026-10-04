@@ -16,13 +16,19 @@ import {
 	MAX_PUBLISH_ATTEMPTS,
 	buildNormalizedPost,
 	isRetryableError,
-	publishTarget,
+	publishTarget as publishTargetCore,
 	refreshDraftStatus,
 	statusAfterFailedPublish
 } from '$lib/server/publish';
 import type { AppDb } from '$lib/server/db/client';
 import { captureConsole, loggedLines } from './console-spy';
 import type { FetchLike } from '$lib/server/providers/types';
+import { approveTestTarget } from './fleet-approval';
+
+const publishTarget: typeof publishTargetCore = async (db, env, store, targetId, options) => {
+	await approveTestTarget(db, targetId);
+	return publishTargetCore(db, env, store, targetId, options);
+};
 
 function mockFetch(
 	handlers: Record<string, (req: Request) => Response | Promise<Response>>
@@ -123,7 +129,7 @@ describe('publishTarget integration', () => {
 		return id;
 	}
 
-	it('sends the same idempotency key on a retry, so the platform can deduplicate', async () => {
+	it('parks a lost provider response until the owner checks the account', async () => {
 		// A lost response on a successful post is the one duplicate the pipeline
 		// cannot see: the target is retried, and without a key the platform has no
 		// way to know it is the same post. Mastodon deduplicates on this header
@@ -162,17 +168,15 @@ describe('publishTarget integration', () => {
 				return new Response('unmocked', { status: 404 });
 			}
 		});
-		expect(first.status).toBe('scheduled'); // retryable
-		// Second attempt, past the retry backoff: the platform deduplicates and
-		// returns the original status.
-		await publishTarget(db, TEST_ENV, store, targetId, {
+		expect(first.status).toBe('uncertain');
+		const second = await publishTarget(db, TEST_ENV, store, targetId, {
 			now: new Date(Date.now() + 60 * 60_000),
 			fetchImpl: session()
 		});
-
-		expect(keys).toHaveLength(2);
+		expect(second.status).toBe('uncertain');
+		expect(second.skipped).toBe(true);
+		expect(keys).toHaveLength(1);
 		expect(keys[0]).toBe(`${targetId}:0`);
-		expect(keys[1]).toBe(keys[0]);
 	});
 
 	it('keeps the claim warm while a slow provider call is in flight', async () => {
@@ -372,7 +376,7 @@ describe('publishTarget integration', () => {
 		expect(called).toBe(false);
 	});
 
-	it('resumes from a crash checkpoint instead of re-publishing', async () => {
+	it('holds a crash checkpoint for reconciliation without re-publishing', async () => {
 		// What a Worker abort mid-publish leaves behind: the target still
 		// claimed and an attempt whose progress callback recorded the segment
 		// that did go live. The stale-claim reclaim must resume, not repost.
@@ -407,11 +411,9 @@ describe('publishTarget integration', () => {
 			}
 		});
 		expect(called).toBe(false);
-		expect(result.status).toBe('published');
-		expect(result.remotePostId).toBe('111');
+		expect(result.status).toBe('uncertain');
 		const [row] = await db.select().from(publishTargets).where(eq(publishTargets.id, targetId));
-		expect(row?.status).toBe('published');
-		expect(row?.remoteUrl).toBe('https://mastodon.test/@u/111');
+		expect(row?.status).toBe('uncertain');
 	});
 
 	it('handles multi-destination partial success', async () => {
@@ -458,15 +460,15 @@ describe('publishTarget integration', () => {
 			})
 		});
 		expect(r1.status).toBe('published');
-		// A 500 is retryable: the target is rescheduled for automatic retry
-		// rather than parked as failed.
-		expect(r2.status).toBe('scheduled');
+		// A provider 500 may follow a successful publish, so owner reconciliation
+		// is required before another attempt.
+		expect(r2.status).toBe('uncertain');
 		const [failedRow] = await db.select().from(publishTargets).where(eq(publishTargets.id, t2));
-		expect(failedRow?.status).toBe('scheduled');
-		expect(failedRow?.scheduledFor?.getTime() ?? 0).toBeGreaterThan(Date.now() + 30_000);
+		expect(failedRow?.status).toBe('uncertain');
+		expect(failedRow?.scheduledFor).toBeNull();
 		await refreshDraftStatus(db, ownDraft);
 		const [draft] = await db.select().from(drafts).where(eq(drafts.id, ownDraft));
-		expect(['partial', 'published', 'failed']).toContain(draft?.status);
+		expect(draft?.status).toBe('partial');
 	});
 
 	it('retryable failures stay claimable, terminal ones park', () => {
@@ -623,7 +625,7 @@ describe('publishTarget integration', () => {
 		expect(result.remotePostId).toContain('reclaimed');
 	});
 
-	it('fences a late success write after a newer claim', async () => {
+	it('holds a stale in-flight request so no second provider call starts', async () => {
 		const targetId = newId();
 		const now = new Date();
 		const ownDraft = await extraDraft('fence');
@@ -679,14 +681,14 @@ describe('publishTarget integration', () => {
 				}
 			})
 		});
-		expect(second.status).toBe('published');
+		expect(second.status).toBe('uncertain');
 		releaseFirst();
 		const late = await first;
 		expect(late.status).toBe('preempted');
 		expect(late.skipped).toBe(true);
 		const [row] = await db.select().from(publishTargets).where(eq(publishTargets.id, targetId));
-		expect(row?.remotePostId).toContain('winner');
-		expect(creates).toBe(2);
+		expect(row?.status).toBe('uncertain');
+		expect(creates).toBe(1);
 	});
 
 	describe('refreshDraftStatus', () => {
@@ -895,6 +897,37 @@ describe('buildNormalizedPost per-segment media', () => {
 		expect(post.text).toBe('');
 		expect(post.media?.length).toBe(1);
 		expect(post.media![0].storageKey).toBe(key);
+	});
+
+	it('flattens a YouTube description and preserves its video across segments', async () => {
+		const now = new Date();
+		const draftId = newId();
+		const key = `test-youtube-${Date.now()}.mp4`;
+		await db.insert(drafts).values({
+			id: draftId,
+			userId,
+			baseBody: 'first line\n---\nsecond line',
+			title: 'Private canary',
+			status: 'draft',
+			createdAt: now,
+			updatedAt: now
+		});
+		await db.insert(draftMedia).values({
+			id: newId(),
+			draftId,
+			storageKey: key,
+			mime: 'video/mp4',
+			size: 128,
+			segmentIndex: 1,
+			sortOrder: 0,
+			createdAt: now
+		});
+		const post = await buildNormalizedPost(db, draftId, 'youtube');
+		expect(post.title).toBe('Private canary');
+		expect(post.text).toBe('first line\n\nsecond line');
+		expect(post.thread).toBeUndefined();
+		expect(post.media?.map((item) => item.storageKey)).toEqual([key]);
+		expect(post.options?.visibility).toBe('private');
 	});
 });
 

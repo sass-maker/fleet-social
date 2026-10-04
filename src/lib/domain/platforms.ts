@@ -1,7 +1,16 @@
-export type PlatformId = 'mastodon' | 'bluesky' | 'linkedin' | 'threads' | 'x';
+export type PlatformId =
+	'mastodon' | 'bluesky' | 'linkedin' | 'threads' | 'x' | 'youtube' | 'instagram';
 
-/** Canonical display order everywhere: X first, then Threads, LinkedIn, Mastodon, Bluesky. */
-export const PLATFORM_ORDER: PlatformId[] = ['x', 'threads', 'linkedin', 'mastodon', 'bluesky'];
+/** Canonical display order everywhere. */
+export const PLATFORM_ORDER: PlatformId[] = [
+	'youtube',
+	'instagram',
+	'x',
+	'threads',
+	'linkedin',
+	'mastodon',
+	'bluesky'
+];
 
 /** The same set, for validation and iteration. Derived so the platform list
  *  only has to be maintained in one place. */
@@ -12,7 +21,15 @@ export function isPlatformId(value: string): value is PlatformId {
 }
 
 /** Preview preference when several platforms apply (matches server capabilities). */
-export const PREVIEW_PRIORITY: PlatformId[] = ['x', 'threads', 'linkedin', 'mastodon', 'bluesky'];
+export const PREVIEW_PRIORITY: PlatformId[] = [
+	'youtube',
+	'instagram',
+	'x',
+	'threads',
+	'linkedin',
+	'mastodon',
+	'bluesky'
+];
 
 /** Sort rank for a platform id; unknown platforms sink to the end, stable. */
 export function platformRank(platform: string): number {
@@ -30,6 +47,7 @@ export function supportsThreads(platform: string): boolean {
 
 export function platformName(p: string): string {
 	if (p === 'linkedin') return 'LinkedIn';
+	if (p === 'youtube') return 'YouTube';
 	if (p === 'x') return 'X';
 	return p.charAt(0).toUpperCase() + p.slice(1);
 }

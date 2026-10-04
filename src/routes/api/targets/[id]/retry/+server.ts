@@ -7,6 +7,7 @@ import { fail, handleError, ok } from '$lib/server/http';
 import { publishTarget } from '$lib/server/publish';
 import { refuseInFlightOrPublished } from '$lib/server/publish-plan';
 import { requireScope, requireUser } from '$lib/server/require';
+import { approvalProblem } from '$lib/server/draft-approval';
 
 export const POST: RequestHandler = async ({ params, locals, platform }) => {
 	try {
@@ -22,6 +23,15 @@ export const POST: RequestHandler = async ({ params, locals, platform }) => {
 		if (target.remotePostId) {
 			return ok({ status: 'published', remotePostId: target.remotePostId, skipped: true });
 		}
+		if (target.status === 'uncertain' || target.status === 'publishing')
+			return fail('Check the social account and reconcile this outcome before retrying', 409);
+		const reviewProblem = await approvalProblem(
+			locals.db,
+			target.draftId,
+			[target.connectionId],
+			'subset'
+		);
+		if (reviewProblem) return fail(reviewProblem, 409);
 		const blocked = refuseInFlightOrPublished(target, now);
 		if (blocked) return fail(blocked, 409);
 

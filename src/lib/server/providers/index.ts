@@ -3,6 +3,8 @@ import { linkedinProvider } from './linkedin';
 import { mastodonProvider } from './mastodon';
 import { threadsProvider } from './threads';
 import { xProvider } from './x';
+import { instagramProvider } from './instagram';
+import { youtubeProvider } from './youtube';
 import type { PlatformId, PlatformProvider } from './types';
 
 const providers: Record<PlatformId, PlatformProvider> = {
@@ -10,7 +12,9 @@ const providers: Record<PlatformId, PlatformProvider> = {
 	mastodon: mastodonProvider,
 	linkedin: linkedinProvider,
 	threads: threadsProvider,
-	x: xProvider
+	x: xProvider,
+	youtube: youtubeProvider,
+	instagram: instagramProvider
 };
 
 export function getProvider(platform: PlatformId | string): PlatformProvider {
@@ -21,6 +25,15 @@ export function getProvider(platform: PlatformId | string): PlatformProvider {
 
 export * from './types';
 export { providerFetch, timedFetch } from './timed-fetch';
+export {
+	youtubeProvider,
+	youtubeAuthorizeUrl,
+	youtubeExchangeCode,
+	youtubeChannel,
+	youtubeRefresh,
+	YoutubeUploadInterrupted,
+	YoutubeUploadUncertain
+} from './youtube';
 export { blueskyProvider, blueskyCreateSession, buildLinkFacets } from './bluesky';
 export {
 	mastodonProvider,
@@ -60,3 +73,13 @@ export {
 	X_MAX_IMAGES,
 	X_MAX_IMAGE_BYTES
 } from './x';
+
+export {
+	instagramProvider,
+	instagramAuthorizeUrl,
+	instagramExchangeCode,
+	instagramAccount,
+	instagramRefresh,
+	InstagramProcessingPending,
+	InstagramUploadUncertain
+} from './instagram';

@@ -4,6 +4,7 @@ import { connections, drafts, publishTargets, users } from '$lib/server/db/schem
 import { newId, type AppDb } from '$lib/server/db/client';
 import { createTestDb } from '$lib/server/db/test';
 import { POST as bulkPOST } from '../src/routes/api/targets/bulk/+server';
+import { approveTestTargets } from './fleet-approval';
 
 describe('POST /api/targets/bulk', () => {
 	let db: AppDb;
@@ -88,6 +89,7 @@ describe('POST /api/targets/bulk', () => {
 				updatedAt: now
 			});
 		}
+		await approveTestTargets(db, draftId, [connA, connB]);
 		// Another user's target: must never be touched or distinguished.
 		const otherDraft = newId();
 		await db.insert(drafts).values({

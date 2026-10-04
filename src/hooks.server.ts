@@ -9,6 +9,7 @@ import {
 	secretMatches
 } from '$lib/domain/bearer';
 import { isApiKeyFormat, touchApiKey, verifyApiKey } from '$lib/server/api-keys';
+import { accessEmail, configuredAccess } from '$lib/server/access-auth';
 import {
 	SESSION_COOKIE,
 	asMachineUser,
@@ -44,6 +45,7 @@ import {
 import { recordEndpointRequest } from '$lib/server/endpoint-telemetry';
 
 export function isPublicPath(path: string): boolean {
+	if (path === '/about' || path === '/privacy' || path === '/terms') return true;
 	if (path === '/login' || path === '/login/setup-2fa' || path === '/login/verify') return true;
 	if (
 		path === '/api/health' ||
@@ -87,6 +89,10 @@ let warnedMissingMedia = false;
 const handleRequest: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
 	const secureRequest = event.url.protocol === 'https:';
+	if (import.meta.env.DEV && process.env.FLEET_SOCIAL_REHEARSAL === '1') {
+		const { handleRehearsal } = await import('$lib/server/rehearsal');
+		return withPageSecurity(path, await handleRehearsal(event, resolve), false);
+	}
 	if (event.request.method === 'OPTIONS' && path.startsWith('/api/')) {
 		// Same-origin app: no CORS preflight needed. Bare 204 (no
 		// Access-Control-* headers) so browsers default-deny cross-origin reads.
@@ -241,13 +247,30 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 			}
 		}
 	}
+	// Cloudflare Access is an interactive login only after the signed assertion
+	// verifies for this application and names the one seeded admin. Keep bearer
+	// credentials on their own path, with their existing scope restrictions.
+	if (!bearer && configuredAccess(platformEnv)) {
+		const email = await accessEmail(event.request.headers, platformEnv);
+		if (email) {
+			const row = admin ?? (await getAdminUser(db));
+			if (row?.email.toLowerCase() === email) {
+				event.locals.user = asMachineUser(row);
+				event.locals.authMethod = 'access';
+				event.locals.apiKeyScopes = null;
+			}
+		}
+	}
 
 	// Remember the origin the instance is actually served from, once the request
 	// is authenticated — the scheduler has no request of its own to read it from,
 	// and only a signed-in visitor proves the hostname is the real one.
-	// Cookies only: a browser visit is the authority on the human-facing URL, and
-	// it keeps API clients (which may use a different host) from rewriting it.
-	if (appEnv.appUrlSource === 'request' && event.locals.authMethod === 'session') {
+	// Interactive visits are the authority on the human-facing URL. API clients
+	// may use a different host and must not rewrite it.
+	if (
+		appEnv.appUrlSource === 'request' &&
+		['session', 'access'].includes(event.locals.authMethod ?? '')
+	) {
 		try {
 			event.platform?.ctx?.waitUntil(rememberAppUrl(db, appEnv.APP_URL));
 		} catch {
@@ -278,10 +301,10 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 		if (problem) return deny(path, 429, { error: problem }, secureRequest);
 	}
 
-	// CSRF: cookie-session mutations must come from this origin. Bearer/API-key
+	// CSRF: interactive mutations must come from this origin. Bearer/API-key
 	// clients (curl, GH Actions) send no Origin/Referer and skip this check.
 	if (
-		event.locals.authMethod === 'session' &&
+		(event.locals.authMethod === 'session' || event.locals.authMethod === 'access') &&
 		path.startsWith('/api/') &&
 		!['GET', 'HEAD', 'OPTIONS'].includes(event.request.method) &&
 		!hasAllowedMutationOrigin(event.request, event.url)

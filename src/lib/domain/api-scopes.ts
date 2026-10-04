@@ -1,7 +1,8 @@
 export const SCOPE_READ = 'read';
 export const SCOPE_WRITE = 'write';
+export const SCOPE_INTAKE = 'intake';
 export const ALL_SCOPES = [SCOPE_READ, SCOPE_WRITE] as const;
-export type ApiScope = (typeof ALL_SCOPES)[number];
+export type ApiScope = (typeof ALL_SCOPES)[number] | typeof SCOPE_INTAKE;
 
 /**
  * Parse the stored scopes JSON. Null/missing means a legacy full-access key
@@ -15,7 +16,9 @@ export function parseApiScopes(raw: string | null | undefined): ApiScope[] {
 	try {
 		const parsed: unknown = JSON.parse(raw);
 		if (!Array.isArray(parsed)) return [];
-		return parsed.filter((s): s is ApiScope => s === SCOPE_READ || s === SCOPE_WRITE);
+		return parsed.filter(
+			(s): s is ApiScope => s === SCOPE_READ || s === SCOPE_WRITE || s === SCOPE_INTAKE
+		);
 	} catch {
 		return [];
 	}
@@ -32,6 +35,8 @@ export function hasApiScope(scopes: ApiScope[] | null | undefined, scope: ApiSco
 /** Sanitize a rotation request's scopes: unknown entries dropped, empty → full. */
 export function normalizeApiScopes(input: unknown): ApiScope[] {
 	if (!Array.isArray(input)) return [...ALL_SCOPES];
-	const kept = input.filter((s): s is ApiScope => s === SCOPE_READ || s === SCOPE_WRITE);
+	const kept = input.filter(
+		(s): s is ApiScope => s === SCOPE_READ || s === SCOPE_WRITE || s === SCOPE_INTAKE
+	);
 	return [...new Set(kept)].length ? [...new Set(kept)] : [...ALL_SCOPES];
 }

@@ -112,3 +112,119 @@ button:disabled {
 	background: var(--border);
 	border-radius: 4px;
 }
+
+:root {
+	--studio-paper: #f5f4ef;
+	--studio-panel: #fffefa;
+	--studio-ink: #253e34;
+	--studio-muted: #606c61;
+	--studio-line: #e0e3d9;
+	--studio-accent: #285d48;
+}
+body {
+	background: var(--studio-paper);
+	color: var(--studio-ink);
+	font-size: 14px;
+}
+.studio-muted {
+	color: var(--studio-muted);
+}
+.studio-primary,
+.studio-secondary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 10px 15px;
+	border-radius: 7px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.5;
+}
+.studio-primary {
+	background: var(--studio-accent);
+	color: white;
+}
+.studio-secondary {
+	background: var(--studio-panel);
+	color: var(--studio-ink);
+	border: 1px solid var(--studio-line);
+}
+.studio-primary:disabled,
+.studio-secondary:disabled {
+	opacity: 0.55;
+}
+.studio-primary:hover:not(:disabled) {
+	background: #204c3a;
+}
+.studio-link,
+.studio-back {
+	color: var(--studio-accent);
+	font-size: 12px;
+	font-weight: 600;
+}
+.studio-back {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+.studio-status {
+	display: inline-block;
+	font-size: 10px;
+	line-height: 1.5;
+	color: #755624;
+	background: #f4ebd7;
+	border-radius: 4px;
+	padding: 3px 6px;
+	font-weight: 600;
+}
+.studio-status.approved {
+	color: #285d48;
+	background: #e2eddf;
+}
+.studio-count {
+	font-size: 11px;
+	border-radius: 4px;
+	background: #e8ebe2;
+	padding: 2px 7px;
+}
+.studio-tabs {
+	display: flex;
+	gap: 2px;
+	border: 1px solid var(--studio-line);
+	background: #eeefe9;
+	border-radius: 8px;
+	padding: 3px;
+	font-size: 12px;
+}
+.studio-tabs button {
+	padding: 6px 13px;
+	border-radius: 5px;
+}
+.studio-tabs button.active {
+	background: var(--studio-panel);
+	box-shadow: 0 1px 3px #00000012;
+	font-weight: 600;
+}
+.studio-empty {
+	padding: 28px 16px;
+	color: var(--studio-muted);
+	line-height: 1.6;
+	font-size: 12px;
+}
+.studio-error {
+	color: #963d32;
+	background: #fbeae6;
+	padding: 12px 14px;
+	border-radius: 6px;
+	font-size: 12px;
+	margin-top: 14px;
+}
+.studio-notice {
+	color: #285d48;
+	background: #e6efdf;
+	padding: 12px 14px;
+	border-radius: 6px;
+	font-size: 12px;
+	margin-top: 14px;
+}

@@ -4,6 +4,7 @@ import { newId, type AppDb } from '$lib/server/db/client';
 import { connections, drafts, publishTargets, users } from '$lib/server/db/schema';
 import { encryptJson } from '$lib/server/crypto';
 import { createTestDb, createTestMedia, TEST_ENV } from '$lib/server/db/test';
+import { approveTestTargets } from './fleet-approval';
 import { writeHeartbeat } from '$lib/server/scheduler';
 import { POST as tickPOST } from '../src/routes/api/internal/tick/+server';
 import { GET as healthGET } from '../src/routes/api/health/+server';
@@ -83,6 +84,7 @@ describe('scheduler routes', () => {
 			createdAt: now,
 			updatedAt: now
 		});
+		await approveTestTargets(db, draftId, [accountId]);
 	});
 	afterAll(() => close());
 

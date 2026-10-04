@@ -20,7 +20,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		);
 		return json({
 			ok: true,
-			service: 'cogsend',
+			service: 'fleet-social',
 			version: __APP_VERSION__,
 			time: new Date().toISOString(),
 			account: { created: Boolean(account), totpEnrolled: Boolean(account?.totpEnabled) }

@@ -1,6 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { first } from '$lib/server/db/client';
+import { approvalProblem } from '$lib/server/draft-approval';
 import { connections, drafts, publishTargets } from '$lib/server/db/schema';
 import { fail, handleError, ok } from '$lib/server/http';
 import { classifyConnections, ensureTargets } from '$lib/server/publish-plan';
@@ -51,6 +52,8 @@ export const POST: RequestHandler = async ({ params, request, locals, platform }
 			return fail('Too many connections (max 10)', 400);
 		const connectionIds = normalizeConnectionIds(body.connectionIds);
 		if (!connectionIds.length) return fail('connectionIds required');
+		const reviewProblem = await approvalProblem(locals.db, params.id, connectionIds);
+		if (reviewProblem) return fail(reviewProblem, 409);
 		const conns = await locals.db
 			.select()
 			.from(connections)

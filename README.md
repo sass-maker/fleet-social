@@ -1,3 +1,13 @@
+# Fleet Social
+
+Private Fleet publishing hub based on [CogSend](https://github.com/deepakness/cogsend) (MIT). Fleet product feeds can create project-attributed drafts with a draft-intake key. The owner reviews the saved content and destinations before scheduling or publishing. Each account keeps its own delivery outcome; an ambiguous provider response waits for owner reconciliation in Posts.
+
+The private Fleet Worker is deployed with isolated D1 and R2. Cloudflare Access, GitHub and Google sign-in, and one owner-connected YouTube channel are live. A private YouTube canary was published and verified on both Fleet Social and YouTube; public YouTube posting remains disabled. Public app disclosures and explicit YouTube consent are implemented in the current branch but are not yet deployed. See [PROJECT_STATUS.md](PROJECT_STATUS.md), [issue #1](https://github.com/sass-maker/fleet-social/issues/1), [issue #3](https://github.com/sass-maker/fleet-social/issues/3), and [issue #4](https://github.com/sass-maker/fleet-social/issues/4) for the rollout state.
+
+For local code qualification, use `npm ci`, `node scripts/sync-fleet-projects.mjs` when the canonical Fleet catalog changes, then `npm test`, `npm run check`, `npm run lint`, and `npm run build`. The CogSend install and release instructions below document the upstream foundation. Fleet's instance uses its own Worker, D1, R2, and Google OAuth project; do not run the upstream setup commands against Fleet resources.
+
+## Upstream CogSend reference
+
 <p align="center">
   <img width="150" alt="CogSend" src="https://github.com/user-attachments/assets/42c2579f-b1f2-4345-980a-01e24c9e027c" />
 </p>
@@ -88,13 +98,13 @@ release tags and rolling back.
 
 ## Documentation
 
-Also published, with search, at [cogsend.com/docs](https://cogsend.com/docs/).
+The upstream CogSend docs are also published, with search, at [cogsend.com/docs](https://cogsend.com/docs/). Fleet-specific additions in this fork remain in this repository.
 
 | Page                                       | What is in it                                                                                                 |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | [Deploying](docs/deploy.md)                | the install and its flags, checking it worked, updating and rolling back, deploying by hand                   |
 | [Configuration](docs/configuration.md)     | secrets, the instance name, `APP_URL`, keeping your deployment separate from upstream, the login and recovery |
-| [OAuth apps](docs/oauth-apps.md)           | LinkedIn, Threads and X app setup, and what each platform allows                                              |
+| [OAuth apps](docs/oauth-apps.md)           | YouTube, LinkedIn, Threads and X app setup, and what each platform allows                                     |
 | [Cloudflare Access](docs/access.md)        | putting an extra gate in front of an instance                                                                 |
 | [Domains and URLs](docs/domains.md)        | the workers.dev URL, a custom domain, and what to update when the hostname changes                            |
 | [Writing and publishing](docs/composer.md) | the composer: threads, overrides, images and alt text, publishing and scheduling                              |
@@ -122,3 +132,7 @@ issues: [SECURITY.md](SECURITY.md) — report them privately.
 
 MIT — see [LICENSE](LICENSE). Third-party notices are in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+## Interview workspace
+
+The Fleet fork adds an editorial month/week calendar, focused saved-revision video review, native YouTube and Instagram Reels connections, and a local Mashup creation workspace. See [Development](docs/development.md#interview-rehearsal) for the isolated demo command and its prepared-video, source-link, and product-story lanes. Real account connection and provider publishing require the operator’s OAuth apps; rehearsal never uploads to social platforms.

@@ -55,3 +55,21 @@ curl -s -X POST "$APP_URL/api/drafts/DRAFT_ID/publish" \
 - Sending several connection ids in one request publishes them in order. The first always runs; each further one runs only if it fits in what is left of the request's Cloudflare call budget (50 on Workers Free, see `SUBREQUEST_LIMIT` in [Configuration](configuration.md#secrets)). The ones that don't fit come back with `status: "pending"` and `deferred: true`. They are already due and go out on the next scheduler tick, so don't send them again. For the fastest results, send one connection id per request. If a request still runs out, it answers `200` with `stopped: true`, `stoppedError`, and the results it did get — the accounts after the last entry were not completed and are still due (a target the failure interrupted is left retryable, never `publishing`), so send those ids again. A `500` means nothing was recorded; check the draft before retrying.
 - Do not call `/api/targets/:id/retry` unless the row is `failed` (or a stuck `publishing` older than 15 minutes).
 - Schedule returns **409** if that account is already published or still publishing. Check `error`, `alreadyPublished`, and `inFlight` instead of treating HTTP 200 as "it was scheduled".
+
+# Fleet Social draft intake
+
+Fleet product feeds should use a key with only the `intake` scope, generated in Settings. It can call `POST /api/drafts` and cannot approve, schedule, publish, or reconcile outcomes. The instance has one active API key, so generating an intake key replaces any existing API key; browser sessions remain separate.
+
+Send a canonical active `projectId` and a stable `sourceRef` for idempotency:
+
+```json
+{
+	"projectId": "codevetter",
+	"sourceRef": "release:1.14.3",
+	"baseBody": "Draft announcement for owner review"
+}
+```
+
+The first request creates a draft; a repeated `(projectId, sourceRef)` returns the existing draft without changing its content. The owner selects connected destinations and approves the saved revision in Compose. Any copy, media, platform variant, or destination change requires renewed approval. If a provider response is uncertain, Posts asks the owner to inspect that account and record the live post URL or confirm no post exists before a manual retry.
+
+## Upstream API reference

@@ -24,6 +24,7 @@
 		platformLimit
 	} from '$lib/domain/editor-limits';
 	import { humanizeError } from '$lib/domain/human-error';
+	import { fleetProjects } from '$lib/domain/fleet-projects';
 	import { dialogFocus } from '$lib/components/dialog-focus';
 	import { platformColorClass } from '$lib/components/platform-color';
 	import {
@@ -116,12 +117,15 @@
 		connectionId: string;
 		// `retrying` = a retryable failure the scheduler will attempt again
 		// automatically; the target is `scheduled` with an error, not failed.
-		status: 'pending' | 'published' | 'failed' | 'publishing' | 'retrying';
+		status: 'pending' | 'published' | 'failed' | 'publishing' | 'retrying' | 'uncertain';
 		error?: string | null;
 	};
 
 	type EditorDraft = {
 		id: string;
+		title?: string | null;
+		projectId?: string | null;
+		approvedAt?: Date | string | null;
 		baseBody?: string | null;
 		selectedConnectionIds?: string[] | null;
 		variants?: Array<{
@@ -156,6 +160,7 @@
 	}
 	const seededDraft = openedDraft();
 	const seededBody = seededDraft?.baseBody || '';
+	const seededTitle = seededDraft?.title || '';
 	const seededOverrides = seededDraft
 		? overridesFromVariants(
 				(seededDraft.variants || []).map((variant) => ({
@@ -211,7 +216,12 @@
 	);
 
 	let draftId = $state<string | null>(page.url.searchParams.get('id'));
+	let projectId = $state(seededDraft?.projectId ?? '');
+	let projectTouched = false;
+	let approvalState = $state<'unapproved' | 'approved' | 'checking'>('unapproved');
+	let approvalBusy = $state(false);
 	let baseBody = $state(seededBody);
+	let youtubeTitle = $state(seededTitle);
 	let activeTab = $state<ActiveTab>('global');
 	let overrides = $state<PlatformOverrideMap>(seededOverrides);
 	// Snapshot on purpose: the server-rendered list paints first; the client
@@ -302,7 +312,46 @@
 		} catch {
 			// storage unavailable: defaults hold
 		}
+		if (draftId) void refreshApproval(draftId);
 	});
+
+	async function refreshApproval(id: string) {
+		approvalState = 'checking';
+		try {
+			const res = await fetch(`/api/drafts/${id}/approval`);
+			const data = await res.json();
+			if (draftId === id) approvalState = res.ok && data.approved ? 'approved' : 'unapproved';
+		} catch {
+			if (draftId === id) approvalState = 'unapproved';
+		}
+	}
+
+	async function approveCurrentDraft() {
+		if (approvalBusy) return;
+		if (!projectId) {
+			showToast('Choose a Fleet project before review', 'warn');
+			return;
+		}
+		if (!selected.size) {
+			showToast('Select at least one account before review', 'warn');
+			return;
+		}
+		approvalBusy = true;
+		try {
+			const id = await persistForAction();
+			if (!id) return;
+			const res = await fetch(`/api/drafts/${id}/approval`, { method: 'POST' });
+			const data = await res.json().catch(() => ({}));
+			if (!res.ok) throw new Error(data.error || 'Could not approve draft');
+			approvalState = 'approved';
+			showToast('Draft approved for selected accounts');
+		} catch (error) {
+			approvalState = 'unapproved';
+			showToast(humanizeError(error instanceof Error ? error.message : 'Approval failed'), 'error');
+		} finally {
+			approvalBusy = false;
+		}
+	}
 
 	function setLocalFlag(key: string, on: boolean) {
 		try {
@@ -417,6 +466,7 @@
 			if (a.platform === 'linkedin') return PLATFORM_LIMITS.linkedin;
 			if (a.platform === 'threads') return PLATFORM_LIMITS.threads;
 			if (a.platform === 'x') return PLATFORM_LIMITS.x;
+			if (a.platform === 'youtube') return PLATFORM_LIMITS.youtube;
 			return PLATFORM_LIMITS.x;
 		});
 		return Math.min(...limits);
@@ -452,6 +502,7 @@
 		const linkedinText = effectivePlatformBody(baseBody, overrides, 'linkedin');
 		const threadsText = effectivePlatformBody(baseBody, overrides, 'threads');
 		const xText = effectivePlatformBody(baseBody, overrides, 'x');
+		const youtubeText = effectivePlatformBody(baseBody, overrides, 'youtube');
 		const linkedinFlat = flattenThreadBody(linkedinText);
 		return {
 			bluesky: {
@@ -467,7 +518,8 @@
 				len: maxThreadSegmentLength(threadsText, countGraphemes),
 				max: PLATFORM_LIMITS.threads
 			},
-			x: { len: maxThreadSegmentLength(xText, countGraphemes), max: PLATFORM_LIMITS.x }
+			x: { len: maxThreadSegmentLength(xText, countGraphemes), max: PLATFORM_LIMITS.x },
+			youtube: { len: countGraphemes(flattenThreadBody(youtubeText)), max: PLATFORM_LIMITS.youtube }
 		};
 	});
 	const blueskyBytesOver = $derived.by(() => {
@@ -501,6 +553,16 @@
 		return null;
 	});
 	const linkedinMediaOver = $derived(linkedinMediaProblem !== null);
+	const youtubeProblem = $derived.by(() => {
+		if (!selectedPlatforms.has('youtube')) return null;
+		if (!youtubeTitle.trim() || youtubeTitle.trim().length > 100)
+			return 'YouTube needs a title of 1–100 characters';
+		if (effectivePlatformBody(baseBody, overrides, 'youtube').length > 5000)
+			return 'YouTube description is too long (max 5,000 characters)';
+		if (media.length !== 1 || media[0]?.mime !== 'video/mp4' || (media[0]?.segmentIndex ?? 0) !== 0)
+			return 'YouTube needs exactly one MP4 video';
+		return null;
+	});
 	const overSelectedLimit = $derived(
 		isOverSelectedPlatformLimit({
 			selectedPlatforms,
@@ -513,7 +575,9 @@
 			threadsLen: counters.threads.len,
 			threadsMax: counters.threads.max,
 			xLen: counters.x.len,
-			xMax: counters.x.max
+			xMax: counters.x.max,
+			youtubeLen: counters.youtube.len,
+			youtubeMax: counters.youtube.max
 		}) ||
 			threadsLinksOver ||
 			linkedinMediaOver ||
@@ -578,6 +642,8 @@
 		for (const k of Object.keys(overrides).sort())
 			sorted[k as PlatformId] = overrides[k as PlatformId]!;
 		return JSON.stringify({
+			project: projectId,
+			t: youtubeTitle,
 			b: baseBody,
 			o: sorted,
 			v: mastoVisibility,
@@ -591,6 +657,7 @@
 	function markDirty() {
 		dirty = true;
 		saveStatus = 'idle';
+		approvalState = 'unapproved';
 	}
 
 	function setActiveBody(nextBody: string) {
@@ -629,7 +696,11 @@
 
 	function resetEditorForNewDraft() {
 		draftId = null;
+		projectId = '';
+		projectTouched = false;
+		approvalState = 'unapproved';
 		baseBody = '';
+		youtubeTitle = '';
 		overrides = {};
 		media = [];
 		mastoVisibility = initialSettings?.mastoVisibility ?? 'public';
@@ -665,6 +736,7 @@
 		const before = fresh
 			? {
 					body: baseBody,
+					title: youtubeTitle,
 					overrides,
 					media,
 					visibility: mastoVisibility,
@@ -707,6 +779,8 @@
 			loadFailedId = null;
 			if (page.url.searchParams.get('id') !== id) return;
 			const d = data.draft;
+			if (!projectTouched) projectId = d.projectId ?? '';
+			projectTouched = false;
 			if (before && draftId !== null && draftId !== id) {
 				// An autosave or media upload claimed a brand-new draft while this
 				// fetch was in flight; it owns the editor now (the URL was
@@ -737,6 +811,7 @@
 			let mergedCleanly = true;
 			if (before) {
 				const keepBody = baseBody !== before.body;
+				const keepTitle = youtubeTitle !== before.title;
 				const keepOverrides = overrides !== before.overrides;
 				const keepMedia = media !== before.media;
 				const keepVisibility = mastoVisibility !== before.visibility;
@@ -745,6 +820,7 @@
 				const keepSelection = selectionTouched;
 				mergedCleanly =
 					!keepBody &&
+					!keepTitle &&
 					!keepOverrides &&
 					!keepMedia &&
 					!keepVisibility &&
@@ -752,6 +828,7 @@
 					!keepPoll &&
 					!keepSelection;
 				if (!keepBody) baseBody = main;
+				if (!keepTitle) youtubeTitle = d.title || '';
 				// Platform bodies the user did not touch still come from the
 				// draft; the ones they did keep their local text.
 				overrides = keepOverrides ? { ...loadedOverrides, ...overrides } : loadedOverrides;
@@ -761,6 +838,7 @@
 				if (!keepPoll) mastoPoll = loadedPoll;
 			} else {
 				baseBody = main;
+				youtubeTitle = d.title || '';
 				overrides = loadedOverrides;
 				media = loadedMedia;
 				mastoVisibility = loadedVisibility;
@@ -809,6 +887,7 @@
 				saveStatus = 'idle';
 				savedSnapshot = takeSnapshot();
 			}
+			void refreshApproval(id);
 			// Otherwise the local edits stay dirty on purpose: the autosave
 			// effect below persists the merged content once the load settles.
 		} catch (err) {
@@ -824,7 +903,9 @@
 	}
 
 	type SaveSnapshot = {
+		projectId: string;
 		baseBody: string;
+		youtubeTitle: string;
 		overrides: PlatformOverrideMap;
 		mastoVisibility: string;
 		mastoCW: string;
@@ -834,7 +915,9 @@
 
 	async function ensureDraft(
 		snap: SaveSnapshot = {
+			projectId,
 			baseBody,
+			youtubeTitle,
 			overrides,
 			mastoVisibility,
 			mastoCW,
@@ -848,7 +931,9 @@
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
+					title: snap.youtubeTitle || null,
 					baseBody: snap.baseBody,
+					projectId: snap.projectId,
 					selectedConnectionIds: snap.selectedConnectionIds
 				})
 			});
@@ -860,7 +945,9 @@
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
+				title: snap.youtubeTitle || null,
 				baseBody: snap.baseBody,
+				projectId: snap.projectId,
 				selectedConnectionIds: snap.selectedConnectionIds
 			})
 		});
@@ -886,7 +973,9 @@
 	async function saveVariants(
 		id: string,
 		snap: SaveSnapshot = {
+			projectId,
 			baseBody,
+			youtubeTitle,
 			overrides,
 			mastoVisibility,
 			mastoCW,
@@ -912,7 +1001,12 @@
 			const mastodonOptions =
 				platform === 'mastodon' &&
 				Boolean(snap.mastoCW || snap.mastoVisibility !== 'public' || snap.mastoPoll);
-			if (customized || mastodonOptions) {
+			const youtubeOptions =
+				platform === 'youtube' &&
+				snap.selectedConnectionIds.some(
+					(id) => connections.find((c) => c.id === id)?.platform === 'youtube'
+				);
+			if (customized || mastodonOptions || youtubeOptions) {
 				// Mark at dispatch, not on response: if the write commits but
 				// the response is lost, a later save must still be allowed to
 				// DELETE the row instead of leaving a stale variant that would
@@ -927,7 +1021,7 @@
 						body: JSON.stringify({
 							platform,
 							body: customized ? (toSave[platform] ?? '') : null,
-							options
+							options: platform === 'youtube' ? { visibility: 'private' } : options
 						})
 					})
 				};
@@ -975,7 +1069,7 @@
 		// Backstop for every caller (autosave, Cmd+S, publish, schedule,
 		// beforeunload): never write a draft whose stored copy never loaded.
 		if (loadFailedId) return null;
-		const emptyNew = !draftId && !baseBody.trim();
+		const emptyNew = !draftId && !baseBody.trim() && !youtubeTitle.trim();
 		if (emptyNew && !allowEmpty) return null;
 		// Nothing changed since the last successful save: skip the round trips.
 		// Callers already gate on dirty; this makes the guarantee explicit for
@@ -987,7 +1081,9 @@
 		saveStatus = 'saving';
 		const before = takeSnapshot();
 		const snap: SaveSnapshot = {
+			projectId,
 			baseBody,
+			youtubeTitle,
 			overrides,
 			mastoVisibility,
 			mastoCW,
@@ -1062,6 +1158,10 @@
 	async function requestPublish(connectionIds: string[]) {
 		// Prevent overlapping publishes/schedules (publishing covers both).
 		if (publishing) return;
+		if (approvalState !== 'approved') {
+			showToast('Review and approve the saved draft before publishing', 'warn');
+			return;
+		}
 		// Fast empty check before opening any UI: mirrors doPersist's
 		// emptyNew guard so an empty composer toasts without flashing the
 		// dialog (or the publishing spinner in skip-ask mode).
@@ -1069,7 +1169,7 @@
 			showToast('Could not load this draft — retry before publishing', 'warn');
 			return;
 		}
-		if (!draftId && !baseBody.trim()) {
+		if (!draftId && !baseBody.trim() && !youtubeTitle.trim()) {
 			showToast('Nothing to publish', 'warn');
 			return;
 		}
@@ -1083,6 +1183,10 @@
 		}
 		if (linkedinMediaOver && connectionIds.some((id) => platformOf(id) === 'linkedin')) {
 			showToast(linkedinMediaProblem ?? 'LinkedIn cannot take this media', 'warn');
+			return;
+		}
+		if (youtubeProblem && connectionIds.some((id) => platformOf(id) === 'youtube')) {
+			showToast(youtubeProblem, 'warn');
 			return;
 		}
 		if (overSelectedLimit) {
@@ -1225,6 +1329,11 @@
 						});
 						return { connectionId, status: 'retrying' as const, error: message };
 					}
+					if (row.status === 'uncertain') {
+						const message = 'Check the social account before retrying';
+						setDestinationProgress(connectionId, { status: 'uncertain', error: message });
+						return { connectionId, status: 'uncertain' as const, error: message };
+					}
 					const message = humanizeError(row.error ?? 'Publish failed');
 					setDestinationProgress(connectionId, { status: 'failed', error: message });
 					return { connectionId, status: 'failed' as const, error: message };
@@ -1240,7 +1349,17 @@
 		const published = settled.filter((s) => s.status === 'published');
 		const inFlight = settled.filter((s) => s.status === 'publishing');
 		const retrying = settled.filter((s) => s.status === 'retrying');
-		if (failed.length) {
+		const uncertain = settled.filter((s) => s.status === 'uncertain');
+		if (uncertain.length) {
+			showToast(
+				'A destination may have received this post. Check its account and reconcile it in Posts.',
+				'warn',
+				{ label: 'View posts', href: '/posts?tab=failed' }
+			);
+			announcePublish(
+				`Check the outcome for ${uncertain.map((item) => destinationName(item.connectionId)).join(', ')}.`
+			);
+		} else if (failed.length) {
 			showToast(
 				humanizeError(
 					failed
@@ -1418,6 +1537,10 @@
 			showToast(linkedinMediaProblem ?? 'LinkedIn cannot take this media', 'warn');
 			return;
 		}
+		if (youtubeProblem) {
+			showToast(youtubeProblem, 'warn');
+			return;
+		}
 		if (overSelectedLimit) {
 			showToast('A post is over the character limit', 'warn');
 			return;
@@ -1485,21 +1608,22 @@
 		const threadsSelected = connections.some((c) => selected.has(c.id) && c.platform === 'threads');
 		const xSelected = connections.some((c) => selected.has(c.id) && c.platform === 'x');
 		const videos = images.filter((f) => f.type === 'video/mp4');
-		const nonLinkedinSelected = connections.some(
-			(c) => selected.has(c.id) && c.platform !== 'linkedin'
+		const unsupportedVideoTargetSelected = connections.some(
+			(c) => selected.has(c.id) && c.platform !== 'linkedin' && c.platform !== 'youtube'
 		);
-		const linkedinOnly = connections.some((c) => selected.has(c.id) && c.platform === 'linkedin');
+		const videoTargetSelected = linkedinSelected || selectedPlatforms.has('youtube');
 		const webpSelected = images.some((f) => f.type === 'image/webp') && linkedinSelected;
-		const overBluesky = images.filter((f) => f.size > BLUESKY_MAX_IMAGE_BYTES);
-		const overLinkedin = images.filter((f) => f.size > LINKEDIN_MAX_IMAGE_BYTES);
+		const stillImages = images.filter((f) => f.type.startsWith('image/'));
+		const overBluesky = stillImages.filter((f) => f.size > BLUESKY_MAX_IMAGE_BYTES);
+		const overLinkedin = stillImages.filter((f) => f.size > LINKEDIN_MAX_IMAGE_BYTES);
 		const advisories: string[] = [];
-		if (videos.length && nonLinkedinSelected) {
+		if (videos.length && unsupportedVideoTargetSelected) {
 			advisories.push(
-				'Video posts only go to LinkedIn — other selected accounts will fail unless you uncheck them.'
+				'Video posts go to LinkedIn or YouTube — other selected accounts will fail unless you uncheck them.'
 			);
 		}
-		if (videos.length && !linkedinOnly) {
-			advisories.push('Select a LinkedIn account or the video has nowhere to go.');
+		if (videos.length && !videoTargetSelected) {
+			advisories.push('Select a LinkedIn or YouTube account for this video.');
 		}
 		if (overBluesky.length && blueskySelected) {
 			advisories.push(
@@ -1538,13 +1662,10 @@
 				f.type === 'image/gif' ? f.size > X_MAX_GIF_BYTES : f.size > X_MAX_IMAGE_BYTES
 			);
 		if (xBadType) {
-			advisories.push('X takes JPEG/PNG/GIF/WebP images only — video goes to LinkedIn.');
+			advisories.push('X takes JPEG/PNG/GIF/WebP images only — video goes to LinkedIn or YouTube.');
 		}
 		if (xOversize) {
 			advisories.push("An image is over X's 5MB cap (15MB for GIFs) — compress it or uncheck X.");
-		}
-		if (videos.length && xSelected) {
-			advisories.push('Video posts only go to LinkedIn — X accounts will fail unless unchecked.');
 		}
 		if (advisories.length) showToast(advisories[0], 'warn');
 		uploadingSegment = segmentIndex;
@@ -2103,16 +2224,22 @@
 		// Don't autosave while the user is deciding to discard: the save
 		// could create/patch a draft between open and confirm.
 		if (isDiscardOpen || discarding) return;
-		const emptyNew = !draftId && !baseBody.trim();
+		const emptyNew = !draftId && !baseBody.trim() && !youtubeTitle.trim();
 		if (emptyNew) return;
+		if (!projectId) return;
 		const timer = setTimeout(() => {
 			void persistAll();
 		}, 1400);
 		return () => clearTimeout(timer);
 	});
 
-	beforeNavigate(() => {
+	beforeNavigate((navigation) => {
 		if (!dirty && Object.keys(altPending).length === 0) return;
+		if (!projectId) {
+			navigation.cancel();
+			showToast('Choose a Fleet project to save this post', 'warn');
+			return;
+		}
 		void persistAll(false, { navigate: false });
 		void flushAltPending();
 	});
@@ -2196,6 +2323,90 @@
 			>
 				{loadingDraftId !== null ? 'Loading…' : 'Retry'}
 			</button>
+		</div>
+	{/if}
+	<div
+		class="mb-5 flex flex-wrap items-end gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm"
+	>
+		<label class="min-w-48 flex-1 text-[11px] font-bold tracking-wide text-stone-500 uppercase">
+			Fleet project
+			<select
+				value={projectId}
+				onchange={(event) => {
+					projectId = event.currentTarget.value;
+					projectTouched = true;
+					markDirty();
+				}}
+				class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-500 focus:outline-none"
+			>
+				<option value="">Choose a project</option>
+				{#each fleetProjects as project (project.id)}
+					<option value={project.id}>{project.name}</option>
+				{/each}
+			</select>
+		</label>
+		<div class="flex items-center gap-2">
+			<span
+				class="text-[12px] font-semibold {approvalState === 'approved'
+					? 'text-emerald-700'
+					: 'text-amber-700'}"
+			>
+				{approvalState === 'approved'
+					? 'Approved'
+					: approvalState === 'checking'
+						? 'Checking review…'
+						: 'Needs review'}
+			</span>
+			<button
+				type="button"
+				disabled={approvalBusy || approvalState === 'approved' || !projectId}
+				onclick={() => void approveCurrentDraft()}
+				class="rounded-full bg-stone-900 px-4 py-2.5 text-[12px] font-bold text-white transition-colors hover:bg-stone-800 disabled:opacity-50"
+			>
+				{approvalBusy ? 'Saving…' : 'Approve draft'}
+			</button>
+		</div>
+	</div>
+	{#if selectedPlatforms.has('youtube')}
+		<div
+			class="mb-5 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm"
+			data-testid="youtube-video-options"
+		>
+			<div class="mb-3 flex items-center justify-between gap-3">
+				<p class="text-[11px] font-bold tracking-wide text-stone-500 uppercase">YouTube video</p>
+				<span class="text-[11px] font-semibold text-stone-500"
+					>Shorts are classified by YouTube</span
+				>
+			</div>
+			<label class="block text-[12px] font-bold text-stone-700">
+				Video title
+				<input
+					type="text"
+					value={youtubeTitle}
+					maxlength="100"
+					oninput={(event) => {
+						youtubeTitle = event.currentTarget.value;
+						markDirty();
+					}}
+					placeholder="Title shown on YouTube"
+					class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-medium text-stone-900 focus:border-stone-500 focus:outline-none"
+				/>
+			</label>
+			<div class="mt-3 flex items-center gap-3 text-[12px] text-stone-600">
+				<label class="font-bold text-stone-700" for="youtube-visibility">Visibility</label>
+				<select
+					id="youtube-visibility"
+					value="private"
+					class="rounded-lg border border-stone-200 bg-stone-50 px-2 py-1.5 font-semibold text-stone-900"
+				>
+					<option value="private">Private</option>
+				</select>
+				<span>The Google API project needs an audit before public uploads.</span>
+			</div>
+			<p class="mt-3 text-[12px] text-stone-500">
+				Attach one MP4 below. The post text is the video description; customize the YouTube tab for
+				a separate description.
+			</p>
 		</div>
 	{/if}
 	<!-- Platform Tabs (Always visible) -->
@@ -2762,7 +2973,7 @@
 					type="button"
 					data-testid="publish-now"
 					class="flex cursor-pointer items-center gap-2 rounded-l-full px-6 py-2.5 text-[13px] font-bold transition-all hover:bg-stone-800 disabled:opacity-60"
-					disabled={publishing}
+					disabled={publishing || approvalState !== 'approved'}
 					aria-busy={publishButtonBusy}
 					onclick={() => void onPublish()}
 				>
@@ -2793,7 +3004,9 @@
 						class="absolute right-0 bottom-full z-40 mb-3 w-64 origin-bottom-right rounded-[1.5rem] border border-stone-200/80 bg-white/95 p-3 text-stone-900 shadow-[0_12px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
 						transition:fly={{ y: 10, duration: 250, opacity: 0 }}
 						role="dialog"
-						aria-label={publishProgress?.some((d) => d.status === 'failed')
+						aria-label={publishProgress?.some(
+							(d) => d.status === 'failed' || d.status === 'uncertain'
+						)
 							? 'Publish results'
 							: 'Confirm post'}
 						use:dialogFocus={{
@@ -2806,7 +3019,7 @@
 						}}
 					>
 						<div class="px-2 pt-2 pb-4 text-center">
-							{#if publishProgress?.some((d) => d.status === 'failed')}
+							{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
 								<h4 class="mb-1 text-[14px] font-extrabold text-stone-900">
 									Couldn’t publish everywhere
 								</h4>
@@ -2842,7 +3055,7 @@
 										>
 											<Check class="h-2.5 w-2.5" />
 										</span>
-									{:else if state?.status === 'failed'}
+									{:else if state?.status === 'failed' || state?.status === 'uncertain'}
 										<span
 											class="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white"
 										>
@@ -2853,7 +3066,7 @@
 							{/each}
 						</div>
 
-						{#if publishProgress?.some((d) => d.status === 'failed')}
+						{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
 							<ul class="mb-3 space-y-1.5" data-testid="publish-progress">
 								{#each publishProgress ?? [] as dest (dest.connectionId)}
 									<li
@@ -2873,6 +3086,13 @@
 											<span class="text-[11px] font-bold text-stone-700">
 												{destinationName(dest.connectionId)} — published
 											</span>
+										{:else if dest.status === 'uncertain'}
+											<TriangleAlert class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+											<span
+												class="min-w-0 flex-1 text-[11px] font-medium break-words text-amber-800"
+												>{destinationName(dest.connectionId)} — outcome uncertain. Check Posts before
+												retrying.</span
+											>
 										{:else if dest.status === 'retrying'}
 											<RefreshCw class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
 											<span
@@ -2893,7 +3113,7 @@
 							</ul>
 						{/if}
 
-						{#if publishProgress?.some((d) => d.status === 'failed')}
+						{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
 							<button
 								type="button"
 								data-testid="publish-progress-close"
@@ -3059,7 +3279,7 @@
 							type="button"
 							data-testid="schedule-confirm"
 							class="w-full cursor-pointer rounded-full bg-stone-900 py-2.5 text-[13px] font-bold text-white shadow-sm transition-all hover:bg-stone-800 disabled:opacity-60"
-							disabled={publishing}
+							disabled={publishing || approvalState !== 'approved'}
 							onclick={() => void onSchedule()}
 						>
 							Confirm Schedule

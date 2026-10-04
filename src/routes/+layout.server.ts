@@ -7,7 +7,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	// does not query the user again.
 	const storedAppName = await readStoredAppName(locals.db);
 	return {
+		rehearsal: locals.rehearsal === true,
 		user: locals.user,
+		authMethod: locals.authMethod,
 		displayName: locals.user?.displayName ?? null,
 		profilePictureUrl: locals.user?.profilePictureUrl ?? '',
 		appName: storedAppName ?? locals.env.APP_NAME,

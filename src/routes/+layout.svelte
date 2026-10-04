@@ -2,98 +2,100 @@
 	import './layout.css';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import {
-		Settings,
-		LogOut,
-		ChevronDown,
-		PenLine,
-		Calendar,
-		Users,
-		ChartColumn
-	} from '@lucide/svelte';
-	import { fly } from 'svelte/transition';
+	import { ChevronDown, PenLine, Settings, LogOut } from '@lucide/svelte';
 	import favicon from '$lib/assets/favicon.svg';
-	import faviconDark from '$lib/assets/favicon-dark.svg';
 	import { menuNav } from '$lib/components/menu-nav';
-
-	let workspaceTrigger: HTMLButtonElement | null = $state(null);
-	let profileTrigger: HTMLButtonElement | null = $state(null);
-
 	let { children, data } = $props();
-
 	let showWorkspaceDropdown = $state(false);
 	let showProfileDropdown = $state(false);
-
-	const userEmail: string | null = $derived(data.user?.email ?? null);
-	const displayName: string | null = $derived(data.displayName ?? null);
-	const profilePictureUrl: string | null = $derived(data.profilePictureUrl ?? null);
-	const avatarSeed = $derived(displayName?.trim() || userEmail?.split('@')[0] || 'cogsend');
-	const avatarSrc = $derived(
-		profilePictureUrl ||
-			`https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(avatarSeed)}`
-	);
-	// Initials stay underneath the picture. A failed URL (and only that URL)
-	// drops the image; the next URL is tried again. Dicebear SVGs have no
-	// intrinsic size, so readiness cannot be decided from naturalWidth.
-	let failedAvatarSrc = $state<string | null>(null);
-
-	function headerInitials(name: string | null, email: string | null): string {
-		const source = (name?.trim() || email?.split('@')[0] || '?').replace(/^@/, '');
-		const parts = source.split(/[\s._-]+/).filter(Boolean);
-		if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-		return source.slice(0, 2).toUpperCase();
-	}
-	const isLoginRoute = $derived(page.url.pathname.startsWith('/login'));
+	let workspaceTrigger: HTMLButtonElement | null = $state(null);
+	let profileTrigger: HTMLButtonElement | null = $state(null);
 	let logoutError = $state<string | null>(null);
+	let resetBusy = $state(false);
+	const isLoginRoute = $derived(page.url.pathname.startsWith('/login'));
+	const userEmail = $derived(data.user?.email ?? null);
+	const avatarSeed = $derived(data.displayName?.trim() || userEmail?.split('@')[0] || 'cogsend');
+	const avatarSrc = $derived(
+		data.profilePictureUrl ||
+			(data.rehearsal
+				? ''
+				: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(avatarSeed)}`)
+	);
+	let failedAvatarSrc = $state<string | null>(null);
+	const initials = $derived(
+		avatarSeed.split(/[\s._-]+/).filter(Boolean).length >= 2
+			? avatarSeed
+					.split(/[\s._-]+/)
+					.filter(Boolean)
+					.slice(0, 2)
+					.map((part) => part[0])
+					.join('')
+					.toUpperCase()
+			: avatarSeed.slice(0, 2).toUpperCase()
+	);
+	const wide = $derived(
+		page.url.pathname === '/' ||
+			page.url.pathname === '/create' ||
+			page.url.pathname.startsWith('/review/')
+	);
+	const links = [
+		{ href: '/create', label: 'Create' },
+		{ href: '/', label: 'Calendar' },
+		{ href: '/?view=review', label: 'Review' },
+		{ href: '/posts', label: 'Library' },
+		{ href: '/accounts', label: 'Accounts' }
+	];
+	function activeLink(href: string) {
+		return href === '/?view=review'
+			? page.url.searchParams.get('view') === 'review' || page.url.pathname.startsWith('/review/')
+			: href === '/'
+				? page.url.pathname === '/' && page.url.searchParams.get('view') !== 'review'
+				: page.url.pathname === href;
+	}
+	function closeOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target.closest('.workspace-menu-container')) showWorkspaceDropdown = false;
+		if (!target.closest('.profile-menu-container')) showProfileDropdown = false;
+	}
 	async function logout() {
-		showProfileDropdown = false;
 		logoutError = null;
 		try {
-			const res = await fetch('/api/auth/logout', { method: 'POST' });
-			if (!res.ok) throw new Error(`Logout failed (${res.status})`);
+			const response = await fetch('/api/auth/logout', { method: 'POST' });
+			if (!response.ok) throw new Error('Could not sign out — try again');
+			if (data.authMethod === 'access') {
+				window.location.assign('/cdn-cgi/access/logout');
+				return;
+			}
 			await invalidateAll();
 			await goto('/login');
-		} catch (err) {
-			// Without this the redirect to /login bounces a still-signed-in user
-			// back to the page they were on, and the button looks broken.
+		} catch (error) {
+			logoutError = error instanceof Error ? error.message : 'Could not sign out';
+		}
+	}
+	async function resetDemo() {
+		resetBusy = true;
+		try {
+			const response = await fetch('/api/rehearsal/reset', { method: 'POST' });
+			if (!response.ok) throw new Error('Could not reset demo');
 			await invalidateAll();
-			logoutError =
-				err instanceof Error && err.message.startsWith('Logout failed')
-					? 'Could not sign out — try again'
-					: 'Could not sign out — check your connection';
-		}
-	}
-
-	// Close dropdowns when clicking outside
-	function handleOutsideClick(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (!target.closest('.workspace-dropdown-container')) {
-			showWorkspaceDropdown = false;
-		}
-		if (!target.closest('.profile-dropdown-container')) {
-			showProfileDropdown = false;
-		}
-	}
-
-	function handleMenuKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			showWorkspaceDropdown = false;
-			showProfileDropdown = false;
+			await goto('/');
+		} catch (error) {
+			logoutError = error instanceof Error ? error.message : 'Could not reset demo';
+		} finally {
+			resetBusy = false;
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>{data.appName} — write & schedule</title>
+	<title>{data.appName} · Creator workspace</title>
 	<meta
 		name="description"
-		content="Minimal social scheduler for Mastodon, Bluesky, LinkedIn, Threads, and X"
+		content="Review, approve and schedule saved videos for connected social accounts."
 	/>
 	<link rel="icon" href={favicon} type="image/svg+xml" />
-	<link rel="icon" href={faviconDark} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
-	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<link rel="canonical" href={page.url.origin + page.url.pathname} />
-	{#if !isLoginRoute && userEmail && data.studioProjectId}
+	{#if !isLoginRoute && userEmail && data.studioProjectId && !data.rehearsal}
 		<script
 			src="https://sassmaker.com/project-strip.js"
 			data-project={data.studioProjectId}
@@ -107,277 +109,293 @@
 		></script>
 	{/if}
 </svelte:head>
-
-<svelte:window onclick={handleOutsideClick} onkeydown={handleMenuKeydown} />
-<a
-	href="#main-content"
-	class="sr-only z-50 rounded-full bg-stone-900 px-4 py-2 text-sm font-bold text-white focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
+<svelte:window
+	onclick={closeOutside}
+	onkeydown={(event) => {
+		if (event.key === 'Escape') {
+			showProfileDropdown = false;
+			showWorkspaceDropdown = false;
+		}
+	}}
+/>
+<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
 	>Skip to content</a
 >
-
 {#if isLoginRoute || !userEmail}
 	{@render children()}
 {:else}
-	<div class="min-h-dvh bg-stone-50 font-sans text-stone-900 selection:bg-stone-200">
-		<!-- TOP NAVIGATION (Floating Header) -->
-		<header
-			class="pointer-events-none fixed top-0 right-0 left-0 z-40 mx-auto flex w-full max-w-[800px] items-center justify-between px-4 py-6 sm:px-6"
-		>
-			<!-- Page content scrolls under the floating pills; this scrim keeps it legible. -->
-			<div
-				class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-28 bg-gradient-to-b from-stone-50 from-40% via-stone-50/80 to-transparent"
-				aria-hidden="true"
-			></div>
-			<!-- landmark for AT: header is banner, nav gives primary pages -->
-			<!-- LEFT: Workspace Dropdown (Pointer events re-enabled) -->
-			<nav aria-label="Primary" class="workspace-dropdown-container pointer-events-auto relative">
-				<button
-					type="button"
-					class="group flex items-center gap-3 rounded-full border border-stone-200/80 bg-white px-2.5 py-2 shadow-[0_4px_20px_-8px_rgb(28_25_23/0.08)] transition-all hover:border-stone-300 hover:shadow-[0_4px_24px_-8px_rgb(28_25_23/0.12)] focus:outline-none"
-					bind:this={workspaceTrigger}
-					onclick={() => (showWorkspaceDropdown = !showWorkspaceDropdown)}
-					aria-haspopup="menu"
-					aria-expanded={showWorkspaceDropdown}
-					aria-controls="workspace-menu"
-					aria-label="Workspace menu"
-				>
-					<img
-						src={favicon}
-						alt=""
-						class="h-7 w-7 rounded-lg shadow-sm ring-1 ring-stone-200"
-						aria-hidden="true"
-					/>
-					<span class="text-[14px] font-extrabold tracking-tight text-stone-900"
-						>{data.appName}</span
-					>
-					<ChevronDown
-						class="mr-1 h-4 w-4 text-stone-500 transition-transform {showWorkspaceDropdown
-							? 'rotate-180'
-							: ''}"
-					/>
-				</button>
-
-				<!-- NAVIGATION DROPDOWN -->
-				{#if showWorkspaceDropdown}
-					<div
-						id="workspace-menu"
-						class="absolute top-14 left-0 z-50 w-56 origin-top-left rounded-[1.5rem] border border-stone-200/80 bg-white p-2 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
-						transition:fly={{ y: -5, duration: 200, opacity: 0 }}
-						role="menu"
-						use:menuNav={{
-							trigger: workspaceTrigger,
-							onEscape: () => (showWorkspaceDropdown = false)
-						}}
-					>
-						<a
-							href="/compose"
-							class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors {page
-								.url.pathname === '/compose'
-								? 'bg-stone-900 text-white shadow-md'
-								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
-							onclick={() => (showWorkspaceDropdown = false)}
-							role="menuitem"
-						>
-							<PenLine
-								class="h-4 w-4 {page.url.pathname === '/compose' ? 'text-white' : 'text-stone-500'}"
-							/> Compose
-						</a>
-						<a
-							href="/posts"
-							class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors {page
-								.url.pathname === '/posts'
-								? 'bg-stone-900 text-white shadow-md'
-								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
-							onclick={() => (showWorkspaceDropdown = false)}
-							role="menuitem"
-						>
-							<Calendar
-								class="h-4 w-4 {page.url.pathname === '/posts' ? 'text-white' : 'text-stone-500'}"
-							/> Posts
-						</a>
-						<a
-							href="/insights"
-							class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors {page
-								.url.pathname === '/insights'
-								? 'bg-stone-900 text-white shadow-md'
-								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
-							onclick={() => (showWorkspaceDropdown = false)}
-							role="menuitem"
-						>
-							<ChartColumn
-								class="h-4 w-4 {page.url.pathname === '/insights'
-									? 'text-white'
-									: 'text-stone-500'}"
-							/> Insights
-						</a>
-						<a
-							href="/accounts"
-							class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors {page
-								.url.pathname === '/accounts'
-								? 'bg-stone-900 text-white shadow-md'
-								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
-							onclick={() => (showWorkspaceDropdown = false)}
-							role="menuitem"
-						>
-							<Users
-								class="h-4 w-4 {page.url.pathname === '/accounts'
-									? 'text-white'
-									: 'text-stone-500'}"
-							/> Accounts
-						</a>
-					</div>
-				{/if}
-			</nav>
-
-			<!-- RIGHT: Write Action & Profile (Pointer events re-enabled) -->
-			<div class="pointer-events-auto flex items-center gap-3">
-				<!-- Contextual Write Button (Hidden when on Compose page) -->
-				{#if page.url.pathname !== '/compose'}
-					<a
-						href="/compose"
-						class="hidden items-center gap-2 rounded-full bg-stone-900 px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_4px_16px_-4px_rgb(28_25_23/0.3)] transition-all hover:bg-stone-800 hover:shadow-[0_4px_20px_-4px_rgb(28_25_23/0.4)] sm:flex"
-					>
-						<PenLine class="h-4 w-4" />
-						<span>Write</span>
-					</a>
-				{/if}
-
-				<!-- Profile Dropdown Container -->
-				<div class="profile-dropdown-container relative">
+	<div class="studio-shell">
+		<header class="studio-header">
+			<div class="studio-topline">
+				<div class="workspace-menu-container">
 					<button
-						type="button"
-						class="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-stone-200/80 bg-white shadow-[0_4px_20px_-8px_rgb(28_25_23/0.08)] transition-all hover:border-stone-300 hover:shadow-[0_4px_24px_-8px_rgb(28_25_23/0.12)] focus:outline-none"
-						onclick={() => (showProfileDropdown = !showProfileDropdown)}
+						class="studio-brand"
+						aria-label="Workspace menu"
 						aria-haspopup="menu"
-						aria-expanded={showProfileDropdown}
-						bind:this={profileTrigger}
-						aria-controls="profile-menu"
-						aria-label="Profile menu"
-						title={userEmail}
+						aria-expanded={showWorkspaceDropdown}
+						bind:this={workspaceTrigger}
+						onclick={() => (showWorkspaceDropdown = !showWorkspaceDropdown)}
+						><span class="studio-mark">f</span>{data.appName}<ChevronDown size={13} /></button
 					>
-						<span
-							class="flex h-full w-full items-center justify-center bg-stone-200 text-[11px] font-bold text-stone-700"
-							aria-hidden="true"
-						>
-							{headerInitials(displayName, userEmail)}
-						</span>
-						{#if failedAvatarSrc !== avatarSrc}
-							<img
-								src={avatarSrc}
-								alt=""
-								aria-hidden="true"
-								referrerpolicy="no-referrer"
-								class="absolute inset-0 h-full w-full object-cover"
-								onerror={() => (failedAvatarSrc = avatarSrc)}
-							/>
-						{/if}
-					</button>
-
-					<!-- PROFILE DROPDOWN -->
-					{#if showProfileDropdown}
-						<div
-							id="profile-menu"
-							class="absolute top-14 right-0 z-50 w-56 origin-top-right rounded-[1.5rem] border border-stone-200/80 bg-white p-2 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
-							transition:fly={{ y: -5, duration: 200, opacity: 0 }}
+					{#if showWorkspaceDropdown}<div
+							class="studio-menu"
 							role="menu"
-							aria-label="Profile"
 							use:menuNav={{
-								trigger: profileTrigger,
-								onEscape: () => (showProfileDropdown = false)
+								trigger: workspaceTrigger,
+								onEscape: () => (showWorkspaceDropdown = false)
 							}}
 						>
-							<div class="mb-1 border-b border-stone-100 px-3 py-3">
-								{#if displayName?.trim()}
-									<p class="truncate text-[13px] font-extrabold text-stone-900">
-										{displayName.trim()}
-									</p>
-									<p
-										class="mt-0.5 truncate text-[11px] font-medium text-stone-500"
-										title={userEmail}
-									>
-										{userEmail}
-									</p>
-								{:else}
-									<p class="truncate text-[13px] font-extrabold text-stone-900" title={userEmail}>
-										{userEmail}
-									</p>
-								{/if}
-							</div>
-
-							<div class="mt-1 p-1">
-								<a
-									href="/settings"
-									class="flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors {page
-										.url.pathname === '/settings'
-										? 'bg-stone-900 text-white shadow-md'
-										: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
-									onclick={() => (showProfileDropdown = false)}
+							{#each [{ href: '/compose', label: 'Compose' }, { href: '/posts', label: 'Posts' }, { href: '/accounts', label: 'Accounts' }, { href: '/insights', label: 'Insights' }, { href: '/', label: 'Calendar' }] as link (link.href)}<a
 									role="menuitem"
-								>
-									<div class="flex items-center gap-3">
-										<Settings
-											class="h-4 w-4 {page.url.pathname === '/settings'
-												? 'text-white'
-												: 'text-stone-500'}"
-										/> Settings
-									</div>
-								</a>
-
-								<a
-									href="/api"
-									class="flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-bold transition-colors {page
-										.url.pathname === '/api'
-										? 'bg-stone-900 text-white shadow-md'
-										: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
-									onclick={() => (showProfileDropdown = false)}
-									role="menuitem"
-								>
-									<div class="flex items-center gap-3">
-										<PenLine
-											class="h-4 w-4 {page.url.pathname === '/api'
-												? 'text-white'
-												: 'text-stone-500'}"
-										/> API docs
-									</div>
-								</a>
-							</div>
-
-							<div class="mx-2 my-1 h-px bg-stone-100"></div>
-
-							<div class="p-1">
-								<button
-									type="button"
-									class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-stone-900"
-									onclick={logout}
-									role="menuitem"
-								>
-									<LogOut class="h-4 w-4 text-stone-500" /> Log out
-								</button>
-								{#if logoutError}
-									<p
-										class="px-3 pb-2 text-[11px] font-medium text-red-600"
-										data-testid="logout-error"
-									>
+									href={link.href}
+									onclick={() => (showWorkspaceDropdown = false)}>{link.label}</a
+								>{/each}
+						</div>{/if}
+				</div>
+				<div class="studio-header-actions">
+					{#if data.rehearsal}<span class="rehearsal-chip">Interview rehearsal</span>{/if}
+					<a href="/create" class="studio-secondary new-post"><PenLine size={14} /> New video</a>
+					<div class="profile-menu-container">
+						<button
+							class="studio-avatar"
+							aria-label="Profile menu"
+							aria-haspopup="menu"
+							aria-expanded={showProfileDropdown}
+							bind:this={profileTrigger}
+							onclick={() => (showProfileDropdown = !showProfileDropdown)}
+							>{initials}{#if avatarSrc && failedAvatarSrc !== avatarSrc}<img
+									src={avatarSrc}
+									alt=""
+									aria-hidden="true"
+									referrerpolicy="no-referrer"
+									onerror={() => (failedAvatarSrc = avatarSrc)}
+								/>{/if}</button
+						>
+						{#if showProfileDropdown}<div
+								class="studio-menu profile-menu"
+								role="menu"
+								aria-label="Profile"
+								use:menuNav={{
+									trigger: profileTrigger,
+									onEscape: () => (showProfileDropdown = false)
+								}}
+							>
+								<p>{data.displayName || userEmail}</p>
+								<a href="/settings" role="menuitem" onclick={() => (showProfileDropdown = false)}
+									><Settings size={14} /> Settings</a
+								><a href="/api" role="menuitem" onclick={() => (showProfileDropdown = false)}
+									>API docs</a
+								><button role="menuitem" onclick={logout}><LogOut size={14} /> Log out</button
+								>{#if logoutError}<p role="alert" class="studio-error" data-testid="logout-error">
 										{logoutError}
-									</p>
-								{/if}
-							</div>
-						</div>
-					{/if}
+									</p>{/if}
+							</div>{/if}
+					</div>
 				</div>
 			</div>
+			<nav class="studio-nav" aria-label="Primary">
+				{#each links as link (link.href)}<a
+						href={link.href}
+						class:active={activeLink(link.href)}
+						aria-current={activeLink(link.href) ? 'page' : undefined}>{link.label}</a
+					>{/each}
+			</nav>
 		</header>
-
-		<!-- MAIN CONTENT AREA
-		     No z-index on <main> on purpose: a stacking context here would trap
-		     page dialogs (z-40/z-50) below the fixed header, so modal overlays
-		     would show the header pills and scrim floating above them. -->
-		<main
-			id="main-content"
-			tabindex="-1"
-			class="relative mx-auto flex min-h-dvh w-full max-w-[800px] flex-col px-6 pt-32 pb-20 focus:outline-none"
-		>
+		{#if data.rehearsal}<div class="rehearsal-banner">
+				<span
+					><strong>Local rehearsal.</strong> Sample destinations · approval and scheduling are saved locally
+					· no provider uploads.</span
+				><button onclick={resetDemo} disabled={resetBusy}
+					>{resetBusy ? 'Resetting…' : 'Reset demo'}</button
+				>
+			</div>{/if}
+		<main id="main-content" tabindex="-1" class:studio-wide={wide} class="studio-main">
 			{@render children()}
 		</main>
+		<footer class="studio-legal">
+			<a href="/privacy">Privacy</a><a href="/terms">Terms</a><span
+				>Fleet Social · owner approval before delivery</span
+			>
+		</footer>
 	</div>
 {/if}
+
+<style>
+	.studio-shell {
+		max-width: 1480px;
+		margin: auto;
+		padding: 28px 40px;
+		min-height: 100dvh;
+	}
+	.studio-topline {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+	}
+	.studio-brand {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		font:
+			600 22px Georgia,
+			serif;
+		letter-spacing: -0.7px;
+		color: var(--studio-ink);
+	}
+	.studio-mark {
+		display: grid;
+		place-items: center;
+		width: 32px;
+		height: 32px;
+		background: var(--studio-accent);
+		color: white;
+		border-radius: 8px;
+		font-size: 19px;
+	}
+	.studio-header-actions {
+		display: flex;
+		align-items: center;
+		gap: 13px;
+	}
+	.studio-avatar {
+		position: relative;
+		overflow: hidden;
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		background: #e8ebe2;
+		font-size: 10px;
+		font-weight: 650;
+	}
+	.studio-avatar img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.studio-nav {
+		display: flex;
+		gap: 29px;
+		border-bottom: 1px solid var(--studio-line);
+		margin-top: 23px;
+		padding-bottom: 18px;
+		font-size: 12px;
+		color: var(--studio-muted);
+	}
+	.studio-nav a.active {
+		color: var(--studio-ink);
+		font-weight: 700;
+	}
+	.studio-main {
+		max-width: 760px;
+		margin: 30px auto 0;
+		min-height: 60vh;
+	}
+	.studio-main.studio-wide {
+		max-width: none;
+	}
+	.studio-legal {
+		display: flex;
+		gap: 20px;
+		color: var(--studio-muted);
+		font-size: 10px;
+		margin-top: 44px;
+		padding: 18px 0;
+		border-top: 1px solid var(--studio-line);
+	}
+	.studio-legal span {
+		margin-left: auto;
+	}
+	.workspace-menu-container,
+	.profile-menu-container {
+		position: relative;
+	}
+	.studio-menu {
+		position: absolute;
+		top: 43px;
+		left: 0;
+		z-index: 50;
+		background: var(--studio-panel);
+		border: 1px solid var(--studio-line);
+		box-shadow: 0 12px 30px #253e3412;
+		padding: 7px;
+		border-radius: 9px;
+		min-width: 185px;
+		font-size: 12px;
+	}
+	.studio-menu a,
+	.studio-menu button {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		padding: 10px 12px;
+		width: 100%;
+		border-radius: 5px;
+	}
+	.studio-menu a:hover,
+	.studio-menu button:hover {
+		background: #e9eee5;
+	}
+	.studio-menu p {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--studio-line);
+	}
+	.profile-menu {
+		left: auto;
+		right: 0;
+	}
+	.rehearsal-chip {
+		font-size: 10px;
+		color: var(--studio-muted);
+		border: 1px solid var(--studio-line);
+		padding: 5px 9px;
+		border-radius: 4px;
+	}
+	.rehearsal-banner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		background: #f1ead8;
+		border-radius: 6px;
+		padding: 10px 13px;
+		font-size: 11px;
+		color: #695329;
+		margin-top: 17px;
+	}
+	.rehearsal-banner button {
+		white-space: nowrap;
+		text-decoration: underline;
+	}
+	@media (max-width: 700px) {
+		.studio-shell {
+			padding: 23px 18px;
+		}
+		.studio-brand {
+			font-size: 20px;
+		}
+		.studio-nav {
+			gap: 24px;
+			overflow: auto;
+		}
+		.new-post,
+		.rehearsal-chip {
+			display: none;
+		}
+		.studio-main {
+			margin-top: 24px;
+		}
+		.studio-legal {
+			flex-wrap: wrap;
+		}
+		.studio-legal span {
+			margin-left: 0;
+		}
+		.rehearsal-banner {
+			align-items: flex-start;
+			font-size: 10px;
+		}
+	}
+</style>

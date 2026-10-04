@@ -1,0 +1,56 @@
+[
+	{
+		"name": "create",
+		"width": 390,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/create-390.jpg"
+	},
+	{
+		"name": "product",
+		"width": 390,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/product-390.jpg"
+	},
+	{
+		"name": "links",
+		"width": 390,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/links-390.jpg"
+	},
+	{
+		"name": "create",
+		"width": 768,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/create-768.jpg"
+	},
+	{
+		"name": "product",
+		"width": 768,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/product-768.jpg"
+	},
+	{
+		"name": "links",
+		"width": 768,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/links-768.jpg"
+	},
+	{
+		"name": "create",
+		"width": 1440,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/create-1440.jpg"
+	},
+	{
+		"name": "product",
+		"width": 1440,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/product-1440.jpg"
+	},
+	{
+		"name": "links",
+		"width": 1440,
+		"overflow": 0,
+		"screenshot": "artifacts/video-quality/links-1440.jpg"
+	}
+]

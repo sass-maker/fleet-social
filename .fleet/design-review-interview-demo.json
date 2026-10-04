@@ -1,0 +1,283 @@
+{
+	"$schema": "fleet.design-review.v2",
+	"version": 2,
+	"project": "fleet-social",
+	"target": "Interview calendar, video approval, Mashup creation and YouTube/Instagram delivery workspace",
+	"surfaceMode": "operate",
+	"mode": "overhaul",
+	"register": "product",
+	"context": { "product": "PRODUCT.md", "design": "DESIGN.md" },
+	"direction": {
+		"productSurfaces": {
+			"scope": "standalone",
+			"landing": "",
+			"app": ".fleet-local/directions/index.html",
+			"reason": "Private single-operator scheduler. The about/privacy/terms pages are product disclosures, not a separate marketing landing or acquisition funnel."
+		},
+		"pairedPreview": { "landing": "", "app": "" },
+		"source": "comparison",
+		"references": [
+			"Postiz calendar: month planning and destination-specific scheduling, https://postiz.com/",
+			"CogSend editor: compact account selection and focused composer, https://cogsend.com/; Preline free card and sidebar patterns: structural grouping and navigation, https://preline.co/docs/components/card.html and https://preline.co/docs/components/sidebar.html",
+			"Anti-reference: the existing narrow chronological feed hides month planning and makes actual video review secondary."
+		],
+		"probes": [
+			{
+				"id": "editorial",
+				"name": "Editorial Planner",
+				"path": ".fleet-local/directions/editorial.html",
+				"thesis": "Calendar-first editorial planning with focused review of real cuts.",
+				"layout": "Wide monthly calendar, compact approval rail, restrained top navigation; dedicated vertical player and saved revision detail. Mobile becomes an agenda.",
+				"typography": "Georgia display and brand with native system sans controls and body.",
+				"system": "Warm neutral paper, deep green action and identity, amber review status.",
+				"signature": "The thumbnail enters the calendar cell and opens the exact saved video revision.",
+				"risk": "Serif display is distinctive but secondary metadata must retain strong contrast.",
+				"contexts": ["Calendar/planning", "Video review"],
+				"compactEvidence": "Rendered at 390x844; calendar switches to agenda, review stacks player and saved revision detail."
+			},
+			{
+				"id": "screening",
+				"name": "Screening Room",
+				"path": ".fleet-local/directions/screening.html",
+				"thesis": "The actual cut is the primary object; approval is a screening decision.",
+				"layout": "Large two-film strip above the calendar, cinematic centered review. Compact screens retain two cuts and stack review.",
+				"typography": "Native sans with heavy compact headline, quieter operational detail.",
+				"system": "Charcoal viewing surfaces, lime approval action, amber pending status.",
+				"signature": "A screening queue presents actual vertical cuts before scheduling.",
+				"risk": "Calendar is below the fold; best for review-first work, weaker for a calendar-led interview.",
+				"contexts": ["Calendar/planning", "Video review"],
+				"compactEvidence": "Rendered at 390x844; calendar switches to agenda, review stacks player and saved revision detail."
+			},
+			{
+				"id": "broadcast",
+				"name": "Broadcast Desk",
+				"path": ".fleet-local/directions/broadcast.html",
+				"thesis": "A persistent operator workspace keeps planning and pending approvals alongside each other.",
+				"layout": "Left navigation, monthly grid and right approval rail; player and revision panel remain in the app shell. Phone navigation becomes horizontal.",
+				"typography": "Native sans, compact headers and measured administrative hierarchy.",
+				"system": "White and pale blue surfaces, blue actions, amber review status.",
+				"signature": "The approval rail keeps actual frames next to the month grid.",
+				"risk": "Greater density requires larger event text and deliberate truncation when implemented.",
+				"contexts": ["Calendar/planning", "Video review"],
+				"compactEvidence": "Rendered at 390x844; calendar switches to agenda, review stacks player and saved revision detail."
+			}
+		],
+		"selected": "editorial",
+		"approval": "approved",
+		"ownerEvidence": {
+			"path": ".fleet-local/directions/owner-selection.md",
+			"quote": "Editorial Planner — spacious calendar and focused video review (recommended)"
+		},
+		"supplied": "",
+		"before": "",
+		"library": {
+			"strategy": "upstream-first",
+			"primary": "FullCalendar month/week with existing Svelte controls and Preline grouping patterns",
+			"sources": [
+				"https://fullcalendar.io/docs/initialize-es6",
+				"https://preline.co/docs/components/card.html",
+				"https://preline.co/docs/components/sidebar.html"
+			],
+			"runtime": "selective",
+			"customReplacement": {
+				"used": false,
+				"authorization": "not-required",
+				"reason": "Reuse structural card/sidebar patterns and native controls. Preserve the existing approval and publish APIs."
+			}
+		},
+		"contract": {
+			"purpose": "Fleet Social is the private review and scheduling surface for Fleet product drafts, with exact saved-revision approval before delivery.",
+			"purposeSource": "PRODUCT.md",
+			"canonicalPurpose": "Fleet Social is the private review and scheduling surface for Fleet product drafts, with exact saved-revision approval before delivery.",
+			"purposeAlignment": "match",
+			"driftNote": "",
+			"audience": "Owner/operator reviewing product and creator videos, including an interview demo audience.",
+			"job": "See a month of proposals, play real pending videos, approve the exact saved revision, schedule or deliver to selected connected accounts.",
+			"thesis": "Calendar-first editorial planning with focused review of real cuts.",
+			"system": "Warm neutral paper, deep green action and identity, amber review status. Wide monthly calendar, compact approval rail, restrained top navigation; dedicated vertical player and saved revision detail. Mobile becomes an agenda. Georgia display and brand with native system sans controls and body.",
+			"signature": "The thumbnail enters the calendar cell and opens the exact saved video revision.",
+			"risk": "Serif display is distinctive but secondary metadata must retain strong contrast. Rehearsal remains explicit.",
+			"qualityBar": "Readable month calendar at laptop size, meaningful real videos awaiting approval, one obvious next action, clear destination and processing state, exact approval revision, reachable phone navigation, no low-contrast metadata."
+		}
+	},
+	"evidence": {
+		"platform": "web",
+		"productContinuity": {
+			"status": "not-applicable",
+			"reason": "Private single-operator scheduler. The about/privacy/terms pages are product disclosures, not a separate marketing landing or acquisition funnel.",
+			"reviewer": "codex",
+			"report": "artifacts/design/review.md",
+			"surfaces": { "landing": "", "app": "http://127.0.0.1:5187/" },
+			"checks": {
+				"designSystem": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"identity": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"vocabulary": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"productTruth": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				},
+				"handoff": {
+					"status": "not-applicable",
+					"observation": "Standalone private operator app; shared Create/Calendar/Review shell assessed in rendered review."
+				}
+			}
+		},
+		"slopScale": {
+			"platform": "web",
+			"posture": "advisory",
+			"reason": "",
+			"checkpoints": [
+				{
+					"stage": "directions",
+					"direction": "editorial",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs http://127.0.0.1:5186/editorial.html http://127.0.0.1:5186/editorial.html?view=review --json",
+					"report": ".fleet-local/directions/editorial-slop.json",
+					"findingsReview": "Initial low-contrast muted copy was corrected from #788278 to #606c61 and rescanned. The cream surface is intentional editorial paper; sequential numerals are calendar dates, not marketing steps. Calendar/review scores 10/7 are advisory."
+				},
+				{
+					"stage": "directions",
+					"direction": "screening",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs http://127.0.0.1:5186/screening.html http://127.0.0.1:5186/screening.html?view=review --json",
+					"report": ".fleet-local/directions/screening-slop.json",
+					"findingsReview": "Dark viewing surface is intentional for actual cuts. Compact uppercase release labels support the screening context. Sequential numbers are calendar dates. Calendar/review scores 10/4 are advisory; calendar below fold is a deliberate tradeoff."
+				},
+				{
+					"stage": "directions",
+					"direction": "broadcast",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs http://127.0.0.1:5186/broadcast.html http://127.0.0.1:5186/broadcast.html?view=review --json",
+					"report": ".fleet-local/directions/broadcast-slop.json",
+					"findingsReview": "Initial low-contrast metadata was corrected from #7a8496 to #606b7f and rescanned. Compact workspace labels are intentional; sequential numbers are calendar dates. Calendar/review scores 6/0 are advisory; event density remains a production polish concern."
+				},
+				{
+					"stage": "iteration",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs http://127.0.0.1:5187/ http://127.0.0.1:5187/review/rehearsal-survive --json",
+					"report": ".fleet-local/iteration-slop.json",
+					"findingsReview": "Calendar/review scored 13/7; paper cream and calendar numerals are intentional. FullCalendar weekday capitalization is functional. Fixed default white event text and yellow today fill by placing semantic CSS variables on the actual calendar root. Metadata meets contrast scan."
+				},
+				{
+					"stage": "final",
+					"status": "scanned",
+					"command": "node /Users/sarthak/Desktop/fleet/saas-maker/tooling/scripts/slop-score.mjs http://127.0.0.1:5187/ http://127.0.0.1:5187/create http://127.0.0.1:5187/review/rehearsal-survive --json",
+					"report": ".fleet-local/final-slop.json",
+					"findingsReview": "Calendar/Create/Review 13/11/7. Calendar numbers and uppercase weekdays are functional; paper is selected direction; Create icons denote workflow steps. No low-contrast finding. Concrete fixes and remaining small metadata, tablet density and repeated speaker posters are recorded in artifacts/design/review.md. Advisory self-review, not owner acceptance."
+				}
+			]
+		},
+		"visualReview": {
+			"status": "pass",
+			"reviewer": "Codex implementation self-review; finished result not yet owner-reviewed",
+			"direction": "editorial",
+			"report": "artifacts/design/review.md",
+			"checks": {
+				"hierarchy": {
+					"status": "pass",
+					"observation": "Calendar is primary on desktop with pending review rail; Create has one clear input lane and Review prioritizes the actual player and saved approval."
+				},
+				"typography": {
+					"status": "pass",
+					"observation": "Georgia display and native sans controls preserve selected direction. Root calendar variables fix white event text; advisory contrast scan has no failures."
+				},
+				"composition": {
+					"status": "pass",
+					"observation": "Real saved-video thumbnails appear in desktop calendar events. Phone agenda and stacked review retain reachable actions; 768px rail moves below month."
+				},
+				"identity": {
+					"status": "pass",
+					"observation": "Paper, green action, amber review state, Fleet Social vocabulary and restrained navigation follow the owner-selected Editorial Planner."
+				},
+				"interaction": {
+					"status": "pass",
+					"observation": "Browser verified prepared import, cached product/link renders, playable video, approval, Monday schedule and labeled local upload receipt; tabs support keyboard navigation."
+				},
+				"responsive": {
+					"status": "pass",
+					"observation": "Nine actual rendered captures at 390/768/1440 have zero document overflow; Library phone gutters fixed before all 54 serial browser tests passed."
+				}
+			}
+		},
+		"screenshots": [
+			{ "width": 390, "path": "artifacts/design/calendar-390.jpg" },
+			{ "width": 390, "path": "artifacts/design/create-390.jpg" },
+			{ "width": 390, "path": "artifacts/design/review-390.jpg" },
+			{ "width": 768, "path": "artifacts/design/calendar-768.jpg" },
+			{ "width": 768, "path": "artifacts/design/create-768.jpg" },
+			{ "width": 768, "path": "artifacts/design/review-768.jpg" },
+			{ "width": 1440, "path": "artifacts/design/calendar-1440.jpg" },
+			{ "width": 1440, "path": "artifacts/design/create-1440.jpg" },
+			{ "width": 1440, "path": "artifacts/design/review-1440.jpg" }
+		],
+		"projectCheck": {
+			"command": "npm test -- --maxWorkers=2; npm run test:e2e:isolated; npm run check; npm run lint; npm run build",
+			"status": "pass"
+		},
+		"critique": {
+			"score": 35,
+			"maximum": 40,
+			"dimensions": {
+				"hierarchy": 7,
+				"typography": 7,
+				"composition": 7,
+				"identity": 7,
+				"interaction": 4,
+				"responsive": 3
+			}
+		},
+		"audit": {
+			"score": 18,
+			"maximum": 20,
+			"dimensions": {
+				"purpose": 4,
+				"accessibility": 5,
+				"behavior": 4,
+				"responsive": 3,
+				"performance": 2
+			}
+		},
+		"unresolved": { "p0": 0, "p1": 0 },
+		"detector": {
+			"posture": "advisory",
+			"findings": [
+				"Final scan: intentional cream paper, calendar labels/numerals and functional Create workflow icons. See rendered review for deductions."
+			]
+		},
+		"comprehension": {
+			"status": "not-applicable",
+			"reviewer": "",
+			"answers": {
+				"product": "",
+				"audience": "",
+				"value": "",
+				"mechanism": "",
+				"proof": "",
+				"nextAction": ""
+			},
+			"purposeScore": {
+				"product": 0,
+				"audience": 0,
+				"value": 0,
+				"mechanism": 0,
+				"proof": 0,
+				"nextAction": 0,
+				"total": 0
+			},
+			"mismatches": []
+		}
+	},
+	"ownerFeedback": {
+		"decision": "keep",
+		"note": "Owner explicitly selected Editorial Planner: \"Editorial Planner — spacious calendar and focused video review (recommended)\". Keep records selected direction per skill contract. The finished implementation has not yet received owner acceptance."
+	}
+}

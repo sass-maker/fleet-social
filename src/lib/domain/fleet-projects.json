@@ -1,0 +1,230 @@
+[
+	{
+		"id": "ai-game",
+		"name": "AliveVille"
+	},
+	{
+		"id": "anchor",
+		"name": "Anchor"
+	},
+	{
+		"id": "anime-list",
+		"name": "Anime List"
+	},
+	{
+		"id": "app-health",
+		"name": "App Health"
+	},
+	{
+		"id": "agent-testing",
+		"name": "Browser Agent Testing"
+	},
+	{
+		"id": "browserdaddy",
+		"name": "BrowserDaddy"
+	},
+	{
+		"id": "calorie",
+		"name": "Calorie"
+	},
+	{
+		"id": "chatgpt-connections",
+		"name": "ChatGPT Connections"
+	},
+	{
+		"id": "codevetter",
+		"name": "CodeVetter"
+	},
+	{
+		"id": "contextdaddy",
+		"name": "ContextDaddy"
+	},
+	{
+		"id": "daddyrad",
+		"name": "DaddyRad"
+	},
+	{
+		"id": "digital-life",
+		"name": "Digital Life"
+	},
+	{
+		"id": "every-song-is-a-website",
+		"name": "Every Song Is a Website"
+	},
+	{
+		"id": "field-track",
+		"name": "Field Track"
+	},
+	{
+		"id": "fleet-social",
+		"name": "Fleet Social"
+	},
+	{
+		"id": "nutrition-formula-engine",
+		"name": "Formula Composition Engine"
+	},
+	{
+		"id": "free-ai",
+		"name": "Free AI"
+	},
+	{
+		"id": "gitstat",
+		"name": "GitStat"
+	},
+	{
+		"id": "pace",
+		"name": "HeyPace"
+	},
+	{
+		"id": "high-signal",
+		"name": "High Signal"
+	},
+	{
+		"id": "on-record",
+		"name": "High Signal Podcasts"
+	},
+	{
+		"id": "human-v2",
+		"name": "Human V2"
+	},
+	{
+		"id": "ios-landings",
+		"name": "iOS landings"
+	},
+	{
+		"id": "issue-pages",
+		"name": "IssuePages"
+	},
+	{
+		"id": "karte",
+		"name": "Karte"
+	},
+	{
+		"id": "email-manager",
+		"name": "Kinetic"
+	},
+	{
+		"id": "kith",
+		"name": "Kith"
+	},
+	{
+		"id": "knowledge-base",
+		"name": "Knowledge Base"
+	},
+	{
+		"id": "live",
+		"name": "Live"
+	},
+	{
+		"id": "looptv",
+		"name": "LoopTV"
+	},
+	{
+		"id": "mashup",
+		"name": "Mashup"
+	},
+	{
+		"id": "meme-lab",
+		"name": "Meme Lab"
+	},
+	{
+		"id": "chatgpt-memory-insights",
+		"name": "Memory Map"
+	},
+	{
+		"id": "mentionpilot",
+		"name": "MentionPilot"
+	},
+	{
+		"id": "motion",
+		"name": "Motion"
+	},
+	{
+		"id": "nomad-data-adventure",
+		"name": "Nomad Data Adventure"
+	},
+	{
+		"id": "open-historia",
+		"name": "Open Historia"
+	},
+	{
+		"id": "what-it-takes-to-win",
+		"name": "Paths"
+	},
+	{
+		"id": "performancedaddy",
+		"name": "PerformanceDaddy"
+	},
+	{
+		"id": "ph-catalog",
+		"name": "PH Catalog"
+	},
+	{
+		"id": "posttrainllm",
+		"name": "PostTrainLLM"
+	},
+	{
+		"id": "reader",
+		"name": "Reader"
+	},
+	{
+		"id": "reddit-insights",
+		"name": "Reddit Insights"
+	},
+	{
+		"id": "research-papers",
+		"name": "Research Papers"
+	},
+	{
+		"id": "rolepatch",
+		"name": "RolePatch"
+	},
+	{
+		"id": "saas-maker",
+		"name": "SaaS Maker"
+	},
+	{
+		"id": "sarthakagrawal-personal",
+		"name": "Sarthak Agrawal"
+	},
+	{
+		"id": "setline",
+		"name": "Setline"
+	},
+	{
+		"id": "significanthobbies",
+		"name": "Significant Hobbies"
+	},
+	{
+		"id": "site-health",
+		"name": "Site Health"
+	},
+	{
+		"id": "slow-serp",
+		"name": "Slow SERP"
+	},
+	{
+		"id": "starboard",
+		"name": "Starboard"
+	},
+	{
+		"id": "storagedaddy",
+		"name": "storagedaddy"
+	},
+	{
+		"id": "swe-interview-prep",
+		"name": "SWE Interview Prep"
+	},
+	{
+		"id": "unified-portfolio",
+		"name": "Unified Portfolio"
+	},
+	{
+		"id": "war-chest",
+		"name": "War Chest"
+	},
+	{
+		"id": "web-playables",
+		"name": "Web Playables"
+	}
+]

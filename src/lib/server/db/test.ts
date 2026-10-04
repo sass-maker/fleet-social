@@ -21,7 +21,9 @@ export const TEST_ENV: AppEnv = {
 	skipTotp: false,
 	// The in-progress LinkedIn video path stays off in tests unless a test
 	// opts in with { ...TEST_ENV, videoUploadEnabled: true }.
-	videoUploadEnabled: false
+	videoUploadEnabled: false,
+	youtubeUploadEnabled: false,
+	instagramUploadEnabled: false
 };
 
 /**

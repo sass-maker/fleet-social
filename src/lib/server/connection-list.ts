@@ -23,15 +23,21 @@ export async function listConnections(db: AppDb, env: AppEnv, userId: string) {
 		.where(and(eq(connections.userId, userId), ne(connections.status, 'disconnected')))
 		.orderBy(desc(connections.createdAt));
 	const secrets = {
+		INSTAGRAM_APP_ID: Boolean(env.INSTAGRAM_APP_ID),
+		INSTAGRAM_APP_SECRET: Boolean(env.INSTAGRAM_APP_SECRET),
 		LINKEDIN_CLIENT_ID: Boolean(env.LINKEDIN_CLIENT_ID),
 		LINKEDIN_CLIENT_SECRET: Boolean(env.LINKEDIN_CLIENT_SECRET),
+		YOUTUBE_CLIENT_ID: Boolean(env.YOUTUBE_CLIENT_ID),
+		YOUTUBE_CLIENT_SECRET: Boolean(env.YOUTUBE_CLIENT_SECRET),
 		THREADS_APP_ID: Boolean(env.THREADS_APP_ID),
 		THREADS_APP_SECRET: Boolean(env.THREADS_APP_SECRET),
 		X_CLIENT_ID: Boolean(env.X_CLIENT_ID),
 		X_CLIENT_SECRET: Boolean(env.X_CLIENT_SECRET)
 	};
 	const configured = {
+		instagram: platformConfigured('instagram', secrets),
 		linkedin: platformConfigured('linkedin', secrets),
+		youtube: platformConfigured('youtube', secrets),
 		threads: platformConfigured('threads', secrets),
 		x: platformConfigured('x', secrets)
 	};

@@ -19,6 +19,8 @@ export function mediaByteLength(media: MediaAttachment): number {
 }
 
 export interface NormalizedPost {
+	/** Used by video destinations; body text remains the description. */
+	title?: string;
 	text: string;
 	media?: MediaAttachment[];
 	thread?: NormalizedPost[];
@@ -49,6 +51,7 @@ export interface PublishResult {
 	remoteUrl?: string;
 	segmentIds?: string[];
 	segmentCids?: string[];
+	visibility?: string;
 }
 
 export interface ConnectionCredentials {
@@ -76,6 +79,10 @@ export interface ConnectionCredentials {
 	xUserId?: string;
 	/** X handle without @ (for permalinks) */
 	xUsername?: string;
+	youtubeChannelId?: string;
+	instagramUserId?: string;
+	instagramUsername?: string;
+	tokenIssuedAt?: number;
 }
 
 export interface ConnectionMeta {
@@ -88,6 +95,26 @@ export interface ConnectionMeta {
 	personUrn?: string;
 	threadsUserId?: string;
 	xUserId?: string;
+	youtubeChannelId?: string;
+}
+
+export interface YoutubeUploadState {
+	sessionUrl: string;
+	approvalHash: string;
+	storageKey: string;
+	totalBytes: number;
+	confirmedBytes: number;
+	videoId?: string;
+}
+
+export interface InstagramUploadState {
+	containerId: string;
+	approvalHash: string;
+	storageKey: string;
+	userId: string;
+	lastPollAt?: number;
+	publishStarted?: boolean;
+	mediaId?: string;
 }
 
 export type FetchLike = typeof fetch;
@@ -227,6 +254,17 @@ export interface PlatformProvider {
 			 *  instance — see $lib/domain/app-url. */
 			allowLocalHosts?: boolean;
 			mediaUrlFor?: (storageKey: string) => Promise<string> | string;
+			youtube?: {
+				state: YoutubeUploadState | null;
+				approvalHash: string;
+				mediaStore: MediaStore;
+				saveState: (state: YoutubeUploadState) => Promise<void>;
+			};
+			instagram?: {
+				state: InstagramUploadState | null;
+				approvalHash: string;
+				saveState: (state: InstagramUploadState) => Promise<void>;
+			};
 			checkpoint?: (state: PublishCheckpoint) => Promise<void> | void;
 			/** A stable key for (target, segment), so a retry after a lost
 			 *  response is recognised by the platform instead of posting twice.
@@ -271,6 +309,7 @@ export interface MediaStore {
 	// back to get().length when absent.
 	size?(storageKey: string): Promise<number | null>;
 	put(storageKey: string, bytes: Uint8Array, mime: string): Promise<void>;
+	putBlob?(storageKey: string, blob: Blob, mime: string): Promise<void>;
 	delete(storageKey: string): Promise<void>;
 	// Bulk delete for the account wipe: R2 takes up to 1,000 keys in one call,
 	// and each call is a subrequest (50 per invocation on Workers Free), so

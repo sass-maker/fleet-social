@@ -146,6 +146,8 @@ jobs:
       # the test suite.
       - run: npm run lint
       - run: npm run check
+      - name: Clip selection regressions
+        run: python3 -m unittest discover -s tests -p mashup_quality_test.py
       - run: npm test
       - run: npm run build
 

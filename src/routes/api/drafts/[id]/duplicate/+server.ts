@@ -56,6 +56,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 				userId: user.id,
 				title: source.title,
 				baseBody: source.baseBody,
+				projectId: source.projectId,
 				selectedConnectionIds: source.selectedConnectionIds,
 				status: 'draft',
 				createdAt: now,

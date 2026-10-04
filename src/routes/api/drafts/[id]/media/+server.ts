@@ -4,7 +4,7 @@ import { canAttachMoreImages, MAX_IMAGES_PER_SEGMENT } from '$lib/domain/media-l
 import { chunkIds, first, newId } from '$lib/server/db/client';
 import { draftMedia, draftVariants, drafts, publishTargets } from '$lib/server/db/schema';
 import { fail, handleError, ok } from '$lib/server/http';
-import { deleteMediaObjects, saveMediaBytes } from '$lib/server/media';
+import { deleteMediaObjects, saveMediaBytes, saveVideoFile } from '$lib/server/media';
 import { draftHasInFlightPublish } from '$lib/server/publish-plan';
 import { requireScope, requireUser } from '$lib/server/require';
 
@@ -111,11 +111,9 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			if (entry instanceof File && entry.size > 0 && !files.includes(entry)) files.push(entry);
 		}
 		if (!files.length) return fail('file required');
-		// Per-file caps, ahead of the ArrayBuffer copy below: formData() already
-		// materialised the body once, and arrayBuffer() would hold a second
-		// copy (~2x the bytes in Worker memory, 128MB limit vs the 95MB video
-		// cap). The Content-Length guard above is what keeps the first copy
-		// bounded.
+		// formData() materialises the body once. Videos go to R2 as Blobs below
+		// so a 95MB MP4 does not require a second full ArrayBuffer in the Worker.
+		// Content-Length bounds the first copy before the multipart parse.
 		for (const f of files) {
 			const isVideo = (f.type || '').toLowerCase().startsWith('video/');
 			const cap = isVideo ? 95_000_000 : 16_000_000;
@@ -156,7 +154,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		const newVideos = files.filter(isVideoFile).length;
 		// In-progress feature (ENABLE_VIDEO_UPLOAD): without this the route would
 		// happily park up to 95MB in R2 for a draft that cannot publish it.
-		if (newVideos > 0 && !locals.env.videoUploadEnabled) {
+		if (newVideos > 0 && !locals.env.videoUploadEnabled && !locals.env.youtubeUploadEnabled) {
 			return fail('Video uploads are not enabled on this instance', 400);
 		}
 		const newImages = files.length - newVideos;
@@ -177,8 +175,12 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		const created = [];
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
-			const bytes = new Uint8Array(await file.arrayBuffer());
-			const saved = await saveMediaBytes(locals.media, { bytes, mime: file.type || 'image/jpeg' });
+			const saved = isVideoFile(file)
+				? await saveVideoFile(locals.media, file)
+				: await saveMediaBytes(locals.media, {
+						bytes: new Uint8Array(await file.arrayBuffer()),
+						mime: file.type || 'image/jpeg'
+					});
 			let media;
 			try {
 				[media] = await locals.db
