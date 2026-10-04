@@ -42,6 +42,7 @@ import {
 	rateLimitProblem,
 	type RateLimiter
 } from '$lib/server/rate-limit';
+import { recordEndpointRequest } from '$lib/server/endpoint-telemetry';
 
 export function isPublicPath(path: string): boolean {
 	if (path === '/about' || path === '/privacy' || path === '/terms') return true;
@@ -85,9 +86,13 @@ let lastLocalTickAt = 0;
 // Module scope, so the missing-binding notice is not repeated per request.
 let warnedMissingMedia = false;
 
-export const handle: Handle = async ({ event, resolve }) => {
+const handleRequest: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
 	const secureRequest = event.url.protocol === 'https:';
+	if (import.meta.env.DEV && process.env.FLEET_SOCIAL_REHEARSAL === '1') {
+		const { handleRehearsal } = await import('$lib/server/rehearsal');
+		return withPageSecurity(path, await handleRehearsal(event, resolve), false);
+	}
 	if (event.request.method === 'OPTIONS' && path.startsWith('/api/')) {
 		// Same-origin app: no CORS preflight needed. Bare 204 (no
 		// Access-Control-* headers) so browsers default-deny cross-origin reads.
@@ -353,4 +358,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	return withPageSecurity(path, await resolve(event), secureRequest);
+};
+
+export const handle: Handle = async (input) => {
+	const startedAt = performance.now();
+	let response: Response;
+	try {
+		response = await handleRequest(input);
+	} catch (error) {
+		recordEndpointRequest(input.event, 500, performance.now() - startedAt);
+		throw error;
+	}
+	recordEndpointRequest(input.event, response.status, performance.now() - startedAt);
+	return response;
 };

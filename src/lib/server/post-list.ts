@@ -29,6 +29,8 @@ export async function loadDraftSummaries(db: AppDb, userId: string, limit = DRAF
 			title: drafts.title,
 			baseBody: drafts.baseBody,
 			projectId: drafts.projectId,
+			approvedAt: drafts.approvedAt,
+			selectedConnectionIds: drafts.selectedConnectionIds,
 			status: drafts.status,
 			updatedAt: drafts.updatedAt
 		})

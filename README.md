@@ -132,3 +132,7 @@ issues: [SECURITY.md](SECURITY.md) — report them privately.
 
 MIT — see [LICENSE](LICENSE). Third-party notices are in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+## Interview workspace
+
+The Fleet fork adds an editorial month/week calendar, focused saved-revision video review, native YouTube and Instagram Reels connections, and a local Mashup creation workspace. See [Development](docs/development.md#interview-rehearsal) for the isolated demo command and its prepared-video, source-link, and product-story lanes. Real account connection and provider publishing require the operator’s OAuth apps; rehearsal never uploads to social platforms.

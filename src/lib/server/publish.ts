@@ -36,7 +36,10 @@ import {
 	type PlatformId,
 	type YoutubeUploadState,
 	YoutubeUploadInterrupted,
-	YoutubeUploadUncertain
+	YoutubeUploadUncertain,
+	InstagramProcessingPending,
+	InstagramUploadUncertain,
+	type InstagramUploadState
 } from './providers';
 import { providerFetch } from './providers/timed-fetch';
 import { countingFetch, type SubrequestBudget } from './budget';
@@ -159,7 +162,7 @@ export async function buildNormalizedPost(
 	};
 
 	const segmentsOpt = options.threadSegments as string[] | undefined;
-	if (platform === 'youtube') {
+	if (platform === 'youtube' || platform === 'instagram') {
 		const description = joinThreadTexts(
 			segmentsOpt?.length
 				? segmentsOpt
@@ -565,6 +568,7 @@ export async function publishTarget(
 		success: false
 	});
 	let youtubeUploadStateEnc: string | null = null;
+	let instagramUploadStateEnc: string | null = null;
 
 	// Segment-level checkpoint: a Worker abort mid-thread leaves the target
 	// claimed with no attempt summary, and the stale-claim reclaim would then
@@ -632,12 +636,15 @@ export async function publishTarget(
 		const provider = getProvider(conn.platform as PlatformId);
 		const baseContent = prebuilt ?? (await buildNormalizedPost(db, target.draftId, conn.platform));
 		const content =
-			conn.platform === 'youtube' ? baseContent : await hydrateMedia(baseContent, store);
+			conn.platform === 'youtube' || conn.platform === 'instagram'
+				? baseContent
+				: await hydrateMedia(baseContent, store);
 		// A row uploaded before the feature was switched off (or on another
 		// instance) must fail with something a person can act on.
 		if (
 			!env.videoUploadEnabled &&
 			!(conn.platform === 'youtube' && env.youtubeUploadEnabled) &&
+			!(conn.platform === 'instagram' && env.instagramUploadEnabled) &&
 			(content.media ?? []).some(isVideoMedia)
 		) {
 			throw new Error('Video uploads are not enabled on this instance');
@@ -694,8 +701,8 @@ export async function publishTarget(
 		}
 
 		const resumeFrom = await lastPartialResume(db, targetId);
-		const youtubeDraft =
-			conn.platform === 'youtube'
+		const videoDraft =
+			conn.platform === 'youtube' || conn.platform === 'instagram'
 				? await first(
 						db
 							.select({ approvalHash: drafts.approvalHash })
@@ -703,12 +710,19 @@ export async function publishTarget(
 							.where(eq(drafts.id, target.draftId))
 					)
 				: null;
-		if (conn.platform === 'youtube' && !youtubeDraft?.approvalHash) {
-			throw new Error('Approve the YouTube draft before upload');
+		if (
+			(conn.platform === 'youtube' || conn.platform === 'instagram') &&
+			!videoDraft?.approvalHash
+		) {
+			throw new Error('Approve the video draft before upload');
 		}
 		const youtubeState =
 			conn.platform === 'youtube'
 				? await lastYoutubeUploadState(db, targetId, env.APP_ENCRYPTION_KEY)
+				: null;
+		const instagramState =
+			conn.platform === 'instagram'
+				? await lastInstagramUploadState(db, targetId, env.APP_ENCRYPTION_KEY)
 				: null;
 		// The upload-heavy part of a publish lives inside provider.publish; make
 		// sure the lease is current before handing over to it.
@@ -735,11 +749,11 @@ export async function publishTarget(
 					resume: resumeFrom ?? undefined,
 					allowLocalHosts: isLocalAppUrl(env.APP_URL),
 					mediaUrlFor: (storageKey: string) => publicMediaUrlFor(env, storageKey),
-					...(conn.platform === 'youtube' && youtubeDraft?.approvalHash
+					...(conn.platform === 'youtube' && videoDraft?.approvalHash
 						? {
 								youtube: {
 									state: youtubeState,
-									approvalHash: youtubeDraft.approvalHash,
+									approvalHash: videoDraft.approvalHash,
 									mediaStore: store,
 									async saveState(state: YoutubeUploadState) {
 										const encrypted = await encryptJson(state, env.APP_ENCRYPTION_KEY);
@@ -748,6 +762,22 @@ export async function publishTarget(
 											.set({ responseSummary: JSON.stringify({ youtubeUpload: encrypted }) })
 											.where(eq(publishAttempts.id, attemptId));
 										youtubeUploadStateEnc = encrypted;
+									}
+								}
+							}
+						: {}),
+					...(conn.platform === 'instagram' && videoDraft?.approvalHash
+						? {
+								instagram: {
+									state: instagramState,
+									approvalHash: videoDraft.approvalHash,
+									async saveState(state: InstagramUploadState) {
+										const encrypted = await encryptJson(state, env.APP_ENCRYPTION_KEY);
+										await db
+											.update(publishAttempts)
+											.set({ responseSummary: JSON.stringify({ instagramUpload: encrypted }) })
+											.where(eq(publishAttempts.id, attemptId));
+										instagramUploadStateEnc = encrypted;
 									}
 								}
 							}
@@ -830,7 +860,9 @@ export async function publishTarget(
 		// means "retrying automatically", `failed` means terminal.
 		const uncertain =
 			err instanceof YoutubeUploadUncertain ||
+			err instanceof InstagramUploadUncertain ||
 			(!(err instanceof YoutubeUploadInterrupted) &&
+				!(err instanceof InstagramProcessingPending) &&
 				providerStarted &&
 				(partial !== null ||
 					providerFailure.code === 'network' ||
@@ -845,12 +877,17 @@ export async function publishTarget(
 			claimedGeneration,
 			{
 				scheduledFor: target.scheduledFor,
-				retryable: err instanceof YoutubeUploadInterrupted || isFailureRetryable(err, message),
+				retryable:
+					err instanceof YoutubeUploadInterrupted ||
+					err instanceof InstagramProcessingPending ||
+					isFailureRetryable(err, message),
+				retryAfterMs: err instanceof InstagramProcessingPending ? 60_000 : undefined,
 				now,
 				partial,
 				errorDetail,
 				uncertain,
-				youtubeUploadStateEnc
+				youtubeUploadStateEnc,
+				instagramUploadStateEnc
 			}
 		);
 		return { status: nextStatus, error: message };
@@ -939,6 +976,25 @@ async function lastYoutubeUploadState(
 	return null;
 }
 
+async function lastInstagramUploadState(
+	db: AppDb,
+	targetId: string,
+	encryptionKey: string
+): Promise<InstagramUploadState | null> {
+	const attempts = await db
+		.select({ responseSummary: publishAttempts.responseSummary })
+		.from(publishAttempts)
+		.where(eq(publishAttempts.publishTargetId, targetId))
+		.orderBy(desc(publishAttempts.startedAt))
+		.limit(20);
+	for (const attempt of attempts) {
+		const summary = parseJson<{ instagramUpload?: string }>(attempt.responseSummary, {});
+		if (summary.instagramUpload)
+			return decryptJson<InstagramUploadState>(summary.instagramUpload, encryptionKey);
+	}
+	return null;
+}
+
 async function markFailed(
 	db: AppDb,
 	targetId: string,
@@ -954,6 +1010,8 @@ async function markFailed(
 		errorDetail?: string | null;
 		uncertain?: boolean;
 		youtubeUploadStateEnc?: string | null;
+		instagramUploadStateEnc?: string | null;
+		retryAfterMs?: number;
 	} = {}
 ): Promise<'scheduled' | 'failed' | 'published' | 'uncertain'> {
 	const now = opts.now ?? new Date();
@@ -977,7 +1035,7 @@ async function markFailed(
 				: new Date(opts.scheduledFor).getTime()
 			: null;
 		if (when == null || Number.isNaN(when) || when <= now.getTime() + 5000) {
-			retryAt = new Date(now.getTime() + retryDelayMs(claimedGeneration));
+			retryAt = new Date(now.getTime() + (opts.retryAfterMs ?? retryDelayMs(claimedGeneration)));
 		}
 	}
 	const failed = await db
@@ -1009,6 +1067,7 @@ async function markFailed(
 		}
 		if (opts.errorDetail) summary.errorDetail = opts.errorDetail;
 		if (opts.youtubeUploadStateEnc) summary.youtubeUpload = opts.youtubeUploadStateEnc;
+		if (opts.instagramUploadStateEnc) summary.instagramUpload = opts.instagramUploadStateEnc;
 		await db
 			.update(publishAttempts)
 			.set({

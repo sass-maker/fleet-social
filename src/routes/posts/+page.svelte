@@ -953,8 +953,8 @@
 	{/if}
 
 	<!-- Tabs: five pills are wider than a phone, so this row swipes instead of
-	     stretching the page. -mx-6/px-6 keeps the pills in the page gutter. -->
-	<div class="-mx-6 mb-6 scrollbar-thin overflow-x-auto px-6">
+	     stretching the page. Its width stays inside the app shell on narrow phones. -->
+	<div class="mb-6 scrollbar-thin overflow-x-auto">
 		<div class="w-max rounded-xl bg-stone-200/50 p-1">
 			<div class="flex" role="group" aria-label="Filter posts by status">
 				{#each ['all', 'scheduled', 'published', 'failed', 'drafts'] as tab (tab)}

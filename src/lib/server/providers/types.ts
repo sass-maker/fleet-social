@@ -80,6 +80,9 @@ export interface ConnectionCredentials {
 	/** X handle without @ (for permalinks) */
 	xUsername?: string;
 	youtubeChannelId?: string;
+	instagramUserId?: string;
+	instagramUsername?: string;
+	tokenIssuedAt?: number;
 }
 
 export interface ConnectionMeta {
@@ -102,6 +105,16 @@ export interface YoutubeUploadState {
 	totalBytes: number;
 	confirmedBytes: number;
 	videoId?: string;
+}
+
+export interface InstagramUploadState {
+	containerId: string;
+	approvalHash: string;
+	storageKey: string;
+	userId: string;
+	lastPollAt?: number;
+	publishStarted?: boolean;
+	mediaId?: string;
 }
 
 export type FetchLike = typeof fetch;
@@ -246,6 +259,11 @@ export interface PlatformProvider {
 				approvalHash: string;
 				mediaStore: MediaStore;
 				saveState: (state: YoutubeUploadState) => Promise<void>;
+			};
+			instagram?: {
+				state: InstagramUploadState | null;
+				approvalHash: string;
+				saveState: (state: InstagramUploadState) => Promise<void>;
 			};
 			checkpoint?: (state: PublishCheckpoint) => Promise<void> | void;
 			/** A stable key for (target, segment), so a retry after a lost

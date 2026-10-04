@@ -1,5 +1,9 @@
 [
 	{
+		"id": "ai-game",
+		"name": "AliveVille"
+	},
+	{
 		"id": "anchor",
 		"name": "Anchor"
 	},
@@ -10,6 +14,10 @@
 	{
 		"id": "app-health",
 		"name": "App Health"
+	},
+	{
+		"id": "agent-testing",
+		"name": "Browser Agent Testing"
 	},
 	{
 		"id": "browserdaddy",
@@ -36,8 +44,16 @@
 		"name": "DaddyRad"
 	},
 	{
+		"id": "digital-life",
+		"name": "Digital Life"
+	},
+	{
 		"id": "every-song-is-a-website",
 		"name": "Every Song Is a Website"
+	},
+	{
+		"id": "field-track",
+		"name": "Field Track"
 	},
 	{
 		"id": "fleet-social",
@@ -52,6 +68,10 @@
 		"name": "Free AI"
 	},
 	{
+		"id": "gitstat",
+		"name": "GitStat"
+	},
+	{
 		"id": "pace",
 		"name": "HeyPace"
 	},
@@ -60,12 +80,28 @@
 		"name": "High Signal"
 	},
 	{
+		"id": "on-record",
+		"name": "High Signal Podcasts"
+	},
+	{
+		"id": "human-v2",
+		"name": "Human V2"
+	},
+	{
 		"id": "ios-landings",
 		"name": "iOS landings"
 	},
 	{
+		"id": "issue-pages",
+		"name": "IssuePages"
+	},
+	{
 		"id": "karte",
 		"name": "Karte"
+	},
+	{
+		"id": "email-manager",
+		"name": "Kinetic"
 	},
 	{
 		"id": "kith",
@@ -80,12 +116,36 @@
 		"name": "Live"
 	},
 	{
+		"id": "looptv",
+		"name": "LoopTV"
+	},
+	{
+		"id": "mashup",
+		"name": "Mashup"
+	},
+	{
 		"id": "meme-lab",
 		"name": "Meme Lab"
 	},
 	{
+		"id": "chatgpt-memory-insights",
+		"name": "Memory Map"
+	},
+	{
 		"id": "mentionpilot",
 		"name": "MentionPilot"
+	},
+	{
+		"id": "motion",
+		"name": "Motion"
+	},
+	{
+		"id": "nomad-data-adventure",
+		"name": "Nomad Data Adventure"
+	},
+	{
+		"id": "open-historia",
+		"name": "Open Historia"
 	},
 	{
 		"id": "what-it-takes-to-win",
@@ -104,8 +164,28 @@
 		"name": "PostTrainLLM"
 	},
 	{
+		"id": "reader",
+		"name": "Reader"
+	},
+	{
+		"id": "reddit-insights",
+		"name": "Reddit Insights"
+	},
+	{
+		"id": "research-papers",
+		"name": "Research Papers"
+	},
+	{
+		"id": "rolepatch",
+		"name": "RolePatch"
+	},
+	{
 		"id": "saas-maker",
 		"name": "SaaS Maker"
+	},
+	{
+		"id": "sarthakagrawal-personal",
+		"name": "Sarthak Agrawal"
 	},
 	{
 		"id": "setline",
@@ -142,5 +222,9 @@
 	{
 		"id": "war-chest",
 		"name": "War Chest"
+	},
+	{
+		"id": "web-playables",
+		"name": "Web Playables"
 	}
 ]

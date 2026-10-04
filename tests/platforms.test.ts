@@ -11,13 +11,14 @@ import {
 } from '$lib/domain/platforms';
 
 describe('platforms', () => {
-	it('recognizes the six platform ids', () => {
+	it('recognizes the seven platform ids', () => {
 		expect(isPlatformId('mastodon')).toBe(true);
 		expect(isPlatformId('bluesky')).toBe(true);
 		expect(isPlatformId('linkedin')).toBe(true);
 		expect(isPlatformId('threads')).toBe(true);
 		expect(isPlatformId('x')).toBe(true);
 		expect(isPlatformId('youtube')).toBe(true);
+		expect(isPlatformId('instagram')).toBe(true);
 		expect(isPlatformId('twitter')).toBe(false);
 	});
 
@@ -33,6 +34,7 @@ describe('platforms', () => {
 	it('preview priority covers every platform exactly once', () => {
 		expect([...PREVIEW_PRIORITY].sort()).toEqual([
 			'bluesky',
+			'instagram',
 			'linkedin',
 			'mastodon',
 			'threads',
@@ -44,6 +46,7 @@ describe('platforms', () => {
 	it('orders YouTube first, then existing platforms', () => {
 		expect([...PLATFORM_ORDER]).toEqual([
 			'youtube',
+			'instagram',
 			'x',
 			'threads',
 			'linkedin',
@@ -51,8 +54,8 @@ describe('platforms', () => {
 			'bluesky'
 		]);
 		expect(platformRank('youtube')).toBe(0);
-		expect(platformRank('x')).toBe(1);
-		expect(platformRank('bluesky')).toBe(5);
+		expect(platformRank('x')).toBe(2);
+		expect(platformRank('bluesky')).toBe(6);
 		expect(platformRank('unknown')).toBe(99);
 	});
 });

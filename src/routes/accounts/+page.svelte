@@ -44,12 +44,19 @@
 		)
 	);
 	// svelte-ignore state_referenced_locally
-	let configured = $state<{ linkedin: boolean; threads: boolean; x: boolean; youtube: boolean }>(
+	let configured = $state<{
+		linkedin: boolean;
+		threads: boolean;
+		x: boolean;
+		youtube: boolean;
+		instagram: boolean;
+	}>(
 		data.configured ?? {
 			linkedin: true,
 			threads: true,
 			x: true,
-			youtube: true
+			youtube: true,
+			instagram: true
 		}
 	);
 	// Per-secret presence from the API. The panel names the missing half of a
@@ -89,6 +96,12 @@
 	let connectCloseBtn: HTMLButtonElement | null = $state(null);
 
 	const availablePlatforms = [
+		{
+			id: 'instagram',
+			name: 'Instagram',
+			description: 'Connect your Creator or Business account for Reels',
+			form: null
+		},
 		{
 			id: 'youtube',
 			name: 'YouTube',
@@ -152,7 +165,8 @@
 					linkedin: payload.configured.linkedin !== false,
 					threads: payload.configured.threads !== false,
 					x: payload.configured.x !== false,
-					youtube: payload.configured.youtube !== false
+					youtube: payload.configured.youtube !== false,
+					instagram: payload.configured.instagram !== false
 				};
 			}
 			if (payload.secrets && typeof payload.secrets === 'object') {
@@ -191,7 +205,7 @@
 	}
 
 	async function connectOAuth(
-		platform: 'mastodon' | 'linkedin' | 'threads' | 'x' | 'youtube',
+		platform: 'mastodon' | 'linkedin' | 'threads' | 'x' | 'youtube' | 'instagram',
 		body: Record<string, string>
 	) {
 		loading = true;
@@ -363,7 +377,8 @@
 			account.platform === 'linkedin' ||
 			account.platform === 'threads' ||
 			account.platform === 'x' ||
-			account.platform === 'youtube'
+			account.platform === 'youtube' ||
+			account.platform === 'instagram'
 		) {
 			if (needsSetup(account.platform, configured)) {
 				showSetupPanel(account.platform);

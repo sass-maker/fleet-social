@@ -31,6 +31,8 @@ const envSchema = z.object({
 	ENABLE_VIDEO_UPLOAD: z.string().optional(),
 	LINKEDIN_CLIENT_ID: z.string().min(1).optional(),
 	LINKEDIN_CLIENT_SECRET: z.string().min(1).optional(),
+	INSTAGRAM_APP_ID: z.string().min(1).optional(),
+	INSTAGRAM_APP_SECRET: z.string().min(1).optional(),
 	YOUTUBE_CLIENT_ID: z.string().min(1).optional(),
 	YOUTUBE_CLIENT_SECRET: z.string().min(1).optional(),
 	THREADS_APP_ID: z.string().min(1).optional(),
@@ -66,6 +68,7 @@ export type AppEnv = z.infer<typeof envSchema> & {
 	videoUploadEnabled: boolean;
 	/** YouTube uploads are available when its dedicated OAuth client is configured. */
 	youtubeUploadEnabled: boolean;
+	instagramUploadEnabled: boolean;
 };
 
 /** Example values that must never reach a real deployment. Exported so
@@ -125,6 +128,9 @@ export function readAppEnv(
 		appUrlSource,
 		skipTotp,
 		videoUploadEnabled,
+		instagramUploadEnabled: Boolean(
+			parsed.data.INSTAGRAM_APP_ID && parsed.data.INSTAGRAM_APP_SECRET
+		),
 		youtubeUploadEnabled: Boolean(
 			parsed.data.YOUTUBE_CLIENT_ID && parsed.data.YOUTUBE_CLIENT_SECRET
 		)
@@ -168,6 +174,9 @@ export async function envFromPlatform(
 		LINKEDIN_CLIENT_ID: asString(platformEnv?.LINKEDIN_CLIENT_ID) ?? fallback.LINKEDIN_CLIENT_ID,
 		LINKEDIN_CLIENT_SECRET:
 			asString(platformEnv?.LINKEDIN_CLIENT_SECRET) ?? fallback.LINKEDIN_CLIENT_SECRET,
+		INSTAGRAM_APP_ID: asString(platformEnv?.INSTAGRAM_APP_ID) ?? fallback.INSTAGRAM_APP_ID,
+		INSTAGRAM_APP_SECRET:
+			asString(platformEnv?.INSTAGRAM_APP_SECRET) ?? fallback.INSTAGRAM_APP_SECRET,
 		YOUTUBE_CLIENT_ID: asString(platformEnv?.YOUTUBE_CLIENT_ID) ?? fallback.YOUTUBE_CLIENT_ID,
 		YOUTUBE_CLIENT_SECRET:
 			asString(platformEnv?.YOUTUBE_CLIENT_SECRET) ?? fallback.YOUTUBE_CLIENT_SECRET,

@@ -1,0 +1,77 @@
+[
+	{
+		"name": "product",
+		"job": "28779644-07ec-4448-a35d-2ac800c79fc1",
+		"draft": "2502cbc2-f077-485f-a027-59658ee27c17",
+		"width": 1080,
+		"height": 1920,
+		"durationSeconds": 13.221333,
+		"audioMeanDb": -32.8,
+		"audioPeakDb": -22.6,
+		"hashVerified": true,
+		"blackEvents": [],
+		"quality": {
+			"recipe": "91dac7400d9f156a7ace47aac500090931f326893397bbc9e8500efaf9d16951",
+			"scenes": [
+				{
+					"durationSeconds": 4,
+					"lines": ["Great videos deserve a", "plan"],
+					"fontSize": 66,
+					"safeTextWidth": 850
+				},
+				{
+					"durationSeconds": 5.13,
+					"lines": [
+						"Fleet Social brings",
+						"Mashup videos, approval,",
+						"and your publishing",
+						"calendar together"
+					],
+					"fontSize": 66,
+					"safeTextWidth": 850
+				},
+				{
+					"durationSeconds": 4.06,
+					"lines": ["Review a video and", "choose its release date"],
+					"fontSize": 66,
+					"safeTextWidth": 850
+				}
+			],
+			"sources": []
+		}
+	},
+	{
+		"name": "links",
+		"job": "95733af1-4e8c-464c-9ff4-1e7b4424e4e6",
+		"draft": "b474ff48-e798-4d58-963e-50c65ec3e074",
+		"width": 1080,
+		"height": 1920,
+		"durationSeconds": 20.061333,
+		"audioMeanDb": -19.9,
+		"audioPeakDb": -1.4,
+		"hashVerified": true,
+		"blackEvents": [],
+		"quality": {
+			"recipe": "91dac7400d9f156a7ace47aac500090931f326893397bbc9e8500efaf9d16951",
+			"scenes": [],
+			"sources": [
+				{
+					"sourceUrl": "https://mashup.highsignal.app/media/operators-final.mp4",
+					"startSeconds": 0,
+					"endSeconds": 13.04,
+					"selection": "caption boundaries and keyword overlap",
+					"spokenText": "Inventors are all good and nice, but if you don't have the people to scale it up and maintain it and install it and operate it, it's not going to do you any good.",
+					"existingBurnedCaptions": true
+				},
+				{
+					"sourceUrl": "https://mashup.highsignal.app/media/survive-technology-final.mp4",
+					"startSeconds": 40.05,
+					"endSeconds": 47.05,
+					"selection": "caption boundaries and keyword overlap",
+					"spokenText": "Creatively destroy what has made us successful in the past and make it better every day.",
+					"existingBurnedCaptions": true
+				}
+			]
+		}
+	}
+]

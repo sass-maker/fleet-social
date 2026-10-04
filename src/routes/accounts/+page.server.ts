@@ -13,6 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return {
 			...connectionData,
 			youtubeConsent,
+			rehearsal: locals.rehearsal === true,
 			loadFailed: false
 		};
 	} catch (err) {
@@ -21,10 +22,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 		console.error('[accounts] list failed', err);
 		return {
 			connections: [],
-			configured: { linkedin: false, threads: false, x: false, youtube: false },
+			configured: { linkedin: false, threads: false, x: false, youtube: false, instagram: false },
 			secrets: {},
 			appUrl: locals.env.APP_URL,
 			youtubeConsent: false,
+			rehearsal: locals.rehearsal === true,
 			loadFailed: true
 		};
 	}

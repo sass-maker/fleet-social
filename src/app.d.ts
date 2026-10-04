@@ -18,6 +18,7 @@ declare global {
 		}
 
 		interface Locals {
+			rehearsal?: boolean;
 			db: AppDb;
 			env: AppEnv;
 			media: MediaStore;

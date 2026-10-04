@@ -8,6 +8,7 @@ import { POST as linkedinPOST } from '../src/routes/api/connections/linkedin/+se
 import { POST as mastodonPOST } from '../src/routes/api/connections/mastodon/+server';
 import { POST as threadsPOST } from '../src/routes/api/connections/threads/+server';
 import { POST as xPOST } from '../src/routes/api/connections/x/+server';
+import { POST as instagramPOST } from '../src/routes/api/connections/instagram/+server';
 import { POST as youtubePOST } from '../src/routes/api/connections/youtube/+server';
 import { platformName } from '$lib/domain/platforms';
 import { PLATFORM_SECRET_NAMES, PLATFORM_SETUP } from '$lib/domain/platform-setup';
@@ -34,7 +35,9 @@ describe('connect routes', () => {
 		LINKEDIN_CLIENT_ID: 'li-client',
 		LINKEDIN_CLIENT_SECRET: 'li-secret',
 		YOUTUBE_CLIENT_ID: 'youtube-client',
-		YOUTUBE_CLIENT_SECRET: 'youtube-secret'
+		YOUTUBE_CLIENT_SECRET: 'youtube-secret',
+		INSTAGRAM_APP_ID: 'instagram-app',
+		INSTAGRAM_APP_SECRET: 'instagram-secret'
 	};
 
 	const locals = (overrides: Record<string, unknown> = {}) => ({
@@ -84,7 +87,14 @@ describe('connect routes', () => {
 	afterEach(() => vi.unstubAllGlobals());
 
 	it('refuses bearer credentials — connecting is session-only', async () => {
-		for (const handler of [mastodonPOST, threadsPOST, xPOST, linkedinPOST, youtubePOST]) {
+		for (const handler of [
+			mastodonPOST,
+			threadsPOST,
+			xPOST,
+			linkedinPOST,
+			youtubePOST,
+			instagramPOST
+		]) {
 			const res = await call(
 				handler,
 				{ instanceUrl: 'https://mastodon.example' },
@@ -136,7 +146,8 @@ describe('connect routes', () => {
 			[threadsPOST, 'threads'],
 			[xPOST, 'x'],
 			[linkedinPOST, 'linkedin'],
-			[youtubePOST, 'youtube']
+			[youtubePOST, 'youtube'],
+			[instagramPOST, 'instagram']
 		] as const) {
 			const setup = PLATFORM_SETUP[platform];
 			const complete: Record<string, unknown> = { ...env };
@@ -175,7 +186,13 @@ describe('connect routes', () => {
 			secrets: Record<string, boolean>;
 			appUrl?: string;
 		};
-		expect(body.configured).toEqual({ linkedin: true, threads: true, x: true, youtube: true });
+		expect(body.configured).toEqual({
+			instagram: true,
+			linkedin: true,
+			threads: true,
+			x: true,
+			youtube: true
+		});
 		expect(body.appUrl).toBe('https://cogsend.example.com/');
 		// Presence per secret, not just per platform: this is what lets the
 		// dialog name the missing half instead of repeating "no credentials".
@@ -193,6 +210,7 @@ describe('connect routes', () => {
 			secrets: Record<string, boolean>;
 		};
 		expect(bareBody.configured).toEqual({
+			instagram: false,
 			linkedin: false,
 			threads: false,
 			x: false,

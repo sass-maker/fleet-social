@@ -1,6 +1,6 @@
 # Fleet Social (CogSend fork)
 
-> Private Fleet scheduler with YouTube, Mastodon, Bluesky, LinkedIn, Threads and X support. SvelteKit 2 and Svelte 5 on Cloudflare Workers, D1 via Drizzle, R2 for media.
+> Private Fleet scheduler with Instagram Reels, YouTube, Mastodon, Bluesky, LinkedIn, Threads and X support. SvelteKit 2 and Svelte 5 on Cloudflare Workers, D1 via Drizzle, R2 for media.
 
 CogSend is single-tenant: one admin account on the operator's own Cloudflare account, with their own provider credentials. Every instance is somebody's personal deployment, so nothing may assume the maintainer's account, domain or data.
 
@@ -58,3 +58,7 @@ The upstream CogSend `docs/` is published at https://cogsend.com/docs/ by github
 - Put secrets in tracked files. Worker secrets go through `npm run secrets:put`.
 - Deploy, publish a release, push a tag, run a remote migration or change credentials unless asked. These act on a real Cloudflare account.
 - Write comments inside copyable command blocks in the docs. The copy button copies them too.
+
+## Local interview adapter
+
+`scripts/rehearsal.mjs` and `src/lib/server/rehearsal*.ts` are development-only Node adapters. They use isolated local data and never contact publishing providers. `scripts/mashup-render.py` invokes the independent Mashup approved-edit and media-receipt interface; it does not modify Mashup source or bypass video approval. Keep the development import guarded by `import.meta.env.DEV`, and verify Node-only adapter code is absent from the production Worker.

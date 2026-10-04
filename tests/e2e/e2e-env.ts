@@ -26,6 +26,8 @@ function parse(raw: string): Record<string, string> {
 }
 
 export function e2eVars(): Record<string, string> {
+	if (process.env.FLEET_SOCIAL_E2E_ISOLATED === '1')
+		return { APP_ENCRYPTION_KEY: '11'.repeat(32), SKIP_TOTP: '1' };
 	return parse(readFileSync(existsSync('.dev.vars') ? '.dev.vars' : FIXTURE, 'utf8'));
 }
 
@@ -35,14 +37,17 @@ export function e2eVars(): Record<string, string> {
  * Keep in sync with playwright.config.ts, which passes the same value to
  * `wrangler dev --persist-to`.
  */
-export const E2E_PERSIST_TO = '.wrangler/e2e-state';
+export const E2E_PERSIST_TO =
+	process.env.FLEET_SOCIAL_E2E_ISOLATED === '1'
+		? process.env.FLEET_SOCIAL_E2E_STATE!
+		: '.wrangler/e2e-state';
 
 /** The account `scripts/seed-local.mjs` puts into that database. Throwaway by
  *  design: it exists only inside `.wrangler/e2e-state`, which every run wipes. */
 export const E2E_ACCOUNT = { email: 'e2e@localhost', password: 'e2e-password' };
 
 /** Extra flags for every `wrangler d1 …` call inside a spec. */
-export const E2E_D1_FLAGS = `--persist-to ${E2E_PERSIST_TO}`;
+export const E2E_D1_FLAGS = `--persist-to ${E2E_PERSIST_TO}${process.env.FLEET_SOCIAL_E2E_ISOLATED === '1' ? ` --config ${process.env.FLEET_SOCIAL_E2E_CONFIG}` : ''}`;
 
 /** Fleet drafts need explicit ownership before the composer can autosave. */
 export async function selectFleetProject(page: Page) {

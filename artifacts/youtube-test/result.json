@@ -1,0 +1,62 @@
+{
+	"testedAt": "2026-10-04T05:42:35.766Z",
+	"backend": "yt-dlp",
+	"version": "2026.08.19",
+	"mode": "public YouTube video and subtitles",
+	"firstFailedJob": "01d3414e-f2fa-4f98-b50d-f988d6b3a37f",
+	"job": "6b71a35b-2d38-4e9c-9c27-3f4abd4390d9",
+	"draft": "aaa41955-12c8-4524-8852-33d86ebb2b6b",
+	"reusedDraft": true,
+	"newlyRenderedOriginalDraft": "595efa93-9da0-4a11-9638-a2808019c542",
+	"sourcesInspected": 2,
+	"sourcesDownloaded": 2,
+	"sourcesFailedAfterFix": 0,
+	"selection": "Up to 14-second caption windows; source order retained; keyword heuristics require review.",
+	"downloadedSourceBytes": [3489347, 2086134],
+	"freshRenderSeconds": 81.7046484375,
+	"durationSeconds": 23.96,
+	"width": 1080,
+	"height": 1920,
+	"finalBytes": 3950564,
+	"audioMeanDb": -19.2,
+	"audioPeakDb": -1.5,
+	"videoHashVerified": true,
+	"captionsHashVerified": true,
+	"quality": {
+		"recipe": "c0a60d1ab4566ebedd2ee8541af466cd73ea7ed8ccb007b6114bbb7dc19a6a2b",
+		"scenes": [],
+		"sources": [
+			{
+				"sourceUrl": "https://www.youtube.com/watch?v=y4Orjmn21VI",
+				"startSeconds": 2082.8,
+				"endSeconds": 2096,
+				"selection": "caption boundaries and keyword overlap",
+				"spokenText": "No. I think the idea that they had a concept of progress—they were practical people. They needed to bring water from here to there. They did that. They needed to build roads",
+				"existingBurnedCaptions": false
+			},
+			{
+				"sourceUrl": "https://www.youtube.com/watch?v=jMR08XbWOgw",
+				"startSeconds": 743.28,
+				"endSeconds": 754,
+				"selection": "caption boundaries and keyword overlap",
+				"spokenText": "When you look at Rafa’s life and the injuries and the things that he had to fight through to become the best in the world, it’s just an incredible hero’s journey story. Also,",
+				"existingBurnedCaptions": false
+			}
+		]
+	},
+	"rights": [
+		{
+			"url": "https://www.youtube.com/watch?v=y4Orjmn21VI",
+			"title": "Joel Mokyr on Clans, Corporations, and a Culture of Growth",
+			"license": "Creative Commons Attribution license (reuse allowed)"
+		},
+		{
+			"url": "https://www.youtube.com/watch?v=jMR08XbWOgw",
+			"title": "Chase Koch on Principles, Music, and Overcoming Entropy | Conversations with Tyler",
+			"license": "Creative Commons Attribution license (reuse allowed)"
+		}
+	],
+	"realBrowserPlayback": { "duration": 23.96, "ended": true, "readyState": 4 },
+	"constraints": "Public licensed originals, no cookies/login/proxies/DRM bypass. No remote publishing. Excerpts may end mid-thought or have weak topical relevance.",
+	"ffmpegPostProcessing": true
+}

@@ -1,8 +1,10 @@
-export type PlatformId = 'mastodon' | 'bluesky' | 'linkedin' | 'threads' | 'x' | 'youtube';
+export type PlatformId =
+	'mastodon' | 'bluesky' | 'linkedin' | 'threads' | 'x' | 'youtube' | 'instagram';
 
 /** Canonical display order everywhere. */
 export const PLATFORM_ORDER: PlatformId[] = [
 	'youtube',
+	'instagram',
 	'x',
 	'threads',
 	'linkedin',
@@ -21,6 +23,7 @@ export function isPlatformId(value: string): value is PlatformId {
 /** Preview preference when several platforms apply (matches server capabilities). */
 export const PREVIEW_PRIORITY: PlatformId[] = [
 	'youtube',
+	'instagram',
 	'x',
 	'threads',
 	'linkedin',

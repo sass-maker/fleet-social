@@ -3,6 +3,7 @@ import { linkedinProvider } from './linkedin';
 import { mastodonProvider } from './mastodon';
 import { threadsProvider } from './threads';
 import { xProvider } from './x';
+import { instagramProvider } from './instagram';
 import { youtubeProvider } from './youtube';
 import type { PlatformId, PlatformProvider } from './types';
 
@@ -12,7 +13,8 @@ const providers: Record<PlatformId, PlatformProvider> = {
 	linkedin: linkedinProvider,
 	threads: threadsProvider,
 	x: xProvider,
-	youtube: youtubeProvider
+	youtube: youtubeProvider,
+	instagram: instagramProvider
 };
 
 export function getProvider(platform: PlatformId | string): PlatformProvider {
@@ -71,3 +73,13 @@ export {
 	X_MAX_IMAGES,
 	X_MAX_IMAGE_BYTES
 } from './x';
+
+export {
+	instagramProvider,
+	instagramAuthorizeUrl,
+	instagramExchangeCode,
+	instagramAccount,
+	instagramRefresh,
+	InstagramProcessingPending,
+	InstagramUploadUncertain
+} from './instagram';

@@ -10,6 +10,7 @@ import {
 	linkedinVerify,
 	threadsVerify,
 	youtubeChannel,
+	instagramAccount,
 	xVerify,
 	type ConnectionCredentials
 } from '$lib/server/providers';
@@ -225,6 +226,24 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 								)
 							}
 						: {}),
+					updatedAt: new Date()
+				})
+				.where(owned);
+		} else if (conn.platform === 'instagram') {
+			const refreshed = await getProvider('instagram').refreshIfNeeded!(creds);
+			const account = await instagramAccount(refreshed);
+			if (creds.instagramUserId && account.id !== creds.instagramUserId)
+				return fail('Instagram account changed — reconnect the original account', 409);
+			await locals.db
+				.update(connections)
+				.set({
+					status: 'active',
+					displayName: account.username,
+					handle: `@${account.username}`,
+					credentialsEncrypted: await encryptJson(
+						{ ...refreshed, instagramUserId: account.id, instagramUsername: account.username },
+						locals.env.APP_ENCRYPTION_KEY
+					),
 					updatedAt: new Date()
 				})
 				.where(owned);

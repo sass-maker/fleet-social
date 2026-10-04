@@ -320,7 +320,7 @@ test('settings defaults persist', async () => {
 	await page.goto('/settings');
 	// The version is injected at build time and shown here, so a bug report can
 	// name it; asserting it also proves the vite define reached the bundle.
-	await expect(page.getByText(/^Version \d+\.\d+\.\d+/)).toBeVisible();
+	await expect(page.getByText(/^Version \d+\.\d+\.\d+ ·/)).toBeVisible();
 	// The update line sits under the version: either a release link (when a
 	// newer one exists) or the manual check. It must never be blank.
 	await expect(page.getByTestId('version-line')).toContainText(/is available|Check for updates/);
