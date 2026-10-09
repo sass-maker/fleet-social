@@ -1,0 +1,117 @@
+{
+  "$schema": "fleet.design-review.v1",
+  "version": 1,
+  "project": "mashup",
+  "target": "Mashup public proof showcase and local editor route",
+  "surfaceMode": "persuade",
+  "mode": "preserve",
+  "register": "product",
+  "context": {
+    "product": "PRODUCT.md",
+    "design": "DESIGN.md"
+  },
+  "direction": {
+    "references": [],
+    "probes": [],
+    "selected": "proof-first-screening-sheet",
+    "approval": "not-required",
+    "before": "artifacts/design/before.png",
+    "library": {
+      "strategy": "upstream-first",
+      "primary": "existing-project-system",
+      "sources": [],
+      "runtime": "existing",
+      "customReplacement": {
+        "used": false,
+        "authorization": "not-required",
+        "reason": ""
+      }
+    },
+    "contract": {
+      "purpose": "Mashup turns an owned creator archive into coherent topic-specific compilations while keeping every edit inspectable.",
+      "purposeSource": "Site Health purposeContract plus PRODUCT.md",
+      "canonicalPurpose": "Mashup turns an owned creator archive into coherent topic-specific compilations while keeping every edit inspectable.",
+      "purposeAlignment": "match",
+      "driftNote": "",
+      "audience": "A creator or local operator assembling comedy, motivation, podcast, or clipping compilations from approved media.",
+      "job": "Watch the best current result, understand how multiple episodes form one argument, inspect its sources and receipts, then decide whether to run Mashup locally.",
+      "thesis": "The edit, not the isolated quote, is the product; lead with the real 47-second result and make its four-part construction inspectable.",
+      "system": "A source-forward screening sheet using the established cool canvas, black playback wells, one blue action accent, compact rules, evidence monospace, and responsive structural stacking.",
+      "signature": "A four-part splice rail ties the finished video directly to its source-faithful argument map, independent score ledger, and episode provenance.",
+      "risk": "A public proof site could imply a hosted clipping factory, so the lifecycle boundary explicitly keeps uploads, archives, rendering, approvals, and posting local."
+    }
+  },
+  "evidence": {
+    "screenshots": [
+      {
+        "width": 390,
+        "path": "artifacts/design/landing-audit/final-390.png"
+      },
+      {
+        "width": 768,
+        "path": "artifacts/design/landing-audit/final-768.png"
+      },
+      {
+        "width": 1440,
+        "path": "artifacts/design/landing-audit/final-1440.png"
+      }
+    ],
+    "projectCheck": {
+      "command": "cd web && pnpm check && pnpm build",
+      "status": "pass"
+    },
+    "critique": {
+      "score": 38,
+      "maximum": 40
+    },
+    "audit": {
+      "score": 19,
+      "maximum": 20
+    },
+    "unresolved": {
+      "p0": 0,
+      "p1": 0
+    },
+    "detector": {
+      "posture": "advisory",
+      "findings": []
+    },
+    "comprehension": {
+      "status": "pass",
+      "reviewer": "independent fresh responsive browser and source review",
+      "answers": {
+        "product": "Mashup turns approved long-form media into coherent, inspectable edits.",
+        "audience": "Creators and operators working with owned, licensed, or public-domain media.",
+        "value": "It builds a complete argument across episodes without losing provenance or editorial control.",
+        "mechanism": "The public proof exposes the authored sequence as four beats, independent score evidence, source links, captions, and validated receipts.",
+        "proof": "The page screens the real 47.15-second three-episode result and a 13.16-second compact cut, with recoverable source episodes and rights context.",
+        "nextAction": "Run Mashup locally from GitHub or inspect the release record."
+      },
+      "purposeScore": {
+        "product": 25,
+        "audience": 15,
+        "value": 15,
+        "mechanism": 15,
+        "proof": 14,
+        "nextAction": 15,
+        "total": 99
+      },
+      "mismatches": []
+    },
+    "performance": {
+      "report": ".fleet/evidence/landing-audit/performance.html",
+      "weightedLcpMs": 1340,
+      "cls": 0,
+      "tbtMs": 0
+    },
+    "visualQuality": {
+      "priority": "P2",
+      "score": 94,
+      "minimum": 90
+    }
+  },
+  "ownerFeedback": {
+    "decision": "delegated",
+    "note": "The owner delegated portfolio landing-page rebuilding and asked that implementation depth follow canonical priority."
+  }
+}

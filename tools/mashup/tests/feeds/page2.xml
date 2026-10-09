@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Page two. Repeats `paged-2` from page one, and has no further next link. -->
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Paginated Pod</title>
+    <link>https://feeds.example.org/paged/</link>
+    <atom:link rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/" />
+    <item>
+      <title>Middle</title>
+      <guid isPermaLink="false">paged-2</guid>
+      <pubDate>Mon, 02 Jun 2025 00:00:00 GMT</pubDate>
+      <itunes:duration>11:00</itunes:duration>
+      <enclosure url="https://cdn.example.org/paged/2.mp3" type="audio/mpeg" />
+    </item>
+    <item>
+      <title>Oldest</title>
+      <guid isPermaLink="false">paged-1</guid>
+      <pubDate>Mon, 26 May 2025 00:00:00 GMT</pubDate>
+      <itunes:duration>12:00</itunes:duration>
+      <enclosure url="https://cdn.example.org/paged/1.mp3" type="audio/mpeg" />
+    </item>
+  </channel>
+</rss>

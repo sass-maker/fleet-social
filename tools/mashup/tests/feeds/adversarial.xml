@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Every feed defect this parser is expected to survive, in one document:
+     a duplicate guid, an entry with no enclosure, a relative enclosure URL
+     with no guid and an unparseable date, a non-HTTP enclosure scheme, an
+     entry with no title, and a raw ampersand in a title. -->
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Broken Things Weekly</title>
+    <link>https://feeds.example.org/broken/</link>
+    <atom:link rel="license" href="https://creativecommons.org/publicdomain/zero/1.0/" />
+    <item>
+      <title>Sound &amp; Fury</title>
+      <guid isPermaLink="false">broken-1</guid>
+      <pubDate>Tue, 01 Apr 2025 12:00:00 +0000</pubDate>
+      <itunes:duration>approximately one hour</itunes:duration>
+      <enclosure url="https://cdn.example.org/broken/1.mp3" type="audio/mpeg" length="10" />
+    </item>
+    <item>
+      <title>Sound and Fury (republished)</title>
+      <guid isPermaLink="false">broken-1</guid>
+      <pubDate>Wed, 02 Apr 2025 12:00:00 +0000</pubDate>
+      <enclosure url="https://cdn.example.org/broken/1-again.mp3" type="audio/mpeg" />
+    </item>
+    <item>
+      <title>Show notes only</title>
+      <guid isPermaLink="false">broken-3</guid>
+      <pubDate>Thu, 03 Apr 2025 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Relative and undated</title>
+      <pubDate>whenever we got round to it</pubDate>
+      <enclosure url="/audio/relative.mp3" type="audio/mpeg" />
+    </item>
+    <item>
+      <title>Hostile enclosure</title>
+      <guid isPermaLink="false">broken-5</guid>
+      <enclosure url="javascript:alert(1)" type="audio/mpeg" />
+    </item>
+    <item>
+      <guid isPermaLink="false">broken-6</guid>
+      <pubDate>Sat, 05 Apr 2025 12:00:00 +0000</pubDate>
+      <itunes:duration>00:00:42</itunes:duration>
+      <enclosure url="https://cdn.example.org/broken/6.bin" type="application/octet-stream" />
+    </item>
+  </channel>
+</rss>

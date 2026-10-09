@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- No machine-readable licence: acquisition must refuse without an override. -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>All Rights Reserved FM</title>
+    <link>https://feeds.example.org/arr/</link>
+    <copyright>Copyright 2025 All Rights Reserved FM. All rights reserved.</copyright>
+    <item>
+      <title>Episode 1</title>
+      <guid isPermaLink="false">arr-1</guid>
+      <enclosure url="https://cdn.example.org/arr/1.mp3" type="audio/mpeg" />
+    </item>
+  </channel>
+</rss>

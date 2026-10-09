@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A licence that names itself and forbids derivative works. -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>No Derivatives Daily</title>
+    <link>https://feeds.example.org/nd/</link>
+    <copyright>Licensed https://creativecommons.org/licenses/by-nd/4.0/</copyright>
+    <item>
+      <title>Episode 1</title>
+      <guid isPermaLink="false">nd-1</guid>
+      <enclosure url="https://cdn.example.org/nd/1.mp3" type="audio/mpeg" />
+    </item>
+  </channel>
+</rss>

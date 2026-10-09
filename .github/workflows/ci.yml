@@ -194,3 +194,43 @@ jobs:
           name: playwright-artifacts-${{ matrix.suite }}
           path: test-results/
           retention-days: 7
+
+  # The local Mashup media module (tools/mashup): Python pipeline and its
+  # public-proof site. Neither is part of the Worker build.
+  mashup-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tools/mashup
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: tools/mashup/uv.lock
+      - run: uv sync --dev --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: sudo apt-get update && sudo apt-get install --yes ffmpeg
+      - run: uv run pytest -q
+
+  mashup-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tools/mashup/web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: tools/mashup/web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build

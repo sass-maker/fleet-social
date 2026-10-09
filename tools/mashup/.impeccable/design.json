@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-27T18:00:00Z",
+  "title": "Design System: Mashup",
+  "extensions": {
+    "colorMeta": {
+      "action-blue": {"role": "primary", "displayName": "Action Blue", "canonical": "#2b4fd8"},
+      "canvas": {"role": "neutral", "displayName": "Cool Canvas", "canonical": "#f4f5f7"},
+      "surface": {"role": "neutral", "displayName": "Working Surface", "canonical": "#ffffff"},
+      "ink": {"role": "neutral", "displayName": "Editorial Ink", "canonical": "#16181d"}
+    },
+    "breakpoints": [
+      {"name": "phone", "value": "620px"}
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single primary action in an operator toolbar.",
+      "html": "<button class=\"ds-btn-primary\">EXPORT BATCH</button>",
+      "css": ".ds-btn-primary { background: var(--accent, #2b4fd8); color: #fff; border: 1px solid transparent; border-radius: 5px; padding: 8px 12px; font: 600 13px/1.2 system-ui, sans-serif; } .ds-btn-primary:hover { filter: brightness(0.94); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent, #2b4fd8); outline-offset: 2px; }"
+    },
+    {
+      "name": "Editorial Candidate",
+      "kind": "card",
+      "refersTo": "editor-card",
+      "description": "Source-forward clip evidence with a compact numbered rail.",
+      "html": "<article class=\"ds-card\"><span class=\"ds-index\">01</span><div><strong>Founder conviction</strong><p>The transcript remains the primary review material.</p><code>EP 12 · 14:08–14:51</code></div></article>",
+      "css": ".ds-card { display: grid; grid-template-columns: 42px 1fr; gap: 12px; color: #16181d; background: #fff; border: 1px solid #d3d6dd; border-radius: 5px; padding: 12px; font: 13.5px/1.45 system-ui, sans-serif; } .ds-card p { margin: 6px 0; } .ds-index, .ds-card code { color: #5d626d; font: 700 11px/1.2 ui-monospace, monospace; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Editorial Control Desk",
+    "overview": "Mashup is a compact working surface where source material, timecodes, transcript evidence, scores, and edit state are easier to compare than decoration.",
+    "keyCharacteristics": ["Dense, scannable, and keyboard-first.", "Source-forward metadata paired with plain-language transcripts.", "Restrained surfaces with explicit semantic states.", "Responsive structure rather than fluid display typography."],
+    "rules": [
+      {"name": "The One Action Color Rule", "body": "Blue identifies selection, focus, and the primary action; it is not ambient decoration.", "section": "colors"},
+      {"name": "The Evidence Type Rule", "body": "Monospace means machine-verifiable editorial evidence, never generic technical flavor.", "section": "typography"}
+    ],
+    "dos": ["Do show source title and original timecode beside every candidate.", "Do keep transcript text readable before exposing deeper scoring detail.", "Do use structural responsive changes for phone and tablet layouts."],
+    "donts": ["Don't turn the operator queue into a gallery of decorative media cards.", "Don't hide provenance, approval, or incomplete output behind optimistic status copy.", "Don't use motion unless it communicates an edit or review-state change."]
+  }
+}

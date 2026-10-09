@@ -1,0 +1,53 @@
+{
+  "scope": "Localcompletebundle served through isolated browser route interception; no production change",
+  "checks": [
+    {
+      "width": 1440,
+      "index": 0,
+      "time": 2.007521,
+      "mode": "disabled",
+      "error": null,
+      "frames": 58,
+      "optionalTrack": {
+        "mode": "showing",
+        "cues": 11
+      }
+    },
+    {
+      "width": 1440,
+      "index": 1,
+      "time": 2.002783,
+      "mode": "disabled",
+      "error": null,
+      "frames": 58,
+      "optionalTrack": {
+        "mode": "showing",
+        "cues": 4
+      }
+    },
+    {
+      "width": 390,
+      "index": 0,
+      "time": 2.003707,
+      "mode": "disabled",
+      "error": null,
+      "frames": 58,
+      "optionalTrack": {
+        "mode": "showing",
+        "cues": 11
+      }
+    },
+    {
+      "width": 390,
+      "index": 1,
+      "time": 2.002988,
+      "mode": "disabled",
+      "error": null,
+      "frames": 58,
+      "optionalTrack": {
+        "mode": "showing",
+        "cues": 4
+      }
+    }
+  ]
+}

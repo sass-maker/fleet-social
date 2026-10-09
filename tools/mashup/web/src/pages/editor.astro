@@ -1,0 +1,39 @@
+---
+import Timeline from '../components/Timeline';
+import '../styles/app.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="A local, structure-aware editor for turning an owned creator archive into inspectable topic compilations." />
+    <title>Mashup editor — inspectable archive-to-edit workflow</title>
+    <script is:inline src="/app-health-log.js" defer></script>
+  </head>
+  <body>
+    <header class="product-intro">
+      <div>
+        <p class="product-kicker">Local operator tool · owned media only</p>
+        <h1>Turn an archive into an edit you can inspect.</h1>
+        <p>Mashup builds topic-specific compilations from entitled source media without hiding the edit behind a model. Every clip remains tied to its transcript, source, score, and place in the editable EDL.</p>
+      </div>
+      <ol aria-label="Mashup workflow">
+        <li><span>01</span><strong>Index the archive</strong><small>Transcripts and entitled source media stay traceable.</small></li>
+        <li><span>02</span><strong>Score the story</strong><small>Independent terms make selection and ordering inspectable.</small></li>
+        <li><span>03</span><strong>Edit the EDL</strong><small>Move, replace, trim, and export without losing provenance.</small></li>
+      </ol>
+      <p class="product-boundary">This editor is a local control surface. If its backend is not running, the workflow remains visible while the EDL correctly reports itself unavailable.</p>
+    </header>
+    <Timeline client:load />
+    <noscript>
+      <p class="fatal">
+        The timeline editor needs JavaScript. Without it, use
+        <code>mashup preview &lt;edl.json&gt;</code> for the read-only transcript.
+      </p>
+    </noscript>
+  </body>
+</html>

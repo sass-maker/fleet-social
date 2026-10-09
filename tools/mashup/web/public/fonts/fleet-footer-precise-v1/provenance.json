@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "family": "Geist",
+      "file": "geist.woff2",
+      "source": "https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2",
+      "sha256": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1",
+      "bytes": 29400,
+      "axes": { "wght": [100, 900] },
+      "license": "geist-OFL.txt",
+      "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/geist/OFL.txt",
+      "upstreamLicenseSha256": "1781d2806a07d91c4edf4740b88449fab7d0eadad53f7c351b94cd4d4eb8c00f",
+      "licenseSha256": "fb64c1011862d97fe49c633ad9180ffd80a61aab6ff220a2935704e8a0c3a7c4",
+      "licenseBytes": 4386,
+      "licenseTreatment": "Trailing whitespace only was normalized; the complete license wording and copyright are preserved."
+    },
+    {
+      "family": "Geist Mono",
+      "file": "geistmono.woff2",
+      "source": "https://fonts.gstatic.com/s/geistmono/v6/or3yQ6H-1_WfwkMZI_qYPLs1a-t7PU0AbeE9KK5U5Ck.woff2",
+      "sha256": "3f98383b122fe015a48536cd4a1cda855a201718923ffe74931a01597107b9b5",
+      "bytes": 9864,
+      "license": "geistmono-OFL.txt",
+      "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/geistmono/OFL.txt",
+      "upstreamLicenseSha256": "1781d2806a07d91c4edf4740b88449fab7d0eadad53f7c351b94cd4d4eb8c00f",
+      "licenseSha256": "fb64c1011862d97fe49c633ad9180ffd80a61aab6ff220a2935704e8a0c3a7c4",
+      "licenseBytes": 4386,
+      "licenseTreatment": "Trailing whitespace only was normalized; the complete license wording and copyright are preserved."
+    }
+  ],
+  "runtimePolicy": "Serve these local WOFF2 assets from the same origin; no runtime Google Fonts request is needed."
+}

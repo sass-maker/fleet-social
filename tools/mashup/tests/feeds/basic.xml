@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A well-formed, CC-licensed podcast feed. Fictional; nothing here resolves. -->
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>The Kettle Logic Show</title>
+    <link>https://feeds.example.org/kettle/</link>
+    <description>A fictional podcast used only as a test fixture.</description>
+    <copyright>Kettle Logic Ltd</copyright>
+    <atom:link rel="license" href="https://creativecommons.org/licenses/by/4.0/" />
+    <atom:link rel="self" href="https://feeds.example.org/kettle/rss" />
+    <item>
+      <title>Episode 3 — The Long One</title>
+      <link>https://feeds.example.org/kettle/3</link>
+      <guid isPermaLink="false">kettle-0003</guid>
+      <pubDate>Wed, 12 Mar 2025 09:00:00 GMT</pubDate>
+      <itunes:duration>1:02:03</itunes:duration>
+      <enclosure url="https://cdn.example.org/kettle/003.mp3" type="audio/mpeg" length="49766400" />
+    </item>
+    <item>
+      <title>Episode 2 — Minutes and Seconds</title>
+      <link>https://feeds.example.org/kettle/2</link>
+      <guid isPermaLink="false">kettle-0002</guid>
+      <pubDate>Wed, 05 Mar 2025 09:00:00 GMT</pubDate>
+      <itunes:duration>45:30</itunes:duration>
+      <enclosure url="https://cdn.example.org/kettle/002.m4a" type="audio/x-m4a" length="21000000" />
+    </item>
+    <item>
+      <title>Episode 1 — Bare Seconds</title>
+      <link>https://feeds.example.org/kettle/1</link>
+      <guid isPermaLink="false">kettle-0001</guid>
+      <pubDate>Wed, 26 Feb 2025 09:00:00 GMT</pubDate>
+      <itunes:duration>3600</itunes:duration>
+      <enclosure url="https://cdn.example.org/kettle/001.mp3" type="audio/mpeg" length="28800000" />
+    </item>
+  </channel>
+</rss>

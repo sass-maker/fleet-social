@@ -24,7 +24,9 @@ if (!existsSync(resolve(destination, 'survive.mp4'))) {
 }
 const rootPointer = resolve(destination, 'mashup-root.txt');
 if (process.argv[3]) writeFileSync(rootPointer, resolve(process.argv[3]));
-const mashupRoot = existsSync(rootPointer) ? readFileSync(rootPointer, 'utf8').trim() : '';
+const mashupRoot = existsSync(rootPointer)
+	? readFileSync(rootPointer, 'utf8').trim()
+	: resolve('tools/mashup');
 const env = {
 	...process.env,
 	FLEET_SOCIAL_REHEARSAL: '1',
