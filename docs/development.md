@@ -97,25 +97,25 @@ An existing build can be tested with `npm run test:e2e:isolated`. Each run creat
 
 This fork has an isolated, loopback-only interview workspace. It uses a local SQLite database and media folder under `.fleet-local/rehearsal`; it creates no production credentials, D1 migrations, or provider requests. Its sample Instagram and YouTube destinations are explicitly labeled. Reset demo retains previous databases and media for recovery.
 
-Install the repository's locked dependencies, then supply Mashup's public proof bundle:
+Install the repository's locked dependencies, then supply Mashup's public proof bundle (existing operator output stays where it was rendered; nothing is moved):
 
 ```sh
 npm ci
-npm run demo -- /path/to/mashup/output/public-proof-caption-staging /path/to/mashup
+npm run demo -- /path/to/mashup/output/public-proof-caption-staging
 ```
 
 Open http://127.0.0.1:5187/. Calendar shows month/week releases, Review plays real MP4s, and Create offers three starting points. A prepared cut opens instantly with its existing Mashup receipt; it is not represented as a fresh render. Your idea becomes editable post copy. Approval binds the saved video, caption and exact destinations; editing requires a new approval. Rehearse upload records a local receipt, while Schedule release saves real local calendar data. No scheduler runs in this mode.
 
-For fresh local renders, use the independent Mashup Python runtime with its frozen lockfile. FFmpeg, ffprobe and yt-dlp must already be installed; the adapter never installs executables or reads cookies.
+For fresh local renders, use the Mashup module in `tools/mashup/` with its frozen lockfile. It runs only on the operator's machine and is never bundled into the Worker. FFmpeg, ffprobe and yt-dlp must already be installed; the adapter never installs executables or reads cookies.
 
 ```sh
-UV_PROJECT_ENVIRONMENT="$PWD/.fleet-local/mashup-runtime" uv sync --project /path/to/mashup --no-dev --frozen
+UV_PROJECT_ENVIRONMENT="$PWD/.fleet-local/mashup-runtime" uv sync --project tools/mashup --no-dev --frozen
 ```
 
 The product lane turns the owner's editable text into three animated scenes and invokes Mashup's approved-edit renderer. It renders native 1080×1920 scenes with measured text wrapping, 4–8-second reading time and an original quiet procedural soundtrack; it uses no synthetic speech or photographic generation. The source-link lane inspects up to three individual public YouTube, Vimeo, Archive.org or Mashup proof links, uses available English captions to choose bounded complete passages up to 24 seconds, and joins them in the owner-approved order. Sentence boundaries are required, long caption gaps are excluded, and ranking favors specific topic words, concentrated relevance and fewer repeated terms. If no complete passage matches the brief within the bound, creation asks for a different brief or source. Captionless sources use the first ten seconds. Source captions are preserved; available captions on new sources are burned in without inventing spoken text. It is an operator-authored edit using text matching and caption boundaries, not a claim of semantic model scoring. Cached renders are keyed by the renderer recipe as well as the approved input, so updated rendering cannot silently return an older video. Source reuse requires the owner's rights confirmation. Login, extractor and rate-limit failures are displayed without cookies, private sources, or bypasses.
 
 YouTube acquisition supports separate video and audio streams, merged to MP4 before Mashup rendering, with source video height capped at 1080 pixels. Fresh acquisition and rendering were verified with two public Creative Commons originals from Conversations with Tyler; this does not guarantee that every public YouTube link is downloadable. Caption punctuation and timing can be inaccurate, and topic-word matching cannot establish semantic relevance, so review the finished video before approval.
 
-The adapter runs `validateOnly` before Mashup render and receipt operations. Completed `fleet.mashup-media-receipt.v1` artifacts are hash-checked before import into Fleet Social. All eight score terms stay in the edit; the operator-authored lane marks them unmeasured. Render progress and outputs remain on disk. Repeating an identical approved plan reuses the hash-verified output instantly and creates a new draft for publishing approval. Once configured, `npm run demo` remembers the local Mashup repository path. A finished video enters Review unapproved for publishing.
+The adapter runs `validateOnly` before Mashup render and receipt operations. Completed `fleet.mashup-media-receipt.v1` artifacts are hash-checked before import into Fleet Social. All eight score terms stay in the edit; the operator-authored lane marks them unmeasured. Render progress and outputs remain on disk. Repeating an identical approved plan reuses the hash-verified output instantly and creates a new draft for publishing approval. `npm run demo` uses `tools/mashup` by default; a second argument (`npm run demo -- <proof-folder> <mashup-path>`) points it at another Mashup checkout and is remembered. A finished video enters Review unapproved for publishing.
 
 This adapter is development-only and is removed from the production Worker build. Production continues to require the normal authenticated session. Public publishing needs a deployed HTTPS media route and configured provider OAuth apps; local rehearsal is not evidence of a real provider upload.

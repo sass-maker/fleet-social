@@ -1,0 +1,32 @@
+node_modules/
+dist/
+.env*
+.wrangler/
+.astro/
+.agents/
+.claude/
+.DS_Store
+*.log
+*.db
+*.db-journal
+archive/
+*.part
+
+# Local pipeline state and reproducible developer environments.
+.mashup/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Generated mashups and experiment runs.
+output/
+experiment/
+study/
+artifacts/
+
+# Generated proof media is injected only into external deployment staging.
+web/public/media/
+web/public/captions/
+web/public/receipts/

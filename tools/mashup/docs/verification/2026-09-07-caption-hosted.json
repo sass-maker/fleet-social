@@ -1,0 +1,49 @@
+{
+  "scope": "Ordinary hosted requests; no route interception",
+  "checks": [
+    {
+      "width": 1440,
+      "index": 0,
+      "src": "https://mashup.highsignal.app/media/survive-technology-final.mp4",
+      "time": 2.005387,
+      "duration": 47.15,
+      "defaultCaptionMode": "disabled",
+      "error": null,
+      "frames": 54,
+      "optionalCaptionCues": 11
+    },
+    {
+      "width": 1440,
+      "index": 1,
+      "src": "https://mashup.highsignal.app/media/operators-final.mp4",
+      "time": 2.010657,
+      "duration": 13.16,
+      "defaultCaptionMode": "disabled",
+      "error": null,
+      "frames": 55,
+      "optionalCaptionCues": 4
+    },
+    {
+      "width": 390,
+      "index": 0,
+      "src": "https://mashup.highsignal.app/media/survive-technology-final.mp4",
+      "time": 2.002511,
+      "duration": 47.15,
+      "defaultCaptionMode": "disabled",
+      "error": null,
+      "frames": 54,
+      "optionalCaptionCues": 11
+    },
+    {
+      "width": 390,
+      "index": 1,
+      "src": "https://mashup.highsignal.app/media/operators-final.mp4",
+      "time": 2.007367,
+      "duration": 13.16,
+      "defaultCaptionMode": "disabled",
+      "error": null,
+      "frames": 54,
+      "optionalCaptionCues": 4
+    }
+  ]
+}

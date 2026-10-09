@@ -1,0 +1,369 @@
+---
+import '../styles/showcase.css';
+import { site } from '../site';
+
+const sourceEpisodes = [
+  {
+    guest: 'Chase Koch',
+    role: 'Threat + callback',
+    title: 'Principles, Music, and Overcoming Entropy',
+    href: 'https://www.youtube.com/watch?v=jMR08XbWOgw&t=2254s',
+  },
+  {
+    guest: 'Daron Acemoglu',
+    role: 'Technology is a choice',
+    title: 'Liberalism, Automation, and the Educated Elite',
+    href: 'https://www.youtube.com/watch?v=e5O1Y-5phEU&t=1455s',
+  },
+  {
+    guest: 'Joel Mokyr',
+    role: 'Execution is the constraint',
+    title: 'Clans, Corporations, and a Culture of Growth',
+    href: 'https://www.youtube.com/watch?v=y4Orjmn21VI&t=2373s',
+  },
+];
+
+const argumentBeats = [
+  {
+    time: '00:00–00:09',
+    role: 'Hook',
+    speaker: 'Chase Koch',
+    quote: "For those, even old industrial companies that aren't transforming themselves with technology, they're going to be dinosaurs really quick.",
+  },
+  {
+    time: '00:09–00:27',
+    role: 'Development',
+    speaker: 'Daron Acemoglu',
+    quote: 'Not every society does that technology in the same way. We could get that wrong.',
+  },
+  {
+    time: '00:27–00:40',
+    role: 'Payoff',
+    speaker: 'Joel Mokyr',
+    quote: "Inventors are all good and nice, but if you don't have the people to scale it up and maintain it and install it and operate it, it's not going to do you any good.",
+  },
+  {
+    time: '00:40–00:47',
+    role: 'Callback',
+    speaker: 'Chase Koch',
+    quote: 'Creatively destroy what has made us successful in the past and make it better every day.',
+  },
+];
+
+const scoreTerms = [
+  ['Relevance', '0.96'],
+  ['Context', '0.96'],
+  ['Non-repetition', '0.98'],
+  ['Progression', '0.97'],
+  ['Escalation', '0.95'],
+  ['Callback', '0.94'],
+  ['Duration fit', '0.99'],
+  ['Source diversity', '0.75'],
+] as const;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: site.name,
+      url: site.url,
+      description: site.description,
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: site.name,
+      url: site.url,
+      applicationCategory: 'MultimediaApplication',
+      operatingSystem: 'macOS, Linux',
+      description: site.summary,
+      image: site.socialImage,
+      downloadUrl: site.github,
+    },
+    {
+      '@type': 'VideoObject',
+      name: 'How companies survive technology',
+      description: 'A 47-second source-faithful argument assembled from four beats across three Creative Commons podcast episodes.',
+      contentUrl: site.primaryMedia,
+      thumbnailUrl: site.socialImage,
+      uploadDate: '2026-08-28',
+      duration: 'PT47.15S',
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content={site.description} />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#f1f3f6" />
+    <link rel="canonical" href={`${site.url}/`} />
+    <link rel="alternate" type="text/markdown" href={`${site.url}/index.md`} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:url" content={`${site.url}/`} />
+    <meta property="og:title" content={site.title} />
+    <meta property="og:description" content={site.description} />
+    <meta property="og:image" content={site.socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:video" content={site.primaryMedia} />
+    <meta property="og:video:type" content="video/mp4" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={site.title} />
+    <meta name="twitter:description" content={site.description} />
+    <meta name="twitter:image" content={site.socialImage} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <title>{site.title}</title>
+    <script is:inline async src="https://www.clarity.ms/tag/y6bvgfkqwg"></script>
+    <script
+      is:inline
+      defer
+      src="https://health.sassmaker.com/tracker.js"
+      data-key="ahk_pub_e05f901e3fd6e74720b699ec1055368170ffc85221676ce89c64190c5593d7d2"
+      data-project="app-import-68263a43a7a51f324c878d0ce7a09718d119ac4d6054358f88ea023e4901350b"
+      data-identity="persistent"
+      data-endpoint="https://ingest.sassmaker.com/v1/browser"
+    ></script>
+    <script is:inline src="/app-health-log.js" defer></script>
+  </head>
+  <body>
+    <!--
+      THESIS: The edit—not the isolated quote—is the product; reject the generic feature-card landing page.
+      OWN-WORLD: A source-forward screening slate with cool paper, black playback wells, action blue, rules, and measured evidence type.
+      STORY: See one real multi-episode argument, inspect its construction and rights, then use Mashup locally.
+      FIRST VIEWPORT: Proposition and actions on the left; the complete 47-second proof and its four-beat splice directly beside it.
+      FORM: Proof-first public screening sheet, derived from Mashup's established editorial desk and selected for this exact release scope.
+    -->
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="Mashup home">
+        <span aria-hidden="true"></span>
+        Mashup
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#construction">Inspect the edit</a>
+        <a href="#provenance">Sources</a>
+        <a
+          href="https://github.com/sass-maker/mashup"
+          aria-label="GitHub repository"
+          title="GitHub repository"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a
+        >
+      </nav>
+      <span class="release-state">Public proof · local operator pilot</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="hero-kicker">One channel · three episodes · one argument</p>
+          <h1 id="hero-title">A good clip lands.<br />A great edit <em>builds.</em></h1>
+          <p class="hero-summary">
+            Mashup helps creators and operators turn approved long-form media into coherent, inspectable edits. Source speech stays intact; the sequencing, provenance, and editorial decisions stay visible.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-action" type="button" data-play-primary data-app-health-event="proof.play.clicked">Play the 47-second edit</button>
+            <a class="secondary-action" href="#construction" data-app-health-event="proof.construction.clicked">See how it was assembled</a>
+          </div>
+          <dl class="proof-facts" aria-label="Primary result facts">
+            <div><dt>Runtime</dt><dd>47.15 sec</dd></div>
+            <div><dt>Sources</dt><dd>3 episodes</dd></div>
+            <div><dt>Structure</dt><dd>4 beats</dd></div>
+            <div><dt>Rights</dt><dd>CC BY</dd></div>
+          </dl>
+          <p class="lifecycle-note">
+            This is a released proof surface, not a hosted clipping service. Mashup still runs locally; approval and posting remain human decisions.
+          </p>
+        </div>
+
+        <div class="screening" id="primary-result">
+          <div class="screening-head">
+            <span>Latest synthesis</span>
+            <span>Startups / technology</span>
+          </div>
+          <video controls playsinline preload="metadata" poster="/primary-poster.jpg" aria-label="How companies survive technology, a 47-second synthesis across three podcast episodes">
+            <source src={site.primaryMedia} type="video/mp4" />
+            <track kind="captions" src={site.primaryCaptions} srclang="en" label="English" />
+            Your browser does not support HTML video.
+          </video>
+          <div class="splice" aria-label="Four-part editorial structure">
+            <span class="splice-hook" title="Hook: 9.76 seconds">Hook</span>
+            <span class="splice-development" title="Development: 17.25 seconds">Choice</span>
+            <span class="splice-payoff" title="Payoff: 13.04 seconds">Operators</span>
+            <span class="splice-callback" title="Callback: 7 seconds">Return</span>
+          </div>
+          <div class="screening-foot">
+            <span>Conversations with Tyler</span>
+            <a href={site.primaryReceipt}>Media receipt</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="construction" id="construction" aria-labelledby="construction-title">
+        <header class="section-heading">
+          <h2 id="construction-title">The edit is the product.</h2>
+          <p>Four complete thoughts become one thesis. Every transition has a job; every source remains recoverable.</p>
+        </header>
+        <ol class="argument-map">
+          {argumentBeats.map((beat, index) => (
+            <li>
+              <div class="beat-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+              <div class="beat-measure"><span>{beat.time}</span><strong>{beat.role}</strong></div>
+              <blockquote>“{beat.quote}”</blockquote>
+              <cite>{beat.speaker}</cite>
+            </li>
+          ))}
+        </ol>
+        <div class="score-ledger" aria-label="Inspectable edit score">
+          {scoreTerms.map(([label, score]) => (
+            <div><span>{label}</span><strong>{score}</strong></div>
+          ))}
+          <p>
+            Eight weighted terms from the approved edit produce the 0.95 result.
+            <a href={site.primaryScoreLedger}>Inspect the score ledger</a>.
+          </p>
+        </div>
+      </section>
+
+      <section class="comparison" aria-labelledby="comparison-title">
+        <div class="comparison-copy">
+          <h2 id="comparison-title">Sometimes one idea is enough.</h2>
+          <p>The compact cut keeps a single claim whole: invention is useless without operators. Same provenance discipline, smaller editorial ambition.</p>
+          <dl>
+            <div><dt>Runtime</dt><dd>13.16 sec</dd></div>
+            <div><dt>Source</dt><dd>Joel Mokyr</dd></div>
+            <div><dt>Boundary review</dt><dd>Open + close passed</dd></div>
+          </dl>
+          <a href={site.compactReceipt}>Inspect the validated receipt <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="compact-screen">
+          <video controls playsinline preload="metadata" poster="/compact-poster.jpg" aria-label="Ideas are not enough, a 13-second podcast clip">
+            <source src={site.compactMedia} type="video/mp4" />
+            <track kind="captions" src={site.compactCaptions} srclang="en" label="English" />
+          </video>
+        </div>
+      </section>
+
+      <section class="provenance" id="provenance" aria-labelledby="provenance-title">
+        <header class="section-heading">
+          <h2 id="provenance-title">Proof carries its sources.</h2>
+          <p>All filmed media in this release comes from Conversations with Tyler episodes marked Creative Commons Attribution reuse-allowed.</p>
+        </header>
+        <div class="source-table" role="table" aria-label="Source episodes">
+          <div class="source-row source-header" role="row">
+            <span role="columnheader">Guest</span>
+            <span role="columnheader">Editorial role</span>
+            <span role="columnheader">Original episode</span>
+          </div>
+          {sourceEpisodes.map((source) => (
+            <div class="source-row" role="row">
+              <strong role="cell" data-label="Guest">{source.guest}</strong>
+              <span role="cell" data-label="Editorial role">{source.role}</span>
+              <a role="cell" data-label="Original episode" href={source.href} target="_blank" rel="noreferrer">{source.title} <span aria-hidden="true">↗</span></a>
+            </div>
+          ))}
+        </div>
+        <p class="rights-note">License: <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">Creative Commons Attribution 3.0</a>. Mashup records source URLs and hashes in the finished-media receipt; it does not invent rights.</p>
+      </section>
+
+      <section class="release-boundary" aria-labelledby="boundary-title">
+        <div>
+          <h2 id="boundary-title">Released proof.<br />Local machinery.</h2>
+          <p>The website is public. The archive, editor, rendering pipeline, and approvals remain on the operator’s machine.</p>
+        </div>
+        <ul>
+          <li><strong>Available now</strong><span>CLI, local transcript editor, approved rendering, source receipts, Startups presets.</span></li>
+          <li><strong>Not hosted</strong><span>Uploads, accounts, archive storage, automatic posting, synthetic speech.</span></li>
+        </ul>
+        <div class="boundary-actions">
+          <a class="primary-action" href="https://github.com/sass-maker/mashup#readme" data-app-health-event="local.run.clicked" target="_blank" rel="noreferrer">Run Mashup locally</a>
+          <a class="secondary-action" href="https://github.com/sass-maker/mashup/issues/12" target="_blank" rel="noreferrer">Read the release record</a>
+        </div>
+      </section>
+    </main>
+
+    <footer aria-label="Mashup footer">
+      <fleet-footer-extension
+        data-fleet-footer-project="mashup"
+        product-name="Mashup"
+        signature-name="Mashup"
+        signature-font="inherit"
+        theme="light"
+        surface="web"
+        font-base="/fonts/fleet-footer-precise-v1/"
+        art-src="/footer-art/mashup.webp"
+        art-alt="Mashup: A local editing bench centers an assembled filmstrip and cutting surface. Original abstract frames, owned-source reels and retained cut slips surround an editable sequence folio."
+        art-width="2170"
+        art-height="725"
+        art-position="50% 50%"
+        art-credit="Original illustration for Mashup"
+        style="font-family: var(--body); --fleet-footer-canvas: var(--paper); --fleet-footer-lower: var(--surface-muted); --fleet-footer-edge: 20px; --fleet-footer-max-width: 1380px;"
+      >
+        <div slot="navigation" data-fleet-footer-navigation class="mashup-footer-native">
+          <p>Source-faithful edits from approved media. No generated voices. No opaque cuts. Microsoft Clarity measures this public proof site only. App Health records page views and named actions with a project-scoped anonymous visitor ID in first-party storage for up to 90 days.</p>
+          <nav aria-label="Mashup resources" class="mashup-footer-groups">
+            <div>
+              <h2 data-fleet-footer-group-label>Explore</h2>
+              <a href="#primary-result">The proof</a>
+              <a href="#construction">How it was assembled</a>
+              <a href="#provenance">Sources and rights</a>
+            </div>
+            <div>
+              <h2 data-fleet-footer-group-label>Use and records</h2>
+              <a href="https://github.com/sass-maker/mashup#readme" target="_blank" rel="noreferrer">Run Mashup locally</a>
+              <a href="https://github.com/sass-maker/mashup#the-transcript-editor" target="_blank" rel="noreferrer">Local editor guide</a>
+              <a href="https://github.com/sass-maker/mashup/issues/12" target="_blank" rel="noreferrer">Release record</a>
+              <a href="https://sassmaker.com/privacy">Privacy</a>
+            </div>
+          </nav>
+        </div>
+        <saas-maker-newsletter-capture
+          slot="capture"
+          product-name="Mashup"
+          catalog-id="mashup"
+          kind="newsletter"
+          source="footer"
+          privacy-url="https://sassmaker.com/privacy"
+          theme="light"
+          layout="compact"
+          integrated
+        ></saas-maker-newsletter-capture>
+      </fleet-footer-extension>
+    </footer>
+
+    <script>
+      const playButton = document.querySelector('[data-play-primary]');
+      const primaryVideo = document.querySelector('#primary-result video');
+
+      playButton?.addEventListener('click', async () => {
+        primaryVideo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (primaryVideo instanceof HTMLVideoElement) {
+          try {
+            await primaryVideo.play();
+          } catch {
+            primaryVideo.focus();
+          }
+        }
+      });
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const tracked = target.closest('[data-app-health-event]');
+        const name = tracked?.getAttribute('data-app-health-event');
+        const appHealth = (window as Window & { appHealth?: { track: (eventName: string) => void } }).appHealth;
+        if (name && typeof appHealth?.track === 'function') appHealth.track(name);
+      });
+    </script>
+    <script is:inline type="module" src="https://sassmaker.com/newsletter-capture.js?v=precise-b0adaa67"></script>
+    <script is:inline src="https://sassmaker.com/project-strip.js?v=precise-b0adaa67" data-project="mashup" data-theme="light" data-surface="web" data-host-only="true" defer></script>
+    <script is:inline src="https://sassmaker.com/ai-chat-footer.js?v=precise-b0adaa67" data-project="mashup" data-name="Mashup" data-theme="light" data-surface="web" data-host-only="true" data-capture="false" defer></script>
+  </body>
+</html>

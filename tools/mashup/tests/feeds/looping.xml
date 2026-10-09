@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A feed whose rel="next" points back at itself. Unbounded without a guard. -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Loop Pod</title>
+    <atom:link rel="license" href="https://creativecommons.org/publicdomain/zero/1.0/" />
+    <atom:link rel="next" href="https://feeds.example.org/loop/rss" />
+    <item>
+      <title>Only</title>
+      <guid isPermaLink="false">loop-1</guid>
+      <enclosure url="https://cdn.example.org/loop/1.mp3" type="audio/mpeg" />
+    </item>
+  </channel>
+</rss>

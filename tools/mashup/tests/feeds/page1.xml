@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Page one of a paginated feed (RFC 5005). The next link is relative, and
+     page two repeats this page's oldest episode. -->
+<rss version="2.0"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Paginated Pod</title>
+    <link>https://feeds.example.org/paged/</link>
+    <atom:link rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/" />
+    <atom:link rel="next" href="rss?page=2" type="application/rss+xml" />
+    <item>
+      <title>Newest</title>
+      <guid isPermaLink="false">paged-3</guid>
+      <pubDate>Mon, 09 Jun 2025 00:00:00 GMT</pubDate>
+      <itunes:duration>10:00</itunes:duration>
+      <enclosure url="https://cdn.example.org/paged/3.mp3" type="audio/mpeg" />
+    </item>
+    <item>
+      <title>Middle</title>
+      <guid isPermaLink="false">paged-2</guid>
+      <pubDate>Mon, 02 Jun 2025 00:00:00 GMT</pubDate>
+      <itunes:duration>11:00</itunes:duration>
+      <enclosure url="https://cdn.example.org/paged/2.mp3" type="audio/mpeg" />
+    </item>
+  </channel>
+</rss>

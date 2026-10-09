@@ -1,0 +1,55 @@
+{
+  "$schema": "fleet.landing-audit.scorecard.v1",
+  "project": "mashup",
+  "priority": "P2",
+  "candidate": "http://127.0.0.1:4401/",
+  "productionChanged": false,
+  "checkedAt": "2026-08-29",
+  "purpose": {
+    "score": 99,
+    "status": "pass",
+    "note": "Fresh-visitor comprehension passed for product, audience, value, mechanism, proof, and next action; the page accurately frames Mashup as a local, rights-bounded workflow for inspectable edits."
+  },
+  "design": {
+    "score": 94,
+    "status": "pass",
+    "note": "The proof-first screening-sheet direction scored 38/40 in critique and 19/20 in audit across 390, 768, and 1440 pixel browser checks, with no unresolved P0 or P1 findings."
+  },
+  "seo": {
+    "score": 98,
+    "passed": 14,
+    "failed": 1,
+    "note": "The sole generic finding asks for an aggregateRating or review on SoftwareApplication. Mashup has no honest review data, so none was fabricated."
+  },
+  "geo": {
+    "score": 100,
+    "tier": "S",
+    "note": "Source candidate rebuilt against the local origin and passed every required agent-index check. The production-default build was restored afterward."
+  },
+  "performance": {
+    "score": 96,
+    "runs": 20,
+    "successfulRuns": 20,
+    "weightedLcpMs": 1340,
+    "weightedCls": 0,
+    "weightedTbtMs": 0,
+    "cwvLcpP75Ms": 1730,
+    "profiles": {
+      "mobileSlowLcpP75Ms": 3213,
+      "mobileMidLcpP75Ms": 1691,
+      "mobileFastLcpP75Ms": 984,
+      "desktopLcpP75Ms": 688
+    },
+    "report": "performance.html"
+  },
+  "verification": {
+    "astroCheck": "pass",
+    "astroBuild": "pass",
+    "mediaReceiptValidation": "pass",
+    "responsiveScreenshots": [
+      "../../../artifacts/design/landing-audit/final-390.png",
+      "../../../artifacts/design/landing-audit/final-768.png",
+      "../../../artifacts/design/landing-audit/final-1440.png"
+    ]
+  }
+}

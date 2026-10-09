@@ -10,3 +10,6 @@ bun.lockb
 
 # Generated: dependency attributions, refreshed by hand when deps change
 THIRD-PARTY-NOTICES.md
+
+# Local Mashup module: Python + Astro with its own ruff and Astro tooling
+/tools/mashup/
