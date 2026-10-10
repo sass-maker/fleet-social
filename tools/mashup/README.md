@@ -25,7 +25,7 @@ The public website screens approved finished results and their provenance. It
 is intentionally static: uploads, archives, rendering, approvals, and posting
 remain local operator responsibilities.
 
-Public proof: <https://mashup.highsignal.app>
+Public proof: <https://mashup.highsignal.app>. The site stays live; see the canonical [public proof deployment instructions](web/README.md#public-proof-deployment) for its Fleet Social source and guarded release workflow.
 
 Current qualification (2026-09-07): both approved public examples now play on
 desktop and mobile, with exact media/caption hashes and readable source receipts.

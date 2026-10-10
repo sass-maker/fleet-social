@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Calendar, EventInput } from '@fullcalendar/core';
+	import type { Calendar, EventContentArg, EventInput } from '@fullcalendar/core';
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import { platformName } from '$lib/domain/platforms';
 	let { events }: { events: EventInput[] } = $props();
@@ -45,7 +45,7 @@
 				eventClassNames(info) {
 					return ['planner-event', `state-${info.event.extendedProps.status}`];
 				},
-				eventContent(info) {
+				eventContent(info: EventContentArg) {
 					const wrapper = document.createElement('div');
 					wrapper.className = 'planner-event-body';
 					if (info.event.extendedProps.posterSrc) {

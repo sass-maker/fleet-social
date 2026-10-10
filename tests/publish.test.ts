@@ -24,6 +24,8 @@ import type { AppDb } from '$lib/server/db/client';
 import { captureConsole, loggedLines } from './console-spy';
 import type { FetchLike } from '$lib/server/providers/types';
 import { approveTestTarget } from './fleet-approval';
+import { POST as reconcilePOST } from '../src/routes/api/targets/[id]/reconcile/+server';
+import { POST as retryPOST } from '../src/routes/api/targets/[id]/retry/+server';
 
 const publishTarget: typeof publishTargetCore = async (db, env, store, targetId, options) => {
 	await approveTestTarget(db, targetId);
@@ -113,6 +115,81 @@ describe('publishTarget integration', () => {
 	});
 
 	afterAll(() => close());
+
+	it('retries an uncertain provider failure only after the owner confirms no post exists', async () => {
+		const ownDraft = await extraDraft();
+		const targetId = newId();
+		const now = new Date();
+		await db.insert(publishTargets).values({
+			id: targetId,
+			draftId: ownDraft,
+			connectionId: connMasto,
+			status: 'pending',
+			createdAt: now,
+			updatedAt: now
+		});
+		const first = await publishTarget(db, TEST_ENV, store, targetId, {
+			fetchImpl: mockFetch({
+				'/api/v1/statuses': () =>
+					new Response('Provider failed after accepting the request', { status: 500 })
+			})
+		});
+		expect(first.status).toBe('uncertain');
+		const locals = {
+			db,
+			env: TEST_ENV,
+			media: store,
+			authMethod: 'session',
+			user: {
+				id: userId,
+				email: 'test-publish@localhost',
+				timezone: 'UTC',
+				totpEnabled: true,
+				mfaVerified: true
+			}
+		};
+		const blocked = await retryPOST({ params: { id: targetId }, locals } as never);
+		expect(blocked.status).toBe(409);
+		expect(await blocked.json()).toMatchObject({ error: expect.stringMatching(/reconcile/i) });
+		const held = await publishTarget(db, TEST_ENV, store, targetId, {
+			fetchImpl: async () => {
+				throw new Error('An uncertain target must not contact the provider');
+			}
+		});
+		expect(held.status).toBe('uncertain');
+		const [before] = await db.select().from(publishTargets).where(eq(publishTargets.id, targetId));
+		expect(before.attemptCount).toBe(1);
+		const reconciled = await reconcilePOST({
+			params: { id: targetId },
+			locals,
+			request: new Request('http://localhost/api/targets/x/reconcile', {
+				method: 'POST',
+				body: JSON.stringify({
+					action: 'not_published',
+					confirmation: 'I checked the destination account'
+				})
+			})
+		} as never);
+		expect(reconciled.status).toBe(200);
+		const [cleared] = await db.select().from(publishTargets).where(eq(publishTargets.id, targetId));
+		expect(cleared.status).toBe('failed');
+		const retried = await publishTarget(db, TEST_ENV, store, targetId, {
+			fetchImpl: mockFetch({
+				'/api/v1/statuses': () =>
+					Response.json({
+						id: 'reconciled-post',
+						url: 'https://mastodon.test/@user/reconciled-post'
+					})
+			})
+		});
+		expect(retried.status).toBe('published');
+		const [after] = await db.select().from(publishTargets).where(eq(publishTargets.id, targetId));
+		expect(after).toMatchObject({
+			status: 'published',
+			remotePostId: 'reconciled-post',
+			attemptCount: 2
+		});
+	});
 
 	async function extraDraft(body = 'Hello from tests') {
 		const id = newId();
