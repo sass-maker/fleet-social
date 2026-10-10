@@ -48,7 +48,7 @@
 		</div>
 		<div class="review-card-text">
 			<span class="studio-status">{draft.approvedAt ? '✓ Approved' : '● Awaiting approval'}</span>
-			<h3>{draft.title || draft.baseBody.slice(0, 60) || 'Untitled post'}</h3>
+			<h3 class="post-title">{draft.title || draft.baseBody.slice(0, 60) || 'Untitled post'}</h3>
 			<p class="studio-muted">Saved revision · {draft.projectId || 'Choose a project'}</p>
 		</div>
 		<div class="review-card-footer">
@@ -109,6 +109,9 @@
 {/if}
 
 <style>
+	.post-title {
+		text-transform: none;
+	}
 	.planner-workspace {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 270px;
@@ -129,8 +132,8 @@
 	.rail-heading h2,
 	.review-page-head h1 {
 		font:
-			400 25px/1.2 Georgia,
-			serif;
+			750 25px/1.2 var(--font-display),
+			sans-serif;
 		letter-spacing: -0.6px;
 	}
 	.rail-heading h2 {
@@ -139,14 +142,14 @@
 	.review-card {
 		display: block;
 		border: 1px solid var(--studio-line);
-		border-radius: 10px;
+		border-radius: var(--radius);
 		overflow: hidden;
 		background: var(--studio-panel);
 		margin-bottom: 17px;
 		transition: border-color 0.15s;
 	}
 	.review-card:hover {
-		border-color: #91a98f;
+		border-color: var(--input);
 	}
 	.preview-frame {
 		height: 140px;

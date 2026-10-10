@@ -1,16 +1,91 @@
 @import 'tailwindcss';
 
-/* Light-only stone theme. New UI uses Tailwind stone classes directly; the
-vars below are the few that components still share. */
+/* Copied from @saas-maker/ui v0.1.18: keep Svelte's single Tailwind entry. */
+@font-face {
+	font-family: 'Geist Variable';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400 700;
+	src: url('../lib/assets/fonts/geist-latin-normal.woff2') format('woff2');
+	unicode-range:
+		U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A,
+		U+201C-201E, U+2022, U+2026, U+2032-2033, U+2039-203A, U+20AC, U+2122, U+2190-2193, U+2197,
+		U+2212, U+00D7;
+}
+@font-face {
+	font-family: 'Geist Mono Variable';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400 600;
+	src: url('../lib/assets/fonts/geist-mono-latin-normal.woff2') format('woff2');
+	unicode-range:
+		U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A,
+		U+201C-201E, U+2022, U+2026, U+2032-2033, U+2039-203A, U+20AC, U+2122, U+2190-2193, U+2197,
+		U+2212, U+00D7;
+}
+@font-face {
+	font-family: 'Figtree Variable';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 400 800;
+	src: url('../lib/assets/fonts/figtree-latin-normal.woff2') format('woff2');
+	unicode-range:
+		U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2013-2014, U+2018-201A,
+		U+201C-201E, U+2022, U+2026, U+2032-2033, U+2039-203A, U+20AC, U+2122, U+2190-2193, U+2197,
+		U+2212, U+00D7;
+}
 
 :root {
 	color-scheme: light;
-	--fg: #0c0c0e;
-	--muted: #6b7280;
-	--border: #e8e8ec;
-	--card: #ffffff;
-	--sel-bg: #b9d9ff;
-	--sel-fg: #0c0c0e;
+	--background: oklch(0.993 0 0);
+	--foreground: oklch(0.17 0.005 270);
+	--surface: oklch(0.975 0.002 270);
+	--card: oklch(1 0 0);
+	--primary: oklch(0.2 0.005 270);
+	--primary-foreground: oklch(0.99 0 0);
+	--secondary: oklch(0.96 0.002 270);
+	--muted-foreground: oklch(0.47 0.008 270);
+	--border: oklch(0.91 0.003 270);
+	--input: oklch(0.89 0.004 270);
+	--brand: oklch(0.55 0.2 264);
+	--brand-soft: oklch(0.95 0.03 264);
+	--ring: var(--brand);
+	--radius: 0.75rem;
+	--font-text: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-display: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+	--fg: var(--foreground);
+	--muted: var(--muted-foreground);
+	--sel-bg: color-mix(in oklch, var(--brand) 26%, transparent);
+	--sel-fg: var(--foreground);
+}
+
+@theme inline {
+	--font-sans: var(--font-text);
+	--font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	/* Existing stone utilities share semantic roles without changing status colors. */
+	--color-stone-50: var(--background);
+	--color-stone-100: var(--surface);
+	--color-stone-200: var(--border);
+	--color-stone-300: var(--input);
+	--color-stone-400: var(--muted-foreground);
+	--color-stone-500: var(--muted-foreground);
+	--color-stone-600: var(--muted-foreground);
+	--color-stone-700: var(--foreground);
+	--color-stone-800: var(--primary);
+	--color-stone-900: var(--primary);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-2xl: calc(var(--radius) + 10px);
 }
 
 html,
@@ -20,17 +95,8 @@ body {
 
 body {
 	color: var(--fg);
-	background: #fafaf9;
-	font-family:
-		ui-sans-serif,
-		system-ui,
-		-apple-system,
-		BlinkMacSystemFont,
-		'Segoe UI',
-		Roboto,
-		'Helvetica Neue',
-		Arial,
-		sans-serif;
+	background: var(--background);
+	font-family: var(--font-text);
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -69,13 +135,10 @@ button:disabled {
 		outline: none;
 	}
 	:focus-visible {
-		outline: 2px solid var(--fg);
+		outline: 2px solid var(--ring);
 		outline-offset: 2px;
 	}
-	/* Text-entry fields never take the global ring: they carry their own
-	focus affordance by convention (border/bg shift on the field or its
-	wrapper), and browsers match :focus-visible on text inputs even for
-	mouse focus. This guards future fields that forget focus:outline-none. */
+	/* Text-entry fields avoid the global outline; their own ring shares its color. */
 	textarea:focus-visible,
 	input:is(
 			[type='text'],
@@ -93,6 +156,7 @@ button:disabled {
 		):focus-visible,
 	input:not([type]):focus-visible {
 		outline-style: none;
+		box-shadow: 0 0 0 2px var(--ring);
 	}
 	@media (prefers-reduced-motion: reduce) {
 		*,
@@ -114,12 +178,12 @@ button:disabled {
 }
 
 :root {
-	--studio-paper: #f5f4ef;
-	--studio-panel: #fffefa;
-	--studio-ink: #253e34;
-	--studio-muted: #606c61;
-	--studio-line: #e0e3d9;
-	--studio-accent: #285d48;
+	--studio-paper: var(--background);
+	--studio-panel: var(--card);
+	--studio-ink: var(--foreground);
+	--studio-muted: var(--muted-foreground);
+	--studio-line: var(--border);
+	--studio-accent: var(--primary);
 }
 body {
 	background: var(--studio-paper);
@@ -136,14 +200,14 @@ body {
 	justify-content: center;
 	gap: 8px;
 	padding: 10px 15px;
-	border-radius: 7px;
+	border-radius: var(--radius-md);
 	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.5;
 }
 .studio-primary {
 	background: var(--studio-accent);
-	color: white;
+	color: var(--primary-foreground);
 }
 .studio-secondary {
 	background: var(--studio-panel);
@@ -155,7 +219,7 @@ body {
 	opacity: 0.55;
 }
 .studio-primary:hover:not(:disabled) {
-	background: #204c3a;
+	background: var(--foreground);
 }
 .studio-link,
 .studio-back {
@@ -185,21 +249,21 @@ body {
 .studio-count {
 	font-size: 11px;
 	border-radius: 4px;
-	background: #e8ebe2;
+	background: var(--secondary);
 	padding: 2px 7px;
 }
 .studio-tabs {
 	display: flex;
 	gap: 2px;
 	border: 1px solid var(--studio-line);
-	background: #eeefe9;
-	border-radius: 8px;
+	background: var(--surface);
+	border-radius: var(--radius-md);
 	padding: 3px;
 	font-size: 12px;
 }
 .studio-tabs button {
 	padding: 6px 13px;
-	border-radius: 5px;
+	border-radius: var(--radius-md);
 }
 .studio-tabs button.active {
 	background: var(--studio-panel);
@@ -216,7 +280,7 @@ body {
 	color: #963d32;
 	background: #fbeae6;
 	padding: 12px 14px;
-	border-radius: 6px;
+	border-radius: var(--radius-md);
 	font-size: 12px;
 	margin-top: 14px;
 }
@@ -224,7 +288,45 @@ body {
 	color: #285d48;
 	background: #e6efdf;
 	padding: 12px 14px;
-	border-radius: 6px;
+	border-radius: var(--radius-md);
 	font-size: 12px;
 	margin-top: 14px;
+}
+
+/* UI chrome follows the library voice; editable text and post copy keep their case. */
+:where(
+	h1,
+	h2,
+	h3,
+	h4,
+	button,
+	nav a,
+	th,
+	[role='tab'],
+	[role='menuitem'],
+	.studio-primary,
+	.studio-secondary,
+	.studio-link,
+	.studio-back,
+	.studio-legal a
+) {
+	text-transform: lowercase;
+}
+:where(h1, h2, h3, h4) {
+	font-family: var(--font-display);
+	letter-spacing: -0.035em;
+}
+@layer utilities {
+	.uppercase:not(.font-mono) {
+		text-transform: lowercase;
+		letter-spacing: normal;
+	}
+	button.rounded-full,
+	a.rounded-full {
+		border-radius: var(--radius-md);
+	}
+	.rounded-\[2rem\],
+	.rounded-\[1\.5rem\] {
+		border-radius: var(--radius-xl);
+	}
 }
