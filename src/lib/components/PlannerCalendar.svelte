@@ -149,8 +149,8 @@
 <style>
 	h1 {
 		font:
-			400 36px/1.2 Georgia,
-			serif;
+			750 36px/1.2 var(--font-display),
+			sans-serif;
 		letter-spacing: -1px;
 		color: var(--studio-ink);
 	}
@@ -203,7 +203,7 @@
 		background: var(--studio-panel);
 		padding: 0;
 		border: 1px solid var(--studio-line);
-		border-radius: 10px;
+		border-radius: var(--radius);
 		overflow: hidden;
 		min-height: 520px;
 	}
