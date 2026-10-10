@@ -88,4 +88,4 @@ approval, provenance, and multi-clip rendering.
 
 ## Work queue
 
-Open work is tracked in [GitHub Issues](https://github.com/sass-maker/mashup/issues).
+Open work is tracked in [GitHub Issues](https://github.com/sass-maker/fleet-social/issues/13).

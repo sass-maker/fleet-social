@@ -133,3 +133,15 @@ web/
 
 No Tailwind, no CDN, no web fonts: the editor has to work on a laptop with the
 network off, because so does the rest of the pipeline.
+
+## Public proof deployment
+
+`mashup.highsignal.app` stays live as the static public proof showcase after consolidation into Fleet Social. Its canonical source is `tools/mashup/web/` in this repository; the former standalone Mashup repository is no longer the deployment source. Rendering and editing remain local.
+
+After Fleet Social's `main` commit passes CI, run the release through `fleet-workspace` from a clean checkout of that same published commit, with the owner's deployment approval. From `tools/mashup/web/`, use the guarded publisher:
+
+```sh
+pnpm deploy /abs/path/to/complete-public-proof-bundle
+```
+
+The publisher builds the site, requires a clean checkout matching published `main`, and checks the complete bundle against the fresh static build and approved media receipts before deploying to Cloudflare Pages project `mashup` on branch `main`. Supply the full proof bundle with its MP4s, captions, receipts and static assets; `web/dist` alone is incomplete. Existing operator bundles remain external data and must not be moved or deleted. CI success is an operator prerequisite, not a check performed by the publisher.
