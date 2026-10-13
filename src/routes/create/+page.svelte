@@ -427,8 +427,8 @@
 	}
 	h1 {
 		font:
-			400 38px/1.2 Georgia,
-			serif;
+			750 38px/1.2 var(--font-display),
+			sans-serif;
 		letter-spacing: -1px;
 		margin: 10px 0;
 	}
@@ -462,8 +462,8 @@
 	}
 	h2 {
 		font:
-			400 25px/1.25 Georgia,
-			serif;
+			750 25px/1.25 var(--font-display),
+			sans-serif;
 		margin-bottom: 13px;
 	}
 	label {
@@ -474,7 +474,7 @@
 	textarea {
 		width: 100%;
 		border: 1px solid var(--studio-line);
-		border-radius: 6px;
+		border-radius: var(--radius);
 		background: var(--studio-panel);
 		padding: 12px;
 		font: inherit;
@@ -514,7 +514,7 @@
 	}
 	.example {
 		border: 1px solid var(--studio-line);
-		border-radius: 9px;
+		border-radius: var(--radius);
 		overflow: hidden;
 		background: var(--studio-panel);
 	}
@@ -529,8 +529,8 @@
 	}
 	.example h3 {
 		font:
-			400 23px/1.25 Georgia,
-			serif;
+			750 23px/1.25 var(--font-display),
+			sans-serif;
 		margin: 10px 0;
 	}
 	.example p {
@@ -625,7 +625,7 @@
 		padding: 23px;
 		border: 1px solid var(--studio-line);
 		background: #eaf0e5;
-		border-radius: 8px;
+		border-radius: var(--radius);
 		margin: 0 0 24px;
 	}
 	.render-progress h2 {

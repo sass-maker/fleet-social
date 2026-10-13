@@ -22,6 +22,14 @@
 				: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(avatarSeed)}`)
 	);
 	let failedAvatarSrc = $state<string | null>(null);
+	function avatarFallback(image: HTMLImageElement) {
+		const source = avatarSrc;
+		const fail = () => (failedAvatarSrc = source);
+		image.addEventListener('error', fail);
+		// A blocked image can fail before hydration; keep the initials without an inline CSP handler.
+		if (image.complete && image.naturalWidth === 0) fail();
+		return () => image.removeEventListener('error', fail);
+	}
 	const initials = $derived(
 		avatarSeed.split(/[\s._-]+/).filter(Boolean).length >= 2
 			? avatarSeed
@@ -168,7 +176,7 @@
 									alt=""
 									aria-hidden="true"
 									referrerpolicy="no-referrer"
-									onerror={() => (failedAvatarSrc = avatarSrc)}
+									{@attach avatarFallback}
 								/>{/if}</button
 						>
 						{#if showProfileDropdown}<div
@@ -238,8 +246,8 @@
 		align-items: center;
 		gap: 11px;
 		font:
-			600 22px Georgia,
-			serif;
+			750 22px var(--font-display),
+			sans-serif;
 		letter-spacing: -0.7px;
 		color: var(--studio-ink);
 	}
@@ -250,7 +258,7 @@
 		height: 32px;
 		background: var(--studio-accent);
 		color: white;
-		border-radius: 8px;
+		border-radius: var(--radius);
 		font-size: 19px;
 	}
 	.studio-header-actions {
@@ -264,7 +272,7 @@
 		width: 30px;
 		height: 30px;
 		border-radius: 50%;
-		background: #e8ebe2;
+		background: var(--secondary);
 		font-size: 10px;
 		font-weight: 650;
 	}
@@ -321,7 +329,7 @@
 		border: 1px solid var(--studio-line);
 		box-shadow: 0 12px 30px #253e3412;
 		padding: 7px;
-		border-radius: 9px;
+		border-radius: var(--radius);
 		min-width: 185px;
 		font-size: 12px;
 	}
@@ -336,7 +344,7 @@
 	}
 	.studio-menu a:hover,
 	.studio-menu button:hover {
-		background: #e9eee5;
+		background: var(--surface);
 	}
 	.studio-menu p {
 		padding: 10px 12px;
@@ -359,7 +367,7 @@
 		justify-content: space-between;
 		gap: 16px;
 		background: #f1ead8;
-		border-radius: 6px;
+		border-radius: var(--radius);
 		padding: 10px 13px;
 		font-size: 11px;
 		color: #695329;

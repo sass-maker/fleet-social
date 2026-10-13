@@ -129,7 +129,7 @@
 		<span class="studio-status" class:approved={data.approved}
 			>{data.approved ? '✓ Approved revision' : '● Awaiting approval'}</span
 		>
-		<h2>{data.draft.title || 'Untitled post'}</h2>
+		<h2 class="post-title">{data.draft.title || 'Untitled post'}</h2>
 		<section>
 			<h3>Caption</h3>
 			<p class="caption">{caption || 'No caption yet.'}</p>
@@ -255,6 +255,9 @@
 </div>
 
 <style>
+	.post-title {
+		text-transform: none;
+	}
 	.source-credits {
 		margin-top: 16px;
 		font-size: 12px;
@@ -271,8 +274,8 @@
 	}
 	h1 {
 		font:
-			400 38px/1.2 Georgia,
-			serif;
+			750 38px/1.2 var(--font-display),
+			sans-serif;
 		letter-spacing: -1px;
 	}
 	.review-heading p {
@@ -290,7 +293,7 @@
 		aspect-ratio: 9/16;
 		object-fit: contain;
 		background: #121414;
-		border-radius: 9px;
+		border-radius: var(--radius);
 	}
 	.media-caption {
 		color: var(--studio-muted);
@@ -302,8 +305,8 @@
 	}
 	h2 {
 		font:
-			400 32px/1.2 Georgia,
-			serif;
+			750 32px/1.2 var(--font-display),
+			sans-serif;
 		letter-spacing: -0.6px;
 		margin: 14px 0 18px;
 		max-width: 600px;
@@ -360,7 +363,7 @@
 	.release-panel {
 		background: var(--studio-panel);
 		border: 1px solid var(--studio-line);
-		border-radius: 9px;
+		border-radius: var(--radius);
 		padding: 19px;
 		margin-top: 20px;
 		display: grid;
@@ -372,7 +375,7 @@
 	input {
 		border: 1px solid var(--studio-line);
 		padding: 10px;
-		border-radius: 6px;
+		border-radius: var(--radius);
 		background: white;
 	}
 	.release-panel button {
