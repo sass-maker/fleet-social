@@ -905,7 +905,7 @@
 					aria-label="Search posts"
 					bind:this={searchInput}
 					bind:value={query}
-					class="w-full rounded-full border border-stone-200/80 bg-white py-2 pr-9 pl-10 text-[13px] font-bold text-stone-900 shadow-sm transition-all placeholder:font-medium placeholder:text-stone-500 focus:border-stone-300 focus:ring-2 focus:ring-stone-200 focus:outline-none sm:w-48"
+					class="w-full rounded-full border border-stone-200/80 bg-white py-2 pr-9 pl-10 text-[13px] font-bold text-stone-900 shadow-sm transition-all placeholder:font-medium placeholder:text-stone-500 focus:border-stone-300 focus:ring-2 focus:ring-ring focus:outline-none sm:w-48"
 				/>
 				{#if query}
 					<button
@@ -1357,7 +1357,7 @@
 						{#if card.kind === 'draft'}
 							<a
 								href="/compose?id={card.draftId}"
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 lowercase transition-colors hover:text-stone-900"
 							>
 								Edit Post
 							</a>
@@ -1379,7 +1379,7 @@
 						{:else if (badge === 'scheduled' || badge === 'retrying') && card.targetId}
 							<a
 								href="/compose?id={card.draftId}"
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 lowercase transition-colors hover:text-stone-900"
 							>
 								Edit Post
 							</a>

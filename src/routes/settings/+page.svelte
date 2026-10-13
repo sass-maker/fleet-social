@@ -782,7 +782,7 @@
 								placeholder="Your name"
 								maxlength="80"
 								autocomplete="name"
-								class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 shadow-sm transition-all focus:border-stone-900 focus:bg-white focus:ring-2 focus:ring-stone-900 focus:outline-none disabled:opacity-50"
+								class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 shadow-sm transition-all focus:border-stone-900 focus:bg-white focus:ring-2 focus:ring-ring focus:outline-none disabled:opacity-50"
 							/>
 						</div>
 						<div>
@@ -1582,7 +1582,7 @@
 						e.preventDefault();
 						savePicture();
 					}}
-					class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 shadow-sm transition-all focus:border-stone-900 focus:bg-white focus:ring-2 focus:ring-stone-900 focus:outline-none"
+					class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 shadow-sm transition-all focus:border-stone-900 focus:bg-white focus:ring-2 focus:ring-ring focus:outline-none"
 				/>
 			</label>
 			{#if pictureMessage}

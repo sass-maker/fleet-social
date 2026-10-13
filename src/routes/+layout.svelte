@@ -22,6 +22,14 @@
 				: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(avatarSeed)}`)
 	);
 	let failedAvatarSrc = $state<string | null>(null);
+	function avatarFallback(image: HTMLImageElement) {
+		const source = avatarSrc;
+		const fail = () => (failedAvatarSrc = source);
+		image.addEventListener('error', fail);
+		// A blocked image can fail before hydration; keep the initials without an inline CSP handler.
+		if (image.complete && image.naturalWidth === 0) fail();
+		return () => image.removeEventListener('error', fail);
+	}
 	const initials = $derived(
 		avatarSeed.split(/[\s._-]+/).filter(Boolean).length >= 2
 			? avatarSeed
@@ -168,7 +176,7 @@
 									alt=""
 									aria-hidden="true"
 									referrerpolicy="no-referrer"
-									onerror={() => (failedAvatarSrc = avatarSrc)}
+									{@attach avatarFallback}
 								/>{/if}</button
 						>
 						{#if showProfileDropdown}<div
