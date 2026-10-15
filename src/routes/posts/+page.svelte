@@ -944,7 +944,7 @@
 						loadFailed = false;
 					}}
 					aria-label="Dismiss error"
-					class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-100 hover:text-red-700"
+					class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-red-700 transition-colors hover:bg-red-100"
 				>
 					<X class="h-3.5 w-3.5" />
 				</button>
@@ -1264,7 +1264,7 @@
 												type="button"
 												disabled={busyTarget === platform.targetId || busy === card.key}
 												onclick={() => discardOne(card, platform)}
-												class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-500 underline-offset-2 transition-colors hover:text-red-700 hover:underline disabled:opacity-50"
+												class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-700 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 											>
 												Discard
 											</button>
@@ -1284,7 +1284,7 @@
 											type="button"
 											disabled={busyTarget === platform.targetId || busy === card.key}
 											onclick={() => discardOne(card, platform)}
-											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-500 underline-offset-2 transition-colors hover:text-red-700 hover:underline disabled:opacity-50"
+											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-700 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 										>
 											Discard
 										</button>
@@ -1320,7 +1320,7 @@
 											type="button"
 											disabled={busyTarget === platform.targetId || busy === card.key}
 											onclick={() => discardOne(card, platform)}
-											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-500 underline-offset-2 transition-colors hover:text-red-700 hover:underline disabled:opacity-50"
+											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-700 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 										>
 											Discard
 										</button>
@@ -1372,7 +1372,7 @@
 							<button
 								type="button"
 								onclick={() => (pendingRemove = drafts.find((d) => d.id === card.draftId) ?? null)}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-500 transition-colors hover:text-red-700"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-600 transition-colors hover:text-red-700"
 							>
 								Remove
 							</button>
@@ -1427,7 +1427,7 @@
 										label: draftExcerpt(card.body, 60) || 'post',
 										cardKey: card.key
 									})}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-500 transition-colors hover:text-red-700"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-red-600 transition-colors hover:text-red-700"
 							>
 								{busy === card.key ? 'Cancelling…' : 'Cancel'}
 							</button>

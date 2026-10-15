@@ -2800,7 +2800,7 @@
 								<div
 									data-testid="segment-count-{index}"
 									class="rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wider transition-colors {isOver
-										? 'border border-red-100 bg-red-50 text-red-600'
+										? 'border border-red-100 bg-red-50 text-red-700'
 										: 'border border-stone-100 bg-stone-50 text-stone-500'}"
 								>
 									{segLen}/{maxChars}
@@ -2909,7 +2909,7 @@
 												platformName(account.platform)}
 										</span>
 										{#if needsReconnect}
-											<span class="shrink-0 text-[11px] font-bold text-red-500"
+											<span class="shrink-0 text-[11px] font-bold text-red-600"
 												>needs reconnect</span
 											>
 										{/if}
@@ -3103,7 +3103,7 @@
 												— retrying automatically
 											</span>
 										{:else}
-											<X class="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500" />
+											<X class="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" />
 											<span class="min-w-0 flex-1 text-[11px] font-medium break-words text-red-600">
 												{destinationName(dest.connectionId)}: {dest.error || 'Publish failed'}
 											</span>

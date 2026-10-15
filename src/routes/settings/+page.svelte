@@ -1070,7 +1070,7 @@
 						type="button"
 						onclick={() => (keyConfirm = 'revoke')}
 						disabled={keyBusy}
-						class="rounded-full bg-red-50 px-6 py-2.5 text-[13px] font-bold text-red-600 transition-all hover:bg-red-100 disabled:opacity-50"
+						class="rounded-full bg-red-50 px-6 py-2.5 text-[13px] font-bold text-red-700 transition-all hover:bg-red-100 disabled:opacity-50"
 					>
 						Revoke
 					</button>
@@ -1358,7 +1358,7 @@
 							type="button"
 							onclick={() => (tickConfirm = 'revoke')}
 							disabled={tickTokenBusy}
-							class="rounded-full bg-red-50 px-6 py-2.5 text-[13px] font-bold text-red-600 transition-all hover:bg-red-100 disabled:opacity-50"
+							class="rounded-full bg-red-50 px-6 py-2.5 text-[13px] font-bold text-red-700 transition-all hover:bg-red-100 disabled:opacity-50"
 						>
 							Revoke
 						</button>
