@@ -53,7 +53,7 @@
 				data-testid="brand-mark"
 				class="mx-auto mb-4 h-12 w-12 rounded-xl shadow-md"
 			/>
-			<h1 class="text-2xl font-extrabold tracking-tight text-stone-900">{data.appName}</h1>
+			<h1 class="text-2xl font-extrabold tracking-tight text-foreground">{data.appName}</h1>
 			<p class="mt-1 text-sm font-medium text-stone-500">Write once. Post everywhere.</p>
 		</div>
 		{#if data.notConfigured}
@@ -63,12 +63,12 @@
 					It cannot be created from a browser. Run this from the machine that deploys it:
 				</p>
 				<pre
-					class="mt-3 overflow-x-auto rounded-xl bg-white/70 px-3 py-2 text-xs font-bold text-stone-800">npm run setup</pre>
+					class="mt-3 overflow-x-auto rounded-xl bg-card/70 px-3 py-2 text-xs font-bold text-foreground">npm run setup</pre>
 			</div>
 		{:else}
 			<form
 				onsubmit={onSubmit}
-				class="space-y-4 rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
+				class="space-y-4 rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
 			>
 				<label class="block text-sm">
 					<span class="text-[11px] font-bold tracking-widest text-stone-500 uppercase">Email</span>
@@ -77,7 +77,7 @@
 						autocomplete="username"
 						placeholder="you@example.com"
 						bind:value={email}
-						class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-sm font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+						class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-sm font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 						required
 					/>
 				</label>
@@ -89,7 +89,7 @@
 						type="password"
 						autocomplete="current-password"
 						bind:value={password}
-						class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-sm font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+						class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-sm font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 						required
 					/>
 				</label>

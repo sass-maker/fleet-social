@@ -24,7 +24,7 @@ The owner writes or reviews posts in a browser. Fleet product workflows may send
 
 ## Capabilities and Constraints
 
-CogSend is the starting codebase. Preserve its SvelteKit on Cloudflare Workers, D1, R2, single-admin authentication, current provider adapters, and existing visual language for the initial release. Additional providers, direct video publishing, external customers, and multi-user roles are outside the approved first scope. Social credentials and Cloudflare secrets remain outside the repository.
+CogSend is the starting codebase. Preserve its SvelteKit on Cloudflare Workers, D1, R2, single-admin authentication, current provider adapters, and calendar-first editorial hierarchy. The approved Nocturne dark direction governs its visual system. Additional providers, direct video publishing, external customers, and multi-user roles are outside the approved first scope. Social credentials and Cloudflare secrets remain outside the repository.
 
 ## Evidence on Hand
 

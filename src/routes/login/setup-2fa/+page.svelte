@@ -72,11 +72,11 @@
 			<p class="text-center text-sm text-stone-500">Preparing your codes…</p>
 		{:else}
 			<div
-				class="space-y-5 rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
+				class="space-y-5 rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
 			>
 				<div class="flex justify-center">
 					<!-- QR is generated on the server from the otpauth URI -->
-					<div class="rounded-xl border border-stone-200/80 bg-white p-3">
+					<div class="rounded-xl border border-stone-200/80 bg-card p-3">
 						<div
 							class="h-48 w-48 [&>svg]:h-full [&>svg]:w-full"
 							role="img"
@@ -130,7 +130,7 @@
 							autocomplete="one-time-code"
 							bind:value={code}
 							placeholder="123456"
-							class="mt-1 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2 text-center text-lg tracking-[0.3em] focus:border-stone-400 focus:bg-white focus:outline-none"
+							class="mt-1 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2 text-center text-lg tracking-[0.3em] focus:border-stone-400 focus:bg-card focus:outline-none"
 							required
 						/>
 					</label>

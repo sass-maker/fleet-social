@@ -191,14 +191,15 @@
 		margin-right: 5px;
 	}
 	.scheduled-dot {
-		background: #42765b;
+		background: #8bc5a4;
 	}
 	.published-dot {
-		background: #5472a1;
+		background: #93b7db;
 	}
 	.calendar-frame {
 		--fc-border-color: var(--studio-line);
-		--fc-today-bg-color: #eef3e9;
+		--fc-page-bg-color: var(--studio-panel);
+		--fc-today-bg-color: #302b22;
 		--fc-event-text-color: var(--studio-ink);
 		background: var(--studio-panel);
 		padding: 0;
@@ -209,8 +210,9 @@
 	}
 	.calendar-frame :global(.fc) {
 		--fc-border-color: var(--studio-line);
-		--fc-today-bg-color: #eef3e9;
-		--fc-neutral-bg-color: #f0f1ea;
+		--fc-page-bg-color: var(--studio-panel);
+		--fc-today-bg-color: #302b22;
+		--fc-neutral-bg-color: #25231f;
 		--fc-small-font-size: 11px;
 		color: var(--studio-ink);
 		font-size: 12px;
@@ -235,9 +237,9 @@
 		font-size: 11px;
 	}
 	.calendar-frame :global(.planner-event) {
-		background: #e6efe8;
+		background: #234138;
 		border: 0;
-		border-left: 2px solid #42765b;
+		border-left: 2px solid #8bc5a4;
 		border-radius: 4px;
 		color: var(--studio-ink);
 		padding: 6px;
@@ -280,13 +282,16 @@
 		margin-top: 4px;
 	}
 	.calendar-frame :global(.state-published) {
-		background: #e8eef6;
-		border-color: #5472a1;
+		background: var(--status-published-bg);
+		border-color: #93b7db;
 	}
-	.calendar-frame :global(.state-failed),
+	.calendar-frame :global(.state-failed) {
+		background: var(--status-error-bg);
+		border-color: #e2958c;
+	}
 	.calendar-frame :global(.state-uncertain) {
-		background: #f9e8e3;
-		border-color: #a43f35;
+		background: var(--status-uncertain-bg);
+		border-color: #b9a5e2;
 	}
 	.calendar-frame :global(.fc-event:focus-visible) {
 		outline: 2px solid var(--studio-accent);

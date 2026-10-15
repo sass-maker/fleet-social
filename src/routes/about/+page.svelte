@@ -6,7 +6,7 @@
 	/>
 </svelte:head>
 
-<main id="main-content" class="mx-auto min-h-dvh max-w-3xl px-5 py-12 text-stone-900 sm:py-20">
+<main id="main-content" class="mx-auto min-h-dvh max-w-3xl px-5 py-12 text-foreground sm:py-20">
 	<p class="text-xs font-bold tracking-widest text-stone-500 uppercase">Fleet Social</p>
 	<h1 class="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">
 		Review before it goes live.
@@ -32,7 +32,7 @@
 		aria-label="Legal"
 		class="mt-14 flex gap-5 border-t border-stone-200 pt-6 text-sm font-medium text-stone-600"
 	>
-		<a class="underline hover:text-stone-900" href="/privacy">Privacy</a>
-		<a class="underline hover:text-stone-900" href="/terms">Terms</a>
+		<a class="underline hover:text-foreground" href="/privacy">Privacy</a>
+		<a class="underline hover:text-foreground" href="/terms">Terms</a>
 	</nav>
 </main>

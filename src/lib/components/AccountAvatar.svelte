@@ -61,7 +61,7 @@
 	{title}
 >
 	<span
-		class="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 text-[11px] font-semibold text-[var(--fg)]"
+		class="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-stone-200 to-stone-300 text-[11px] font-semibold text-[var(--fg)]"
 		aria-hidden="true"
 	>
 		{initials(handle, displayName)}

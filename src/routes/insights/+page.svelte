@@ -248,7 +248,7 @@
 	<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
 		<div class="flex flex-col gap-2">
 			<p class="text-[11px] font-bold tracking-widest text-stone-500 uppercase">Analytics</p>
-			<h1 class="text-3xl font-extrabold tracking-tight text-stone-900">Insights</h1>
+			<h1 class="text-3xl font-extrabold tracking-tight text-foreground">Insights</h1>
 			<p class="text-[13px] font-medium text-stone-500">
 				{#if stats}
 					Delivery stats for the last {rangeWords(stats.range.days)}, compared with the previous
@@ -265,8 +265,8 @@
 					aria-pressed={range === value}
 					onclick={() => pickRange(value)}
 					class="rounded-xl px-3.5 py-1.5 text-[13px] font-bold transition-colors {range === value
-						? 'bg-white text-stone-900 shadow-sm'
-						: 'text-stone-500 hover:text-stone-900'}"
+						? 'bg-card text-foreground shadow-sm'
+						: 'text-stone-500 hover:text-foreground'}"
 				>
 					{value} days
 				</button>
@@ -296,7 +296,7 @@
 					type="button"
 					onclick={() => (error = null)}
 					aria-label="Dismiss error"
-					class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-100 hover:text-red-700"
+					class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-red-700 transition-colors hover:bg-red-100"
 				>
 					<X class="h-3.5 w-3.5" />
 				</button>
@@ -309,7 +309,7 @@
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-hidden="true">
 			{#each [0, 1, 2] as i (i)}
 				<div
-					class="animate-pulse rounded-[1.5rem] border border-stone-200/80 bg-white p-4 {i === 2
+					class="animate-pulse rounded-[1.5rem] border border-stone-200/80 bg-card p-4 {i === 2
 						? 'col-span-2 sm:col-span-1'
 						: ''}"
 				>
@@ -319,7 +319,7 @@
 			{/each}
 		</div>
 		<div
-			class="mt-5 animate-pulse rounded-[2rem] border border-stone-200/80 bg-white p-5"
+			class="mt-5 animate-pulse rounded-[2rem] border border-stone-200/80 bg-card p-5"
 			aria-hidden="true"
 		>
 			<div class="h-4 w-32 rounded bg-stone-100"></div>
@@ -327,22 +327,22 @@
 		</div>
 	{:else if stats && !hasActivity}
 		<div
-			class="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-stone-200/80 bg-white px-4 py-20 text-center"
+			class="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-stone-200/80 bg-card px-4 py-20 text-center"
 		>
 			<div
 				class="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-stone-100 bg-stone-50 text-stone-500 shadow-sm"
 			>
 				<ChartColumn class="h-6 w-6" />
 			</div>
-			<h3 class="mb-2 text-lg font-extrabold tracking-tight text-stone-900">No data yet</h3>
+			<h3 class="mb-2 text-lg font-extrabold tracking-tight text-foreground">No data yet</h3>
 			<p class="max-w-sm text-[13px] leading-relaxed font-medium text-stone-500">
 				Publish a few posts and their delivery stats will show up here.
 			</p>
 		</div>
 	{:else if stats}
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-3" data-testid="insights-stats">
-			<div class="rounded-[1.5rem] border border-stone-200/80 bg-white p-4 shadow-sm">
-				<p class="text-2xl font-extrabold tracking-tight text-stone-900">
+			<div class="rounded-[1.5rem] border border-stone-200/80 bg-card p-4 shadow-sm">
+				<p class="text-2xl font-extrabold tracking-tight text-foreground">
 					{stats.totals.published}
 				</p>
 				<p class="mt-1 text-[11px] font-bold tracking-widest text-stone-500 uppercase">Published</p>
@@ -350,8 +350,8 @@
 					{countDelta(stats.totals.published, stats.previous.published)}
 				</p>
 			</div>
-			<div class="rounded-[1.5rem] border border-stone-200/80 bg-white p-4 shadow-sm">
-				<p class="text-2xl font-extrabold tracking-tight text-stone-900">
+			<div class="rounded-[1.5rem] border border-stone-200/80 bg-card p-4 shadow-sm">
+				<p class="text-2xl font-extrabold tracking-tight text-foreground">
 					{stats.totals.scheduled}
 				</p>
 				<p class="mt-1 text-[11px] font-bold tracking-widest text-stone-500 uppercase">Scheduled</p>
@@ -364,9 +364,9 @@
 				</p>
 			</div>
 			<div
-				class="col-span-2 rounded-[1.5rem] border border-stone-200/80 bg-white p-4 shadow-sm sm:col-span-1"
+				class="col-span-2 rounded-[1.5rem] border border-stone-200/80 bg-card p-4 shadow-sm sm:col-span-1"
 			>
-				<p class="text-xl font-extrabold tracking-tight text-stone-900 sm:text-2xl">
+				<p class="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
 					{latestPost.text}
 				</p>
 				<p class="mt-1 text-[11px] font-bold tracking-widest text-stone-500 uppercase">Last post</p>
@@ -377,7 +377,7 @@
 		</div>
 
 		<div class="mt-7 mb-2.5 flex flex-wrap items-center justify-between gap-3">
-			<h2 class="text-[15px] font-extrabold tracking-tight text-stone-900">
+			<h2 class="text-[15px] font-extrabold tracking-tight text-foreground">
 				{style === 'cum'
 					? 'Published, cumulative'
 					: stats.range.bucket === 'week'
@@ -398,8 +398,8 @@
 						aria-pressed={style === 'cum'}
 						onclick={() => (style = 'cum')}
 						class="rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors {style === 'cum'
-							? 'bg-white text-stone-900 shadow-sm'
-							: 'text-stone-500 hover:text-stone-900'}"
+							? 'bg-card text-foreground shadow-sm'
+							: 'text-stone-500 hover:text-foreground'}"
 					>
 						Cumulative
 					</button>
@@ -408,8 +408,8 @@
 						aria-pressed={style === 'bars'}
 						onclick={() => (style = 'bars')}
 						class="rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors {style === 'bars'
-							? 'bg-white text-stone-900 shadow-sm'
-							: 'text-stone-500 hover:text-stone-900'}"
+							? 'bg-card text-foreground shadow-sm'
+							: 'text-stone-500 hover:text-foreground'}"
 					>
 						Bars
 					</button>
@@ -418,7 +418,7 @@
 		</div>
 
 		<div
-			class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
+			class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-card shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
 			data-testid="insights-chart"
 		>
 			<div class="p-4 pb-3.5 sm:p-5">
@@ -474,8 +474,8 @@
 						>
 							<defs>
 								<linearGradient id="insights-area" x1="0" y1="0" x2="0" y2="1">
-									<stop offset="0%" stop-color="#1c1917" stop-opacity="0.13"></stop>
-									<stop offset="100%" stop-color="#1c1917" stop-opacity="0"></stop>
+									<stop offset="0%" stop-color="#d3a75d" stop-opacity="0.13"></stop>
+									<stop offset="100%" stop-color="#d3a75d" stop-opacity="0"></stop>
 								</linearGradient>
 							</defs>
 							<line
@@ -483,7 +483,7 @@
 								y1={CHART_H - CHART_BOTTOM}
 								x2={CHART_W}
 								y2={CHART_H - CHART_BOTTOM}
-								stroke="#e7e5e4"
+								stroke="#393630"
 								stroke-width="1"
 								vector-effect="non-scaling-stroke"
 							></line>
@@ -491,7 +491,7 @@
 							<path
 								d={previousLine}
 								fill="none"
-								stroke="#78716c"
+								stroke="#b8b0a2"
 								stroke-width="2"
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -500,7 +500,7 @@
 							<path
 								d={currentLine}
 								fill="none"
-								stroke="#1c1917"
+								stroke="#d3a75d"
 								stroke-width="2.5"
 								stroke-linecap="round"
 								stroke-linejoin="round"
@@ -542,7 +542,7 @@
 			{#if stats.totals.failed === 0}
 				<span class="text-stone-500">No failures in this period.</span>
 			{:else}
-				<strong class="text-[13px] font-extrabold text-stone-900"
+				<strong class="text-[13px] font-extrabold text-foreground"
 					>{stats.totals.failed} failed</strong
 				>
 				<span class="text-stone-500"
@@ -550,7 +550,7 @@
 				>
 				<a
 					href="/posts?tab=failed"
-					class="text-[12px] font-extrabold whitespace-nowrap text-stone-900 hover:underline"
+					class="text-[12px] font-extrabold whitespace-nowrap text-foreground hover:underline"
 				>
 					Review in Posts →
 				</a>
@@ -558,14 +558,14 @@
 		</p>
 
 		<div class="mt-7 mb-2.5 flex items-center justify-between gap-3">
-			<h2 class="text-[15px] font-extrabold tracking-tight text-stone-900">Accounts</h2>
+			<h2 class="text-[15px] font-extrabold tracking-tight text-foreground">Accounts</h2>
 			<p class="text-[12px] font-semibold text-stone-500">
 				{stats.range.days === 90 ? '13 weeks' : `${stats.range.days} days`} · {accounts.length}
 				{accounts.length === 1 ? 'account' : 'accounts'}
 			</p>
 		</div>
 		<div
-			class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
+			class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-card shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
 			data-testid="insights-accounts"
 		>
 			{#each accounts as account, index (account.connectionId)}
@@ -586,7 +586,7 @@
 						/>
 						<div class="min-w-0">
 							<h3
-								class="truncate text-[14.5px] leading-tight font-extrabold tracking-tight text-stone-900"
+								class="truncate text-[14.5px] leading-tight font-extrabold tracking-tight text-foreground"
 							>
 								{platformName(account.platform)}
 								{#if !account.connected}
@@ -605,7 +605,7 @@
 						class="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end sm:gap-6"
 					>
 						<div class="text-right">
-							<p class="text-[15px] font-extrabold text-stone-900">
+							<p class="text-[15px] font-extrabold text-foreground">
 								{account.published}
 							</p>
 							<p class="mt-0.5 text-[10px] font-bold tracking-widest text-stone-500 uppercase">
@@ -613,7 +613,7 @@
 							</p>
 						</div>
 						<div class="min-w-14 text-right">
-							<p class="text-[15px] font-extrabold text-stone-900">
+							<p class="text-[15px] font-extrabold text-foreground">
 								{lastPost(account)}
 							</p>
 							<p class="mt-0.5 text-[10px] font-bold tracking-widest text-stone-500 uppercase">

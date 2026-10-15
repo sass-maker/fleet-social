@@ -36,20 +36,31 @@
 }
 
 :root {
-	color-scheme: light;
-	--background: oklch(0.993 0 0);
-	--foreground: oklch(0.17 0.005 270);
-	--surface: oklch(0.975 0.002 270);
-	--card: oklch(1 0 0);
-	--primary: oklch(0.2 0.005 270);
-	--primary-foreground: oklch(0.99 0 0);
-	--secondary: oklch(0.96 0.002 270);
-	--muted-foreground: oklch(0.47 0.008 270);
-	--border: oklch(0.91 0.003 270);
-	--input: oklch(0.89 0.004 270);
-	--brand: oklch(0.55 0.2 264);
-	--brand-soft: oklch(0.95 0.03 264);
-	--ring: var(--brand);
+	color-scheme: dark;
+	--background: #12110f;
+	--foreground: #f6f1e6;
+	--surface: #1c1b18;
+	--card: #24221e;
+	--primary: #d3a75d;
+	--primary-foreground: #17130e;
+	--secondary: #302d27;
+	--muted-foreground: #b8b0a2;
+	--border: #393630;
+	--input: #625b50;
+	--brand: #d3a75d;
+	--brand-soft: #493924;
+	--ring: #e8c486;
+	--status-review-bg: #493924;
+	--status-review-fg: #f0ca8c;
+	--status-approved-bg: #1e3b32;
+	--status-approved-fg: #c0e4cc;
+	--status-error-bg: #472b28;
+	--status-error-fg: #ffd0c7;
+	--status-uncertain-bg: #393149;
+	--status-uncertain-fg: #ddd0f5;
+	--status-uncertain-border: #766395;
+	--status-published-bg: #26394c;
+	--status-published-fg: #c7ddf5;
 	--radius: 0.75rem;
 	--font-text: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
 	--font-display: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
@@ -70,17 +81,43 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
-	/* Existing stone utilities share semantic roles without changing status colors. */
-	--color-stone-50: var(--background);
-	--color-stone-100: var(--surface);
+	/* Stone utilities remain composable on the dark operator surfaces. */
+	--color-stone-50: var(--surface);
+	--color-stone-100: var(--secondary);
 	--color-stone-200: var(--border);
 	--color-stone-300: var(--input);
-	--color-stone-400: var(--muted-foreground);
+	--color-stone-400: #9f978a;
 	--color-stone-500: var(--muted-foreground);
-	--color-stone-600: var(--muted-foreground);
-	--color-stone-700: var(--foreground);
-	--color-stone-800: var(--primary);
-	--color-stone-900: var(--primary);
+	--color-stone-600: #c9c0b2;
+	--color-stone-700: #e2dccc;
+	--color-stone-800: #705838;
+	--color-stone-900: #5b4830;
+	--color-amber-50: var(--status-review-bg);
+	--color-amber-100: #584329;
+	--color-amber-200: #785a34;
+	--color-amber-300: #9c7740;
+	--color-amber-400: #c09551;
+	--color-amber-500: #ad7c39;
+	--color-amber-600: #e1b16a;
+	--color-amber-700: #edc78d;
+	--color-amber-800: #f3d4a4;
+	--color-amber-900: var(--status-review-fg);
+	--color-red-50: var(--status-error-bg);
+	--color-red-100: #5b302c;
+	--color-red-200: #814943;
+	--color-red-500: #b85249;
+	--color-red-600: #d7776b;
+	--color-red-700: #f0afa4;
+	--color-emerald-50: var(--status-approved-bg);
+	--color-emerald-100: #2a493a;
+	--color-emerald-200: #3d674e;
+	--color-emerald-500: #378064;
+	--color-emerald-600: #8cc8a2;
+	--color-emerald-700: #b4dfc1;
+	--color-emerald-800: #c8e9d0;
+	--color-emerald-900: var(--status-approved-fg);
+	--color-sky-50: var(--status-published-bg);
+	--color-sky-700: var(--status-published-fg);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -219,7 +256,7 @@ body {
 	opacity: 0.55;
 }
 .studio-primary:hover:not(:disabled) {
-	background: var(--foreground);
+	background: #e0b977;
 }
 .studio-link,
 .studio-back {
@@ -236,15 +273,15 @@ body {
 	display: inline-block;
 	font-size: 10px;
 	line-height: 1.5;
-	color: #755624;
-	background: #f4ebd7;
+	color: var(--status-review-fg);
+	background: var(--status-review-bg);
 	border-radius: 4px;
 	padding: 3px 6px;
 	font-weight: 600;
 }
 .studio-status.approved {
-	color: #285d48;
-	background: #e2eddf;
+	color: var(--status-approved-fg);
+	background: var(--status-approved-bg);
 }
 .studio-count {
 	font-size: 11px;
@@ -277,16 +314,16 @@ body {
 	font-size: 12px;
 }
 .studio-error {
-	color: #963d32;
-	background: #fbeae6;
+	color: var(--status-error-fg);
+	background: var(--status-error-bg);
 	padding: 12px 14px;
 	border-radius: var(--radius-md);
 	font-size: 12px;
 	margin-top: 14px;
 }
 .studio-notice {
-	color: #285d48;
-	background: #e6efdf;
+	color: var(--status-approved-fg);
+	background: var(--status-approved-bg);
 	padding: 12px 14px;
 	border-radius: var(--radius-md);
 	font-size: 12px;
