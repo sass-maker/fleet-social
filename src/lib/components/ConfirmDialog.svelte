@@ -35,7 +35,7 @@
 	let cancelBtn: HTMLButtonElement | null = $state(null);
 	const confirmClass = $derived(
 		tone === 'danger'
-			? 'bg-red-600 text-white hover:bg-red-700'
+			? 'bg-[#963f36] text-white hover:bg-[#ad5046]'
 			: 'bg-stone-900 text-white hover:bg-stone-800'
 	);
 </script>
@@ -53,7 +53,7 @@
 			aria-modal="true"
 			aria-labelledby={titleId}
 			aria-describedby={body ? bodyId : undefined}
-			class="max-h-[85dvh] w-full max-w-sm overflow-y-auto rounded-[1.5rem] border border-stone-200/80 bg-white/95 p-5 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
+			class="max-h-[85dvh] w-full max-w-sm overflow-y-auto rounded-[1.5rem] border border-stone-200/80 bg-card/95 p-5 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
 			use:dialogFocus={{
 				onEscape: onCancel,
 				// A danger confirm must not have Enter land on the destructive
@@ -79,7 +79,7 @@
 					onclick={onCancel}
 					disabled={busy}
 					data-testid="confirm-dialog-cancel"
-					class="rounded-full border border-stone-200 px-4 py-1.5 text-sm font-bold text-stone-500 transition-colors hover:border-stone-300 hover:text-stone-900 disabled:opacity-50"
+					class="rounded-full border border-stone-200 px-4 py-1.5 text-sm font-bold text-stone-500 transition-colors hover:border-stone-300 hover:text-foreground disabled:opacity-50"
 				>
 					{cancelLabel}
 				</button>

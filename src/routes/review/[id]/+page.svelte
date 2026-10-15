@@ -343,7 +343,7 @@
 		height: 17px;
 		border-radius: 4px;
 		background: var(--studio-accent);
-		color: white;
+		color: var(--primary-foreground);
 	}
 	.destination p {
 		font-size: 11px;
@@ -376,7 +376,8 @@
 		border: 1px solid var(--studio-line);
 		padding: 10px;
 		border-radius: var(--radius);
-		background: white;
+		background: var(--studio-panel);
+		color: var(--studio-ink);
 	}
 	.release-panel button {
 		justify-self: start;
@@ -398,7 +399,8 @@
 	.text-preview {
 		padding: 25px;
 		border: 1px solid var(--studio-line);
-		background: white;
+		background: var(--studio-panel);
+		color: var(--studio-ink);
 		white-space: pre-wrap;
 	}
 	@media (max-width: 700px) {

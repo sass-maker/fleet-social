@@ -97,7 +97,7 @@
 		</div>
 	{:else if preview}
 		<div
-			class="mt-3 overflow-hidden rounded-xl border border-stone-200/80 bg-white"
+			class="mt-3 overflow-hidden rounded-xl border border-stone-200/80 bg-card"
 			data-testid="link-preview"
 		>
 			{#if preview.image}
@@ -120,7 +120,7 @@
 						</div>
 					{/if}
 					{#if preview.title}
-						<div class="truncate text-[13px] font-bold text-stone-900">{preview.title}</div>
+						<div class="truncate text-[13px] font-bold text-foreground">{preview.title}</div>
 					{/if}
 					{#if preview.description}
 						<div class="mt-0.5 line-clamp-2 text-[12px] font-medium text-stone-500">

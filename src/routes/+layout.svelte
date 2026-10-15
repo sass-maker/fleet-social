@@ -107,12 +107,14 @@
 		<script
 			src="https://sassmaker.com/project-strip.js"
 			data-project={data.studioProjectId}
+			data-theme="dark"
 			defer
 		></script>
 		<script
 			src="https://sassmaker.com/ai-chat-footer.js"
 			data-name={data.appName}
 			data-capture="false"
+			data-theme="dark"
 			defer
 		></script>
 	{/if}
@@ -126,7 +128,9 @@
 		}
 	}}
 />
-<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
+<a
+	href="#main-content"
+	class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-foreground focus:shadow-lg"
 	>Skip to content</a
 >
 {#if isLoginRoute || !userEmail}
@@ -162,7 +166,7 @@
 				</div>
 				<div class="studio-header-actions">
 					{#if data.rehearsal}<span class="rehearsal-chip">Interview rehearsal</span>{/if}
-					<a href="/create" class="studio-secondary new-post"><PenLine size={14} /> New video</a>
+					<a href="/create" class="studio-primary new-post"><PenLine size={14} /> New video</a>
 					<div class="profile-menu-container">
 						<button
 							class="studio-avatar"
@@ -257,7 +261,7 @@
 		width: 32px;
 		height: 32px;
 		background: var(--studio-accent);
-		color: white;
+		color: var(--primary-foreground);
 		border-radius: var(--radius);
 		font-size: 19px;
 	}
@@ -292,9 +296,21 @@
 		font-size: 12px;
 		color: var(--studio-muted);
 	}
+	.studio-nav a {
+		position: relative;
+	}
 	.studio-nav a.active {
 		color: var(--studio-ink);
 		font-weight: 700;
+	}
+	.studio-nav a.active::after {
+		position: absolute;
+		bottom: -19px;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: var(--studio-accent);
+		content: '';
 	}
 	.studio-main {
 		max-width: 760px;
@@ -327,7 +343,7 @@
 		z-index: 50;
 		background: var(--studio-panel);
 		border: 1px solid var(--studio-line);
-		box-shadow: 0 12px 30px #253e3412;
+		box-shadow: 0 12px 30px #00000055;
 		padding: 7px;
 		border-radius: var(--radius);
 		min-width: 185px;
@@ -366,11 +382,11 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 16px;
-		background: #f1ead8;
+		background: var(--status-review-bg);
 		border-radius: var(--radius);
 		padding: 10px 13px;
 		font-size: 11px;
-		color: #695329;
+		color: var(--status-review-fg);
 		margin-top: 17px;
 	}
 	.rehearsal-banner button {

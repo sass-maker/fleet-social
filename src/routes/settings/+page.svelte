@@ -716,7 +716,7 @@
 	<div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 		<div>
 			<p class="text-[11px] font-bold tracking-widest text-stone-500 uppercase">Preferences</p>
-			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">Settings</h1>
+			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-foreground">Settings</h1>
 		</div>
 	</div>
 
@@ -733,9 +733,11 @@
 
 	<div class="grid gap-6">
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 		>
-			<h2 class="mb-6 text-[17px] font-extrabold tracking-tight text-stone-900">Profile Details</h2>
+			<h2 class="mb-6 text-[17px] font-extrabold tracking-tight text-foreground">
+				Profile Details
+			</h2>
 			<form class="space-y-5" onsubmit={saveProfile}>
 				<div class="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
 					<div class="relative shrink-0 self-start">
@@ -763,7 +765,7 @@
 							}}
 							aria-label={profilePictureUrl.trim() ? 'Edit profile picture' : 'Add profile picture'}
 							title="Edit profile picture"
-							class="absolute -right-0.5 -bottom-0.5 flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 shadow-sm transition-colors hover:bg-stone-100 hover:text-stone-900 disabled:opacity-50"
+							class="absolute -right-0.5 -bottom-0.5 flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-card text-stone-600 shadow-sm transition-colors hover:bg-stone-100 hover:text-foreground disabled:opacity-50"
 						>
 							<Pencil class="h-4 w-4" />
 						</button>
@@ -782,7 +784,7 @@
 								placeholder="Your name"
 								maxlength="80"
 								autocomplete="name"
-								class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 shadow-sm transition-all focus:border-stone-900 focus:bg-white focus:ring-2 focus:ring-ring focus:outline-none disabled:opacity-50"
+								class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground shadow-sm transition-all focus:border-stone-900 focus:bg-card focus:ring-2 focus:ring-ring focus:outline-none disabled:opacity-50"
 							/>
 						</div>
 						<div>
@@ -790,7 +792,7 @@
 								class="mb-2 block text-[11px] font-bold tracking-widest text-stone-500 uppercase"
 								>Email Address</span
 							>
-							<p class="text-[13px] font-bold text-stone-900">{data.user?.email}</p>
+							<p class="text-[13px] font-bold text-foreground">{data.user?.email}</p>
 							<p class="mt-1 text-[11px] font-medium text-stone-500">
 								Used to sign in — it cannot be changed here.
 							</p>
@@ -813,9 +815,9 @@
 		</div>
 
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 		>
-			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">
+			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">
 				New post defaults
 			</h2>
 			<p class="mb-6 text-[13px] font-medium text-stone-500">
@@ -834,7 +836,7 @@
 							id="masto-visibility"
 							bind:value={prefVisibility}
 							disabled={prefsLoading || !prefsLoaded}
-							class="w-full appearance-none rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none disabled:opacity-50"
+							class="w-full appearance-none rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none disabled:opacity-50"
 						>
 							<option value="public">Public</option>
 							<option value="unlisted">Unlisted</option>
@@ -885,7 +887,7 @@
 										/>
 									</div>
 									<div class="flex flex-col overflow-hidden">
-										<span class="truncate text-[13px] font-bold text-stone-900"
+										<span class="truncate text-[13px] font-bold text-foreground"
 											>{a.displayName || displayHandle(a.handle) || 'account'}</span
 										>
 										<span class="truncate text-[11px] font-medium text-stone-500 capitalize"
@@ -901,7 +903,7 @@
 											: 'bg-stone-200'}"
 									>
 										<span
-											class="inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {isOn
+											class="inline-block h-4 w-4 transform rounded-full bg-card shadow ring-0 transition duration-200 ease-in-out {isOn
 												? 'translate-x-4'
 												: 'translate-x-0'}"
 										></span>
@@ -934,7 +936,7 @@
 								: 'bg-stone-200'}"
 						>
 							<span
-								class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {askPublish
+								class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-card shadow ring-0 transition duration-200 ease-in-out {askPublish
 									? 'translate-x-4'
 									: 'translate-x-0'}"
 							></span>
@@ -969,18 +971,18 @@
 		</div>
 
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 			aria-label="API access"
 			data-testid="api-key-section"
 		>
-			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">API access</h2>
+			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">API access</h2>
 			<p class="mb-6 max-w-md text-[13px] leading-relaxed font-medium text-stone-500">
 				Choose draft intake for Fleet product feeds. That key can submit project-attributed drafts
 				but cannot review or publish them. A full key can manage posts. Generating a replacement
 				revokes the current key. See the
 				<a
 					href="/api"
-					class="font-bold text-stone-900 underline underline-offset-2 hover:text-stone-700"
+					class="font-bold text-foreground underline underline-offset-2 hover:text-stone-700"
 					>API reference</a
 				> for full details.
 			</p>
@@ -989,7 +991,7 @@
 					New key access
 					<select
 						bind:value={keyScope}
-						class="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900"
+						class="rounded-xl border border-stone-200 bg-card px-3 py-2 text-sm text-foreground"
 					>
 						<option value="intake">Fleet draft intake only</option>
 						<option value="full">Full API access</option>
@@ -1009,7 +1011,7 @@
 						</p>
 					</div>
 					<code
-						class="block rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 font-mono text-[13px] break-all text-stone-900 shadow-sm select-all"
+						class="block rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 font-mono text-[13px] break-all text-foreground shadow-sm select-all"
 						data-testid="api-key-value">{keyRevealed}</code
 					>
 					<div class="flex flex-wrap items-center gap-2 pt-2">
@@ -1035,7 +1037,7 @@
 					data-testid="api-key-status"
 				>
 					<div>
-						<p class="flex items-center gap-2 text-[13px] font-extrabold text-stone-900">
+						<p class="flex items-center gap-2 text-[13px] font-extrabold text-foreground">
 							Active key
 							<code
 								class="rounded bg-emerald-100/50 px-1.5 py-0.5 font-mono text-[12px] text-emerald-700"
@@ -1104,9 +1106,9 @@
 		</div>
 
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 		>
-			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">
+			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">
 				Two-factor authentication
 			</h2>
 			<p class="mb-6 max-w-md text-[13px] leading-relaxed font-medium text-stone-500">
@@ -1153,7 +1155,7 @@
 						bind:value={rotateCode}
 						placeholder="Current authenticator or backup code"
 						aria-label="Current authenticator or backup code"
-						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 						required
 					/>
 					<button
@@ -1166,7 +1168,7 @@
 			{:else}
 				<div class="max-w-sm space-y-4">
 					<div class="flex justify-center">
-						<div class="rounded-xl border border-stone-200/80 bg-white p-3 shadow-sm">
+						<div class="rounded-xl border border-stone-200/80 bg-card p-3 shadow-sm">
 							<div
 								class="h-48 w-48 [&>svg]:h-full [&>svg]:w-full"
 								role="img"
@@ -1177,7 +1179,7 @@
 						</div>
 					</div>
 					<code
-						class="block rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 text-center text-sm font-bold tracking-widest text-stone-900 shadow-sm"
+						class="block rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 text-center text-sm font-bold tracking-widest text-foreground shadow-sm"
 						>{rotateSecret}</code
 					>
 					<ul class="grid grid-cols-2 gap-2 font-mono text-sm font-bold text-stone-700">
@@ -1208,7 +1210,7 @@
 								: 'bg-stone-200'}"
 						>
 							<span
-								class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {rotateSaved
+								class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-card shadow ring-0 transition duration-200 ease-in-out {rotateSaved
 									? 'translate-x-4'
 									: 'translate-x-0'}"
 							></span>
@@ -1223,7 +1225,7 @@
 							bind:value={rotateConfirm}
 							placeholder="New app code"
 							aria-label="New app code"
-							class="w-full flex-1 rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+							class="w-full flex-1 rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 							required
 						/>
 						<button
@@ -1238,11 +1240,11 @@
 		</div>
 
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 			aria-label="Scheduled publishing"
 			data-testid="scheduler-section"
 		>
-			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">
+			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">
 				Scheduled publishing
 			</h2>
 			<p class="mb-6 max-w-md text-[13px] leading-relaxed font-medium text-stone-500">
@@ -1257,7 +1259,7 @@
 				data-testid="scheduler-status"
 			>
 				<div>
-					<p class="text-[13px] font-extrabold text-stone-900" data-testid="scheduler-status-line">
+					<p class="text-[13px] font-extrabold text-foreground" data-testid="scheduler-status-line">
 						{tickStatusLine}
 					</p>
 					{#if schedulerMessage}
@@ -1298,7 +1300,7 @@
 						</p>
 					</div>
 					<code
-						class="block rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 font-mono text-[13px] break-all text-stone-900 shadow-sm select-all"
+						class="block rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 font-mono text-[13px] break-all text-foreground shadow-sm select-all"
 						data-testid="tick-token-value">{tickTokenRevealed}</code
 					>
 					<div class="flex flex-wrap items-center gap-2">
@@ -1325,7 +1327,7 @@
 					data-testid="tick-token-status"
 				>
 					{#if tickToken?.configured}
-						<p class="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-stone-900">
+						<p class="flex flex-wrap items-center gap-2 text-[13px] font-extrabold text-foreground">
 							Tick token
 							<code
 								class="rounded bg-emerald-100/50 px-1.5 py-0.5 font-mono text-[12px] text-emerald-700"
@@ -1375,14 +1377,14 @@
 			{/if}
 
 			<details class="mt-6">
-				<summary class="cursor-pointer text-[13px] font-bold text-stone-900">
+				<summary class="cursor-pointer text-[13px] font-bold text-foreground">
 					How to call the tick from another service
 				</summary>
 				<div class="mt-3 space-y-3 text-[13px] leading-relaxed font-medium text-stone-600">
 					<p>Send a POST with the token as a bearer credential:</p>
 					<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
 						<code
-							class="min-w-0 flex-1 rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 font-mono text-[12px] break-all text-stone-900 select-all"
+							class="min-w-0 flex-1 rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 font-mono text-[12px] break-all text-foreground select-all"
 							data-testid="tick-url">{tickUrl}</code
 						>
 						<button
@@ -1394,7 +1396,7 @@
 						</button>
 					</div>
 					<pre
-						class="overflow-x-auto rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 font-mono text-[12px] text-stone-900">curl -X POST {tickUrl} \
+						class="overflow-x-auto rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-3 font-mono text-[12px] text-foreground">curl -X POST {tickUrl} \
   -H "Authorization: Bearer &lt;tick token&gt;"</pre>
 					<p>
 						In cron-job.org: create a job, method <strong>POST</strong>, schedule every minute, and
@@ -1407,9 +1409,9 @@
 		</div>
 
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 		>
-			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">Instance</h2>
+			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">Instance</h2>
 			<p class="mb-6 max-w-md text-[13px] leading-relaxed font-medium text-stone-500">
 				Shown in the page title, the header and the login screen. Leave it empty for the default.
 			</p>
@@ -1420,13 +1422,13 @@
 				{#if release?.updateAvailable && release.latest}
 					<a
 						href={release.latest.url}
-						class="font-bold text-stone-900 underline underline-offset-2 hover:text-stone-700"
+						class="font-bold text-foreground underline underline-offset-2 hover:text-stone-700"
 						>Version {release.latest.version} is available</a
 					>
 					<span class="text-stone-500">
 						— you run {release.current}; update the way you installed it (<a
 							href="https://github.com/deepakness/cogsend/blob/main/docs/deploy.md#updating-and-rolling-back"
-							class="font-bold text-stone-900 underline underline-offset-2 hover:text-stone-700"
+							class="font-bold text-foreground underline underline-offset-2 hover:text-stone-700"
 							>Updating</a
 						>)</span
 					>
@@ -1450,7 +1452,7 @@
 					maxlength={INSTANCE_NAME_MAX}
 					placeholder="CogSend"
 					aria-label="Instance name"
-					class="w-full flex-1 rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+					class="w-full flex-1 rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 				/>
 				<button
 					type="submit"
@@ -1462,9 +1464,9 @@
 		</div>
 
 		<div
-			class="rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
+			class="rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] sm:p-8"
 		>
-			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-stone-900">Login</h2>
+			<h2 class="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">Login</h2>
 			<p class="mb-6 max-w-md text-[13px] leading-relaxed font-medium text-stone-500">
 				The email and password used to sign in. Changing the password signs out every device.
 			</p>
@@ -1479,7 +1481,7 @@
 							type="email"
 							autocomplete="username"
 							bind:value={accountEmail}
-							class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+							class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 							required
 						/>
 					</label>
@@ -1491,7 +1493,7 @@
 							type="password"
 							autocomplete="current-password"
 							bind:value={accountPassword}
-							class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+							class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 							required
 						/>
 					</label>
@@ -1506,7 +1508,7 @@
 								minlength="8"
 								bind:value={accountNewPassword}
 								placeholder="Leave empty to keep"
-								class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+								class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 							/>
 						</label>
 						<label class="block flex-1 text-sm">
@@ -1517,7 +1519,7 @@
 								type="password"
 								autocomplete="new-password"
 								bind:value={accountConfirm}
-								class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+								class="mt-1.5 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 							/>
 						</label>
 					</div>
@@ -1582,7 +1584,7 @@
 						e.preventDefault();
 						savePicture();
 					}}
-					class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-stone-900 shadow-sm transition-all focus:border-stone-900 focus:bg-white focus:ring-2 focus:ring-ring focus:outline-none"
+					class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-4 py-2.5 text-[13px] font-bold text-foreground shadow-sm transition-all focus:border-stone-900 focus:bg-card focus:ring-2 focus:ring-ring focus:outline-none"
 				/>
 			</label>
 			{#if pictureMessage}

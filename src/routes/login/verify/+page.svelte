@@ -40,7 +40,7 @@
 		</div>
 		<form
 			onsubmit={onSubmit}
-			class="space-y-4 rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
+			class="space-y-4 rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
 		>
 			<label class="block text-sm">
 				<span class="text-xs text-stone-500">{useBackup ? 'Backup code' : 'Code'}</span>
@@ -50,7 +50,7 @@
 					autocomplete="one-time-code"
 					bind:value={code}
 					placeholder={useBackup ? 'XXXX-XXXX' : '123456'}
-					class="mt-1 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2 text-center text-lg tracking-[0.2em] focus:border-stone-400 focus:bg-white focus:outline-none"
+					class="mt-1 w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2 text-center text-lg tracking-[0.2em] focus:border-stone-400 focus:bg-card focus:outline-none"
 					required
 				/>
 			</label>

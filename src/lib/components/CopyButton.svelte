@@ -42,7 +42,7 @@
 	class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors {state ===
 	'failed'
 		? 'text-red-600'
-		: 'text-stone-400'} hover:bg-stone-200/70 hover:text-stone-900"
+		: 'text-stone-400'} hover:bg-stone-200/70 hover:text-foreground"
 >
 	{#if state === 'copied'}
 		<Check class="h-4 w-4 text-emerald-600" />

@@ -2319,14 +2319,14 @@
 					const id = loadFailedId;
 					if (id) void loadDraft(id);
 				}}
-				class="rounded-full border border-amber-300 bg-white px-4 py-1.5 text-[12px] font-bold text-amber-900 transition-colors hover:bg-amber-100 disabled:opacity-50"
+				class="rounded-full border border-amber-300 bg-card px-4 py-1.5 text-[12px] font-bold text-amber-900 transition-colors hover:bg-amber-100 disabled:opacity-50"
 			>
 				{loadingDraftId !== null ? 'Loading…' : 'Retry'}
 			</button>
 		</div>
 	{/if}
 	<div
-		class="mb-5 flex flex-wrap items-end gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm"
+		class="mb-5 flex flex-wrap items-end gap-3 rounded-2xl border border-stone-200 bg-card p-4 shadow-sm"
 	>
 		<label class="min-w-48 flex-1 text-[11px] font-bold tracking-wide text-stone-500 uppercase">
 			Fleet project
@@ -2337,7 +2337,7 @@
 					projectTouched = true;
 					markDirty();
 				}}
-				class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-bold text-stone-900 focus:border-stone-500 focus:outline-none"
+				class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-bold text-foreground focus:border-stone-500 focus:outline-none"
 			>
 				<option value="">Choose a project</option>
 				{#each fleetProjects as project (project.id)}
@@ -2369,7 +2369,7 @@
 	</div>
 	{#if selectedPlatforms.has('youtube')}
 		<div
-			class="mb-5 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm"
+			class="mb-5 rounded-2xl border border-stone-200 bg-card p-4 shadow-sm"
 			data-testid="youtube-video-options"
 		>
 			<div class="mb-3 flex items-center justify-between gap-3">
@@ -2389,7 +2389,7 @@
 						markDirty();
 					}}
 					placeholder="Title shown on YouTube"
-					class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-medium text-stone-900 focus:border-stone-500 focus:outline-none"
+					class="mt-1.5 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-[13px] font-medium text-foreground focus:border-stone-500 focus:outline-none"
 				/>
 			</label>
 			<div class="mt-3 flex items-center gap-3 text-[12px] text-stone-600">
@@ -2397,7 +2397,7 @@
 				<select
 					id="youtube-visibility"
 					value="private"
-					class="rounded-lg border border-stone-200 bg-stone-50 px-2 py-1.5 font-semibold text-stone-900"
+					class="rounded-lg border border-stone-200 bg-stone-50 px-2 py-1.5 font-semibold text-foreground"
 				>
 					<option value="private">Private</option>
 				</select>
@@ -2419,7 +2419,7 @@
 			class="flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-bold whitespace-nowrap transition-all {activeTab ===
 			'global'
 				? 'bg-stone-900 text-white shadow-md'
-				: 'border border-stone-200/80 bg-white text-stone-500 hover:border-stone-300 hover:text-stone-900 hover:shadow-sm'}"
+				: 'border border-stone-200/80 bg-card text-stone-500 hover:border-stone-300 hover:text-foreground hover:shadow-sm'}"
 			onclick={() => (activeTab = 'global')}
 		>
 			Global
@@ -2433,7 +2433,7 @@
 				class="flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-bold whitespace-nowrap transition-all {activeTab ===
 				platform
 					? 'bg-stone-900 text-white shadow-md'
-					: 'border border-stone-200/80 bg-white text-stone-500 hover:border-stone-300 hover:text-stone-900 hover:shadow-sm'}"
+					: 'border border-stone-200/80 bg-card text-stone-500 hover:border-stone-300 hover:text-foreground hover:shadow-sm'}"
 			>
 				<button
 					type="button"
@@ -2462,7 +2462,7 @@
 						class="-mr-1.5 ml-0.5 flex items-center justify-center rounded-full p-1 transition-colors {activeTab ===
 						platform
 							? 'text-stone-300 hover:bg-stone-700 hover:text-white'
-							: 'text-stone-500 hover:bg-stone-100 hover:text-stone-900'}"
+							: 'text-stone-500 hover:bg-stone-100 hover:text-foreground'}"
 						title="Unlinked from Global. Click to re-sync."
 						onclick={() => resetToGlobal(platform)}
 					>
@@ -2479,7 +2479,7 @@
 				<button
 					type="button"
 					data-testid="add-override-toggle"
-					class="flex items-center gap-1.5 rounded-full border border-dashed border-stone-200 px-3 py-1.5 text-[12px] font-bold whitespace-nowrap text-stone-500 transition-colors hover:border-stone-300 hover:bg-stone-100 hover:text-stone-900"
+					class="flex items-center gap-1.5 rounded-full border border-dashed border-stone-200 px-3 py-1.5 text-[12px] font-bold whitespace-nowrap text-stone-500 transition-colors hover:border-stone-300 hover:bg-stone-100 hover:text-foreground"
 					onclick={(e) => {
 						e.stopPropagation();
 						isAddOverrideOpen = !isAddOverrideOpen;
@@ -2490,7 +2490,7 @@
 
 				{#if isAddOverrideOpen}
 					<div
-						class="absolute top-full left-0 z-40 mt-2 w-48 rounded-[1rem] border border-stone-200/80 bg-white p-2 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
+						class="absolute top-full left-0 z-40 mt-2 w-48 rounded-[1rem] border border-stone-200/80 bg-card p-2 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
 						transition:slide={{ duration: 150 }}
 					>
 						<div class="mb-1 px-2 py-1">
@@ -2531,7 +2531,7 @@
 				<button
 					type="button"
 					data-testid="masto-settings-toggle"
-					class="flex items-center gap-1.5 rounded-full border border-stone-200 px-3 py-1.5 text-[12px] font-bold whitespace-nowrap text-stone-500 transition-colors hover:border-stone-300 hover:bg-stone-100 hover:text-stone-900"
+					class="flex items-center gap-1.5 rounded-full border border-stone-200 px-3 py-1.5 text-[12px] font-bold whitespace-nowrap text-stone-500 transition-colors hover:border-stone-300 hover:bg-stone-100 hover:text-foreground"
 					onclick={(e) => {
 						e.stopPropagation();
 						isMastoOptionsOpen = !isMastoOptionsOpen;
@@ -2542,7 +2542,7 @@
 
 				{#if isMastoOptionsOpen}
 					<div
-						class="absolute top-full left-0 z-40 mt-2 w-64 rounded-[1rem] border border-stone-200/80 bg-white p-3 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
+						class="absolute top-full left-0 z-40 mt-2 w-64 rounded-[1rem] border border-stone-200/80 bg-card p-3 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
 						transition:slide={{ duration: 150 }}
 					>
 						<div class="mb-2">
@@ -2560,7 +2560,7 @@
 										mastoVisibility = e.currentTarget.value as typeof mastoVisibility;
 										markDirty();
 									}}
-									class="rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1.5 text-[12px] font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+									class="rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1.5 text-[12px] font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 								>
 									<option value="public">Public</option>
 									<option value="unlisted">Unlisted</option>
@@ -2580,7 +2580,7 @@
 										mastoCW = e.currentTarget.value;
 										markDirty();
 									}}
-									class="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-1.5 text-[12px] font-medium text-stone-900 placeholder:text-stone-500 focus:border-stone-400 focus:bg-white focus:outline-none"
+									class="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-1.5 text-[12px] font-medium text-foreground placeholder:text-stone-500 focus:border-stone-400 focus:bg-card focus:outline-none"
 								/>
 							</label>
 						</div>
@@ -2603,7 +2603,7 @@
 						<img
 							src={avatarSrc}
 							alt="Avatar"
-							class="relative z-10 h-10 w-10 rounded-full border-[3px] border-stone-50 bg-white object-cover shadow-sm"
+							class="relative z-10 h-10 w-10 rounded-full border-[3px] border-stone-50 bg-card object-cover shadow-sm"
 						/>
 						{#if index < segments.length - 1}
 							<div
@@ -2618,7 +2618,7 @@
 					card past the composer column instead of ellipsizing. -->
 					<div
 						data-testid="segment-card-{index}"
-						class="flex min-w-0 flex-1 flex-col rounded-[1.5rem] border border-stone-200/80 bg-white p-5 shadow-[0_4px_24px_-8px_rgb(28_25_23/0.06)] transition-all focus-within:border-stone-500 focus-within:shadow-[0_8px_30px_-12px_rgb(28_25_23/0.12)] focus-within:ring-2 focus-within:ring-stone-900/10"
+						class="flex min-w-0 flex-1 flex-col rounded-[1.5rem] border border-stone-200/80 bg-card p-5 shadow-[0_4px_24px_-8px_rgb(28_25_23/0.06)] transition-all focus-within:border-stone-500 focus-within:shadow-[0_8px_30px_-12px_rgb(28_25_23/0.12)] focus-within:ring-2 focus-within:ring-stone-900/10"
 					>
 						<textarea
 							use:autoResize={segment}
@@ -2632,7 +2632,7 @@
 							ondragover={(e) => e.preventDefault()}
 							placeholder={index === 0 ? "What's happening?" : 'Add another post...'}
 							aria-label={index === 0 ? 'Post text' : `Post ${index + 1} text`}
-							class="w-full resize-none bg-transparent text-[15px] font-medium text-stone-900 placeholder:text-stone-500 focus:outline-none"
+							class="w-full resize-none bg-transparent text-[15px] font-medium text-foreground placeholder:text-stone-500 focus:outline-none"
 							rows="1"></textarea>
 
 						{#if segMedia.length > 0}
@@ -2702,7 +2702,7 @@
 							{#if altOpen[m.id]}
 								<!-- In flow under the media strip: as a thumb-anchored popover this
 								     hung off the right edge whenever the thumb was not the first. -->
-								<div class="mt-2 rounded-xl border border-stone-200/80 bg-white p-2 shadow-sm">
+								<div class="mt-2 rounded-xl border border-stone-200/80 bg-card p-2 shadow-sm">
 									<input
 										type="text"
 										value={m.altText || ''}
@@ -2710,14 +2710,14 @@
 										oninput={(e) => updateMediaAlt(m.id, e.currentTarget.value)}
 										placeholder="Describe this image…"
 										aria-label={`Alt text for image ${index + 1}`}
-										class="w-full rounded-lg border border-stone-200 bg-stone-50 px-2 py-1 text-[11px] font-medium text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+										class="w-full rounded-lg border border-stone-200 bg-stone-50 px-2 py-1 text-[11px] font-medium text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 									/>
 									<div class="mt-1 flex justify-end">
 										<button
 											type="button"
 											data-testid="alt-done-{m.id}"
 											onclick={() => toggleAlt(m.id)}
-											class="text-[11px] font-bold text-stone-900 hover:underline">Done</button
+											class="text-[11px] font-bold text-foreground hover:underline">Done</button
 										>
 									</div>
 								</div>
@@ -2738,7 +2738,7 @@
 											type="button"
 											data-testid="add-thread-post"
 											onclick={onAddSegment}
-											class="flex items-center gap-1.5 rounded-full border border-stone-100 bg-stone-50 px-3 py-1.5 text-[12px] font-bold text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
+											class="flex items-center gap-1.5 rounded-full border border-stone-100 bg-stone-50 px-3 py-1.5 text-[12px] font-bold text-stone-500 transition-colors hover:bg-stone-100 hover:text-foreground"
 										>
 											<Plus class="h-3.5 w-3.5" /> Thread
 										</button>
@@ -2775,7 +2775,7 @@
 									type="button"
 									data-testid="attach-image-{index}"
 									disabled={uploadingSegment === index}
-									class="flex items-center justify-center rounded-lg p-1.5 text-stone-500 opacity-0 transition-all group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-stone-50 hover:text-stone-900 disabled:opacity-40 pointer-coarse:opacity-100"
+									class="flex items-center justify-center rounded-lg p-1.5 text-stone-500 opacity-0 transition-all group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-stone-50 hover:text-foreground disabled:opacity-40 pointer-coarse:opacity-100"
 									aria-label={uploadingSegment === index
 										? `Uploading to post ${index + 1}`
 										: `Add image to post ${index + 1}`}
@@ -2823,7 +2823,7 @@
 				<button
 					type="button"
 					data-testid="destinations-toggle"
-					class="flex items-center gap-2 rounded-full border border-stone-200/80 bg-white/95 px-4 py-2.5 text-[13px] font-bold text-stone-700 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl transition-all hover:border-stone-300 hover:bg-white {isAccountsPopoverOpen
+					class="flex items-center gap-2 rounded-full border border-stone-200/80 bg-card/95 px-4 py-2.5 text-[13px] font-bold text-stone-700 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl transition-all hover:border-stone-300 hover:bg-card {isAccountsPopoverOpen
 						? 'border-stone-300 bg-stone-50'
 						: ''}"
 					onclick={openDestinations}
@@ -2856,7 +2856,7 @@
 				<!-- Sleek Popover Menu -->
 				{#if isAccountsPopoverOpen}
 					<div
-						class="absolute bottom-full left-0 z-40 mb-3 w-72 rounded-[1.5rem] border border-stone-200/80 bg-white p-2 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
+						class="absolute bottom-full left-0 z-40 mb-3 w-72 rounded-[1.5rem] border border-stone-200/80 bg-card p-2 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)]"
 						transition:slide={{ duration: 200 }}
 						role="dialog"
 						aria-label="Destinations"
@@ -2869,7 +2869,7 @@
 								type="button"
 								onclick={clearSelection}
 								disabled={selected.size === 0}
-								class="rounded-md bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-700 transition hover:bg-stone-200 hover:text-stone-900 disabled:cursor-default disabled:opacity-40 disabled:hover:bg-stone-100 disabled:hover:text-stone-700"
+								class="rounded-md bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-700 transition hover:bg-stone-200 hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-stone-100 disabled:hover:text-stone-700"
 							>
 								Clear all
 							</button>
@@ -2901,7 +2901,7 @@
 										/>
 										<span
 											class="min-w-0 flex-1 truncate text-[13px] font-bold {isSelected
-												? 'text-stone-900'
+												? 'text-foreground'
 												: 'text-stone-600'}"
 										>
 											{account.displayName ||
@@ -2928,7 +2928,7 @@
 												type="button"
 												onclick={() => void verifyConnection(account.id)}
 												disabled={reconnecting === account.id}
-												class="text-[11px] font-bold text-stone-900 underline"
+												class="text-[11px] font-bold text-foreground underline"
 											>
 												{reconnecting === account.id ? 'Checking…' : 'Reconnect'}
 											</button>
@@ -2949,7 +2949,7 @@
 							{/each}
 							{#if connections.length === 0}
 								<div class="px-3 py-4 text-center">
-									<p class="text-[13px] font-bold text-stone-900">Connect an account first</p>
+									<p class="text-[13px] font-bold text-foreground">Connect an account first</p>
 									<p class="mt-1 text-[12px] font-medium text-stone-500">
 										Add one, then come back to write.
 									</p>
@@ -3001,7 +3001,7 @@
 				<!-- Post Confirmation Popover -->
 				{#if isPostConfirmOpen && pendingPublish}
 					<div
-						class="absolute right-0 bottom-full z-40 mb-3 w-64 origin-bottom-right rounded-[1.5rem] border border-stone-200/80 bg-white/95 p-3 text-stone-900 shadow-[0_12px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
+						class="absolute right-0 bottom-full z-40 mb-3 w-64 origin-bottom-right rounded-[1.5rem] border border-stone-200/80 bg-card/95 p-3 text-foreground shadow-[0_12px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
 						transition:fly={{ y: 10, duration: 250, opacity: 0 }}
 						role="dialog"
 						aria-label={publishProgress?.some(
@@ -3020,14 +3020,14 @@
 					>
 						<div class="px-2 pt-2 pb-4 text-center">
 							{#if publishProgress?.some((d) => d.status === 'failed' || d.status === 'uncertain')}
-								<h4 class="mb-1 text-[14px] font-extrabold text-stone-900">
+								<h4 class="mb-1 text-[14px] font-extrabold text-foreground">
 									Couldn’t publish everywhere
 								</h4>
 								<p class="text-[12px] font-medium text-stone-500">
 									Fix the problems below, then retry from Posts.
 								</p>
 							{:else}
-								<h4 class="mb-1 text-[14px] font-extrabold text-stone-900">Confirm Post</h4>
+								<h4 class="mb-1 text-[14px] font-extrabold text-foreground">Confirm Post</h4>
 								<p class="text-[12px] font-medium text-stone-500">
 									Publishing to {pendingAccounts.length}
 									{pendingAccounts.length === 1 ? 'destination' : 'destinations'}.
@@ -3136,7 +3136,7 @@
 							</button>
 							<button
 								type="button"
-								class="mt-1 w-full rounded-full py-1.5 text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900"
+								class="mt-1 w-full rounded-full py-1.5 text-[12px] font-bold text-stone-500 transition-colors hover:text-foreground"
 								onclick={() => dismissPostConfirm()}
 							>
 								Keep editing
@@ -3162,14 +3162,14 @@
 				{#if scheduleOpen}
 					<div
 						data-testid="schedule-panel"
-						class="absolute right-0 bottom-full z-40 mb-3 w-72 origin-bottom-right rounded-[1.5rem] border border-stone-200/80 bg-white/95 p-3 text-stone-900 shadow-[0_12px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
+						class="absolute right-0 bottom-full z-40 mb-3 w-72 origin-bottom-right rounded-[1.5rem] border border-stone-200/80 bg-card/95 p-3 text-foreground shadow-[0_12px_40px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
 						transition:fly={{ y: 10, duration: 250, opacity: 0 }}
 						role="dialog"
 						aria-label="Schedule post"
 					>
 						<div class="flex items-center gap-2 px-2 pt-2 pb-3">
-							<Calendar class="h-4 w-4 text-stone-900" />
-							<h4 class="text-[14px] font-extrabold text-stone-900">Schedule Post</h4>
+							<Calendar class="h-4 w-4 text-foreground" />
+							<h4 class="text-[14px] font-extrabold text-foreground">Schedule Post</h4>
 						</div>
 
 						<div class="mx-1 mb-4 flex rounded-lg bg-stone-100 p-1">
@@ -3177,8 +3177,8 @@
 								type="button"
 								class="flex-1 rounded-md py-1.5 text-[12px] font-bold transition-colors {scheduleMode ===
 								'relative'
-									? 'bg-white text-stone-900 shadow-sm'
-									: 'text-stone-500 hover:text-stone-900'}"
+									? 'bg-card text-foreground shadow-sm'
+									: 'text-stone-500 hover:text-foreground'}"
 								onclick={() => {
 									scheduleMode = 'relative';
 									scheduleTouched = true;
@@ -3191,8 +3191,8 @@
 								type="button"
 								class="flex-1 rounded-md py-1.5 text-[12px] font-bold transition-colors {scheduleMode ===
 								'absolute'
-									? 'bg-white text-stone-900 shadow-sm'
-									: 'text-stone-500 hover:text-stone-900'}"
+									? 'bg-card text-foreground shadow-sm'
+									: 'text-stone-500 hover:text-foreground'}"
 								onclick={() => {
 									scheduleMode = 'absolute';
 								}}
@@ -3217,7 +3217,7 @@
 											scheduleTouched = true;
 											applyRelativeFields();
 										}}
-										class="w-20 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-center text-[13px] font-bold text-stone-900 transition-colors focus:border-stone-400 focus:bg-white focus:outline-none"
+										class="w-20 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-center text-[13px] font-bold text-foreground transition-colors focus:border-stone-400 focus:bg-card focus:outline-none"
 									/>
 									<select
 										data-testid="schedule-offset-unit"
@@ -3227,7 +3227,7 @@
 											scheduleTouched = true;
 											applyRelativeFields();
 										}}
-										class="flex-1 appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-stone-900 transition-colors focus:border-stone-400 focus:bg-white focus:outline-none"
+										class="flex-1 appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-foreground transition-colors focus:border-stone-400 focus:bg-card focus:outline-none"
 									>
 										<option value="mins">Minutes</option>
 										<option value="hours">Hours</option>
@@ -3249,7 +3249,7 @@
 											oninput={() => (scheduleTouched = true)}
 											min={minSchedDate}
 											aria-label="Schedule date"
-											class="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-stone-900 transition-colors focus:border-stone-400 focus:bg-white focus:outline-none"
+											class="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-foreground transition-colors focus:border-stone-400 focus:bg-card focus:outline-none"
 										/>
 									</div>
 									<div class="flex-1">
@@ -3259,7 +3259,7 @@
 											bind:value={schedTime}
 											oninput={() => (scheduleTouched = true)}
 											aria-label="Schedule time"
-											class="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-stone-900 transition-colors focus:border-stone-400 focus:bg-white focus:outline-none"
+											class="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-foreground transition-colors focus:border-stone-400 focus:bg-card focus:outline-none"
 										/>
 									</div>
 								</div>
@@ -3302,7 +3302,7 @@
 	{#if toastMessage}
 		{@const tone = toastTone}
 		<div
-			class="pointer-events-none fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2.5 rounded-full border border-stone-200/80 bg-white/95 px-4 py-2.5 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
+			class="pointer-events-none fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2.5 rounded-full border border-stone-200/80 bg-card/95 px-4 py-2.5 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.15)] backdrop-blur-xl"
 			transition:fly={{ y: 20, duration: 300, opacity: 0 }}
 			role={tone === 'error' ? 'alert' : 'status'}
 			data-testid="publish-toast"
@@ -3342,7 +3342,7 @@
 					data-testid="toast-dismiss"
 					onclick={dismissToast}
 					aria-label="Dismiss error"
-					class="pointer-events-auto -mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
+					class="pointer-events-auto -mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-foreground"
 				>
 					<X class="h-3.5 w-3.5" />
 				</button>
@@ -3379,7 +3379,7 @@
 			aria-modal="true"
 			aria-labelledby="remove-media-title"
 			aria-describedby="remove-media-body"
-			class="w-full max-w-sm rounded-[1.5rem] border border-stone-200/80 bg-white/95 p-5 shadow-xl backdrop-blur-xl"
+			class="w-full max-w-sm rounded-[1.5rem] border border-stone-200/80 bg-card/95 p-5 shadow-xl backdrop-blur-xl"
 			use:dialogFocus={{
 				initial: keepMediaBtn,
 				// Always dismissable: closing does not cancel the request, and a
@@ -3387,7 +3387,7 @@
 				onEscape: () => (pendingMediaRemove = null)
 			}}
 		>
-			<h2 id="remove-media-title" class="text-sm font-extrabold text-stone-900">
+			<h2 id="remove-media-title" class="text-sm font-extrabold text-foreground">
 				Remove this image?
 			</h2>
 			<p id="remove-media-body" class="mt-1 text-sm font-medium text-stone-500">

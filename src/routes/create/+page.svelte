@@ -10,6 +10,7 @@
 	let scenes = $state(['', '', '']);
 	let rights = $state(false);
 	let approved = $state(false);
+	let missingPosters = $state<Record<string, boolean>>({});
 	let busy = $state(false);
 	let problem = $state('');
 	let jobId = $state('');
@@ -248,8 +249,10 @@
 						rows="3"
 						maxlength="600"></textarea>
 					<p class="studio-muted">
-						Choose a prepared Mashup cut below for an instant demo. Your idea becomes its editable
-						post caption. These are existing exports, ready to review.
+						Your idea becomes an editable post caption.
+						{data.rehearsal
+							? 'Choose a prepared Mashup cut below for an instant demo. These exports are ready to review.'
+							: 'Prepared cuts become available after rehearsal media is installed on this instance.'}
 					</p>
 					<button
 						class="studio-secondary"
@@ -264,12 +267,20 @@
 					>
 				</section>
 				<div class="prepared-heading">
-					<h2>Ready in one click</h2>
-					<span>Verified Mashup exports</span>
+					<h2>{data.rehearsal ? 'Ready in one click' : 'Prepared cuts'}</h2>
+					<span>{data.rehearsal ? 'Verified Mashup exports' : 'Preview unavailable here'}</span>
 				</div>
 				<div class="example-grid">
 					{#each ranked as example (example.id)}<article class="example">
-							<img src={`/api/rehearsal/poster/rehearsal-${example.id}`} alt={example.title} />
+							{#if data.rehearsal && !missingPosters[example.id]}
+								<img
+									src={`/api/rehearsal/poster/rehearsal-${example.id}`}
+									alt={example.title}
+									onerror={() => (missingPosters[example.id] = true)}
+								/>
+							{:else}
+								<div class="example-poster-fallback"><Film size={28} />Preview unavailable</div>
+							{/if}
 							<div>
 								<p class="studio-muted">
 									{example.duration}s · {example.sources} source {example.sources === 1
@@ -524,6 +535,17 @@
 		object-fit: cover;
 		object-position: center 32%;
 	}
+	.example-poster-fallback {
+		height: 180px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		background: var(--surface);
+		color: var(--studio-muted);
+		font-size: 11px;
+	}
 	.example > div {
 		padding: 20px;
 	}
@@ -624,7 +646,7 @@
 	.render-progress {
 		padding: 23px;
 		border: 1px solid var(--studio-line);
-		background: #eaf0e5;
+		background: var(--status-approved-bg);
 		border-radius: var(--radius);
 		margin: 0 0 24px;
 	}

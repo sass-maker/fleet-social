@@ -816,7 +816,7 @@
 	<div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 		<div>
 			<p class="text-[11px] font-bold tracking-widest text-stone-500 uppercase">Library</p>
-			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">Posts</h1>
+			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-foreground">Posts</h1>
 		</div>
 
 		<!-- Account filter + search -->
@@ -830,7 +830,7 @@
 						aria-haspopup="menu"
 						aria-expanded={accountMenuOpen}
 						aria-label="Filter posts by account"
-						class="flex items-center gap-2 rounded-full border border-stone-200/80 bg-white py-2 pr-3 pl-3.5 text-[12px] font-bold text-stone-700 shadow-sm transition-colors hover:border-stone-300 hover:text-stone-900"
+						class="flex items-center gap-2 rounded-full border border-stone-200/80 bg-card py-2 pr-3 pl-3.5 text-[12px] font-bold text-stone-700 shadow-sm transition-colors hover:border-stone-300 hover:text-foreground"
 					>
 						{#if selectedAccount}
 							<SocialIcon platform={selectedAccount.platform} className="h-3.5 w-3.5" />
@@ -849,7 +849,7 @@
 
 					{#if accountMenuOpen}
 						<div
-							class="absolute top-full left-0 z-30 mt-2 w-64 max-w-[calc(100vw-3rem)] origin-top-left rounded-[1.25rem] border border-stone-200/80 bg-white p-1.5 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] md:right-0 md:left-auto md:origin-top-right"
+							class="absolute top-full left-0 z-30 mt-2 w-64 max-w-[calc(100vw-3rem)] origin-top-left rounded-[1.25rem] border border-stone-200/80 bg-card p-1.5 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] md:right-0 md:left-auto md:origin-top-right"
 							role="menu"
 							aria-label="Filter by account"
 							use:menuNav={{
@@ -864,13 +864,13 @@
 								onclick={() => pickAccount(null)}
 								class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-bold transition-colors {accountFilter ===
 								null
-									? 'bg-stone-100 text-stone-900'
-									: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
+									? 'bg-stone-100 text-foreground'
+									: 'text-stone-600 hover:bg-stone-50 hover:text-foreground'}"
 							>
 								<Users class="h-4 w-4 shrink-0 text-stone-500" />
 								<span class="flex-1 truncate">All accounts</span>
 								{#if accountFilter === null}
-									<Check class="h-4 w-4 shrink-0 text-stone-900" />
+									<Check class="h-4 w-4 shrink-0 text-foreground" />
 								{/if}
 							</button>
 							{#each accounts as account (account.id)}
@@ -881,13 +881,13 @@
 									onclick={() => pickAccount(account.id)}
 									class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-bold transition-colors {accountFilter ===
 									account.id
-										? 'bg-stone-100 text-stone-900'
-										: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'}"
+										? 'bg-stone-100 text-foreground'
+										: 'text-stone-600 hover:bg-stone-50 hover:text-foreground'}"
 								>
 									<SocialIcon platform={account.platform} className="h-4 w-4 shrink-0" />
 									<span class="flex-1 truncate">{accountFilterLabel(account)}</span>
 									{#if accountFilter === account.id}
-										<Check class="h-4 w-4 shrink-0 text-stone-900" />
+										<Check class="h-4 w-4 shrink-0 text-foreground" />
 									{/if}
 								</button>
 							{/each}
@@ -897,7 +897,7 @@
 			{/if}
 			<div class="group relative min-w-0 flex-1 sm:flex-none">
 				<Search
-					class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-stone-500 transition-colors group-focus-within:text-stone-900"
+					class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-stone-500 transition-colors group-focus-within:text-foreground"
 				/>
 				<input
 					type="text"
@@ -905,7 +905,7 @@
 					aria-label="Search posts"
 					bind:this={searchInput}
 					bind:value={query}
-					class="w-full rounded-full border border-stone-200/80 bg-white py-2 pr-9 pl-10 text-[13px] font-bold text-stone-900 shadow-sm transition-all placeholder:font-medium placeholder:text-stone-500 focus:border-stone-300 focus:ring-2 focus:ring-ring focus:outline-none sm:w-48"
+					class="w-full rounded-full border border-stone-200/80 bg-card py-2 pr-9 pl-10 text-[13px] font-bold text-foreground shadow-sm transition-all placeholder:font-medium placeholder:text-stone-500 focus:border-stone-300 focus:ring-2 focus:ring-ring focus:outline-none sm:w-48"
 				/>
 				{#if query}
 					<button
@@ -965,8 +965,8 @@
 						onclick={() => (activeTab = tab as typeof activeTab)}
 						class="rounded-lg px-4 py-1.5 text-[13px] font-bold capitalize transition-all {activeTab ===
 						tab
-							? 'bg-white text-stone-900 shadow-sm'
-							: 'text-stone-500 hover:text-stone-900'}"
+							? 'bg-card text-foreground shadow-sm'
+							: 'text-stone-500 hover:text-foreground'}"
 					>
 						{tab === 'all' ? 'All Posts' : tab}
 						{#if countFor(tab as typeof activeTab) > 0}
@@ -992,7 +992,7 @@
 		{#if loading && visible.length === 0}
 			{#each [0, 1, 2] as i (i)}
 				<div
-					class="flex animate-pulse flex-col rounded-[2rem] border border-stone-200/80 bg-white p-5 sm:p-6"
+					class="flex animate-pulse flex-col rounded-[2rem] border border-stone-200/80 bg-card p-5 sm:p-6"
 					aria-hidden="true"
 				>
 					<div class="mb-4 flex items-center justify-between">
@@ -1010,7 +1010,7 @@
 		{#each visible as card (card.key)}
 			{@const badge = statusBadge(card.status)}
 			<div
-				class="flex flex-col rounded-[2rem] border border-stone-200/80 bg-white p-5 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] transition-all hover:border-stone-300 hover:shadow-[0_8px_30px_-12px_rgb(28_25_23/0.1)] sm:p-6"
+				class="flex flex-col rounded-[2rem] border border-stone-200/80 bg-card p-5 shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)] transition-all hover:border-stone-300 hover:shadow-[0_8px_30px_-12px_rgb(28_25_23/0.1)] sm:p-6"
 			>
 				<!-- Post Header -->
 				<div class="mb-4 flex items-start justify-between">
@@ -1034,11 +1034,13 @@
 							{:else}
 								<div
 									class="flex h-8 w-8 items-center justify-center rounded-full border border-stone-100 bg-stone-50 {platform.status ===
-										'failed' || platform.status === 'uncertain'
+									'failed'
 										? 'border-red-200 bg-red-50'
-										: platform.status === 'scheduled' && platform.error
-											? 'border-amber-200 bg-amber-50'
-											: ''}"
+										: platform.status === 'uncertain'
+											? 'border-[var(--status-uncertain-border)] bg-[var(--status-uncertain-bg)]'
+											: platform.status === 'scheduled' && platform.error
+												? 'border-amber-200 bg-amber-50'
+												: ''}"
 									title={platform.error
 										? `${platformName(platform.name)}: ${humanizeError(platform.error)}`
 										: platform.status || platformName(platform.name)}
@@ -1080,7 +1082,7 @@
 							</span>
 						{:else if badge === 'uncertain'}
 							<span
-								class="inline-flex items-center gap-1.5 rounded bg-amber-50 px-2.5 py-1 text-[10px] font-bold tracking-widest text-amber-800 uppercase"
+								class="inline-flex items-center gap-1.5 rounded bg-[var(--status-uncertain-bg)] px-2.5 py-1 text-[10px] font-bold tracking-widest text-[var(--status-uncertain-fg)] uppercase"
 							>
 								<XCircle class="h-3 w-3" /> Check outcome
 							</span>
@@ -1106,7 +1108,7 @@
 					{fleetProjectName(card.projectId)}
 				</p>
 				<p
-					class="mb-5 text-[14px] leading-relaxed font-medium break-words whitespace-pre-wrap text-stone-800"
+					class="mb-5 text-[14px] leading-relaxed font-medium break-words whitespace-pre-wrap text-foreground"
 				>
 					{draftExcerpt(card.body, 500)}
 				</p>
@@ -1120,7 +1122,7 @@
 							<div class="flex flex-wrap gap-2">
 								{#each preview as m, i (m.id)}
 									<div
-										class="relative h-20 w-20 overflow-hidden rounded-xl border border-stone-200/80 bg-white"
+										class="relative h-20 w-20 overflow-hidden rounded-xl border border-stone-200/80 bg-card"
 									>
 										{#if isPostVideo(m)}
 											<!-- svelte-ignore a11y_media_has_caption -->
@@ -1167,21 +1169,25 @@
 				{/if}
 
 				{#if card.platforms.some((platform) => platform.status === 'uncertain')}
-					<div class="mb-4 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-						<p class="text-xs font-bold text-amber-900">
+					<div
+						class="mb-4 flex flex-col gap-4 rounded-2xl border border-[var(--status-uncertain-border)] bg-[var(--status-uncertain-bg)] p-4"
+					>
+						<p class="text-xs font-bold text-[var(--status-uncertain-fg)]">
 							The provider may have accepted this post. Check each destination account before
 							choosing an outcome.
 						</p>
 						{#each card.platforms.filter((platform) => platform.status === 'uncertain') as platform (platform.targetId)}
 							{#if platform.targetId}
-								<div class="flex flex-col gap-2 border-t border-amber-200 pt-3">
-									<p class="text-xs font-bold text-amber-900">
+								<div
+									class="flex flex-col gap-2 border-t border-[var(--status-uncertain-border)] pt-3"
+								>
+									<p class="text-xs font-bold text-[var(--status-uncertain-fg)]">
 										{platformName(platform.name)}{platform.handle
 											? ` · ${displayHandle(platform.handle)}`
 											: ''}
 									</p>
 									<label
-										class="text-xs font-medium text-amber-900"
+										class="text-xs font-medium text-[var(--status-uncertain-fg)]"
 										for="reconcile-{platform.targetId}"
 										>If the post is live, paste its HTTPS URL</label
 									>
@@ -1195,7 +1201,7 @@
 												...reconcileUrls,
 												[platform.targetId!]: event.currentTarget.value
 											})}
-										class="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-xs text-stone-900 focus:border-stone-500 focus:outline-none"
+										class="w-full rounded-xl border border-[var(--status-uncertain-border)] bg-card px-3 py-2 text-xs text-foreground focus:border-stone-500 focus:outline-none"
 									/>
 									<div class="flex flex-wrap items-center gap-3">
 										<button
@@ -1203,10 +1209,12 @@
 											disabled={busyTarget === platform.targetId ||
 												!reconcileUrls[platform.targetId]?.trim()}
 											onclick={() => void reconcileTarget(platform.targetId!, 'published')}
-											class="text-xs font-bold text-stone-900 underline-offset-2 hover:underline disabled:opacity-50"
+											class="text-xs font-bold text-foreground underline-offset-2 hover:underline disabled:opacity-50"
 											>Mark published</button
 										>
-										<label class="flex items-center gap-2 text-xs font-medium text-amber-900">
+										<label
+											class="flex items-center gap-2 text-xs font-medium text-[var(--status-uncertain-fg)]"
+										>
 											<input
 												type="checkbox"
 												checked={checkedAbsent[platform.targetId] ?? false}
@@ -1223,7 +1231,7 @@
 											disabled={busyTarget === platform.targetId ||
 												!checkedAbsent[platform.targetId]}
 											onclick={() => void reconcileTarget(platform.targetId!, 'not_published')}
-											class="text-xs font-bold text-stone-900 underline-offset-2 hover:underline disabled:opacity-50"
+											class="text-xs font-bold text-foreground underline-offset-2 hover:underline disabled:opacity-50"
 											>Allow manual retry</button
 										>
 									</div>
@@ -1247,7 +1255,7 @@
 									<div class="flex shrink-0 items-center gap-3">
 										<a
 											href="/accounts"
-											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-900 underline-offset-2 hover:underline"
+											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-foreground underline-offset-2 hover:underline"
 										>
 											Reconnect
 										</a>
@@ -1268,7 +1276,7 @@
 											type="button"
 											disabled={busyTarget === platform.targetId || busy === card.key}
 											onclick={() => void retryOne(platform.targetId!)}
-											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-900 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
+											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-foreground underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 										>
 											{busyTarget === platform.targetId ? 'Retrying…' : 'Retry'}
 										</button>
@@ -1304,7 +1312,7 @@
 											type="button"
 											disabled={busyTarget === platform.targetId || busy === card.key}
 											onclick={() => void retryOne(platform.targetId!)}
-											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-900 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
+											class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-foreground underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 										>
 											{busyTarget === platform.targetId ? 'Retrying…' : 'Retry now'}
 										</button>
@@ -1331,7 +1339,7 @@
 							href={video.remoteUrl || undefined}
 							target="_blank"
 							rel="noreferrer"
-							class="font-bold text-stone-900 underline">{video.remotePostId}</a
+							class="font-bold text-foreground underline">{video.remotePostId}</a
 						>
 					</p>
 				{/each}
@@ -1343,13 +1351,13 @@
 					<p class="text-[12px] font-bold text-stone-500">
 						{#if card.whenLabel === 'scheduled' && card.when}
 							Will publish
-							<span class="text-stone-900" title={card.whenTitle}>{card.whenText}</span>
+							<span class="text-foreground" title={card.whenTitle}>{card.whenText}</span>
 						{:else if card.whenLabel === 'published' && card.when}
 							Published
-							<span class="text-stone-900" title={card.whenTitle}>{card.whenText}</span>
+							<span class="text-foreground" title={card.whenTitle}>{card.whenText}</span>
 						{:else if card.when}
 							Edited
-							<span class="text-stone-900" title={card.whenTitle}>{card.whenText}</span>
+							<span class="text-foreground" title={card.whenTitle}>{card.whenText}</span>
 						{/if}
 					</p>
 
@@ -1357,7 +1365,7 @@
 						{#if card.kind === 'draft'}
 							<a
 								href="/compose?id={card.draftId}"
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 lowercase transition-colors hover:text-stone-900"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 lowercase transition-colors hover:text-foreground"
 							>
 								Edit Post
 							</a>
@@ -1372,14 +1380,14 @@
 								type="button"
 								disabled={duplicating === card.draftId}
 								onclick={() => void duplicateDraft(card.draftId)}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900 disabled:opacity-50"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-foreground disabled:opacity-50"
 							>
 								{duplicating === card.draftId ? 'Duplicating…' : 'Duplicate'}
 							</button>
 						{:else if (badge === 'scheduled' || badge === 'retrying') && card.targetId}
 							<a
 								href="/compose?id={card.draftId}"
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 lowercase transition-colors hover:text-stone-900"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 lowercase transition-colors hover:text-foreground"
 							>
 								Edit Post
 							</a>
@@ -1406,7 +1414,7 @@
 
 									applyRelativeReschedule();
 								}}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-foreground"
 							>
 								Reschedule
 							</button>
@@ -1429,7 +1437,7 @@
 								busy === card.key || (busyTarget !== null && failedIds.includes(busyTarget))}
 							<a
 								href="/compose?id={card.draftId}"
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-foreground"
 							>
 								Edit & re-draft
 							</a>
@@ -1437,7 +1445,7 @@
 								type="button"
 								disabled={duplicating === card.draftId}
 								onclick={() => void duplicateDraft(card.draftId)}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-900 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-foreground underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 							>
 								{duplicating === card.draftId ? 'Duplicating…' : 'Post again'}
 							</button>
@@ -1445,7 +1453,7 @@
 								type="button"
 								disabled={cardBusy || failedIds.length === 0}
 								onclick={() => void retryAll(card.key, failedIds)}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-900 underline-offset-2 transition-colors hover:underline disabled:opacity-50"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-foreground underline-offset-2 transition-colors hover:underline disabled:opacity-50"
 							>
 								{cardBusy
 									? 'Retrying…'
@@ -1458,7 +1466,7 @@
 								type="button"
 								disabled={duplicating === card.draftId}
 								onclick={() => void duplicateDraft(card.draftId)}
-								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-stone-900 disabled:opacity-50"
+								class="-my-3 inline-flex min-h-11 items-center text-[12px] font-bold text-stone-500 transition-colors hover:text-foreground disabled:opacity-50"
 							>
 								{duplicating === card.draftId ? 'Duplicating…' : 'Post again'}
 							</button>
@@ -1474,8 +1482,8 @@
 								type="button"
 								class="flex-1 rounded-md py-1.5 text-[12px] font-bold transition-colors {rescheduleMode ===
 								'relative'
-									? 'bg-white text-stone-900 shadow-sm'
-									: 'text-stone-500 hover:text-stone-900'}"
+									? 'bg-card text-foreground shadow-sm'
+									: 'text-stone-500 hover:text-foreground'}"
 								onclick={() => {
 									rescheduleMode = 'relative';
 									applyRelativeReschedule();
@@ -1487,8 +1495,8 @@
 								type="button"
 								class="flex-1 rounded-md py-1.5 text-[12px] font-bold transition-colors {rescheduleMode ===
 								'absolute'
-									? 'bg-white text-stone-900 shadow-sm'
-									: 'text-stone-500 hover:text-stone-900'}"
+									? 'bg-card text-foreground shadow-sm'
+									: 'text-stone-500 hover:text-foreground'}"
 								onclick={() => {
 									rescheduleMode = 'absolute';
 								}}
@@ -1510,14 +1518,14 @@
 										aria-label="Reschedule in amount"
 										bind:value={rescheduleRelativeValue}
 										oninput={applyRelativeReschedule}
-										class="w-20 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-center text-[13px] font-bold text-stone-900 transition-colors focus:border-stone-400 focus:bg-white focus:outline-none"
+										class="w-20 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-center text-[13px] font-bold text-foreground transition-colors focus:border-stone-400 focus:bg-card focus:outline-none"
 									/>
 									<select
 										data-testid="reschedule-offset-unit"
 										aria-label="Reschedule in unit"
 										bind:value={rescheduleRelativeUnit}
 										onchange={applyRelativeReschedule}
-										class="flex-1 appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-stone-900 transition-colors focus:border-stone-400 focus:bg-white focus:outline-none"
+										class="flex-1 appearance-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-[13px] font-bold text-foreground transition-colors focus:border-stone-400 focus:bg-card focus:outline-none"
 									>
 										<option value="mins">Minutes</option>
 										<option value="hours">Hours</option>
@@ -1537,7 +1545,7 @@
 										data-testid="reschedule-datetime"
 										min={minRescheduleAt}
 										bind:value={rescheduleAt}
-										class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2 text-sm font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+										class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2 text-sm font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 									/>
 								</div>
 							</div>
@@ -1560,7 +1568,7 @@
 							<button
 								type="button"
 								onclick={() => (rescheduleId = null)}
-								class="rounded-full border border-stone-200 px-4 py-1.5 text-xs font-bold text-stone-500 hover:text-stone-900"
+								class="rounded-full border border-stone-200 px-4 py-1.5 text-xs font-bold text-stone-500 hover:text-foreground"
 								>Keep</button
 							>
 						</div>
@@ -1571,14 +1579,14 @@
 
 		{#if !loading && !loadFailed && visible.length === 0}
 			<div
-				class="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-stone-200/80 bg-white px-4 py-20 text-center"
+				class="flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-stone-200/80 bg-card px-4 py-20 text-center"
 			>
 				<div
 					class="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-stone-100 bg-stone-50 text-stone-500 shadow-sm"
 				>
 					<CalendarClock class="h-6 w-6" />
 				</div>
-				<h3 class="mb-2 text-lg font-extrabold tracking-tight text-stone-900">
+				<h3 class="mb-2 text-lg font-extrabold tracking-tight text-foreground">
 					{emptyPostsHeading(activeTab)}
 				</h3>
 				<p class="max-w-sm text-[13px] leading-relaxed font-medium text-stone-500">
@@ -1625,7 +1633,7 @@
 
 {#if pendingDelete}
 	<div
-		class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700 shadow-lg"
+		class="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-full border border-stone-200 bg-card px-4 py-2 text-sm text-stone-700 shadow-lg"
 		role="status"
 	>
 		<span>Draft deleted</span>

@@ -432,7 +432,9 @@
 	<div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 		<div>
 			<p class="text-[11px] font-bold tracking-widest text-stone-500 uppercase">Integrations</p>
-			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900">Connected Accounts</h1>
+			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-foreground">
+				Connected Accounts
+			</h1>
 		</div>
 		<button
 			type="button"
@@ -469,7 +471,7 @@
 	{/if}
 
 	<div
-		class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
+		class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-card shadow-[0_8px_30px_-12px_rgb(28_25_23/0.06)]"
 	>
 		{#if initialLoading && connections.length === 0}
 			<div class="animate-pulse" aria-hidden="true">
@@ -492,7 +494,7 @@
 				<button
 					type="button"
 					onclick={() => void load()}
-					class="rounded-full border border-stone-300 bg-white px-4 py-1.5 text-[12px] font-bold text-stone-900 transition-colors hover:bg-stone-100"
+					class="rounded-full border border-stone-300 bg-card px-4 py-1.5 text-[12px] font-bold text-foreground transition-colors hover:bg-stone-100"
 				>
 					Retry
 				</button>
@@ -519,7 +521,7 @@
 								undefined}
 						/>
 						<div>
-							<h3 class="text-[15px] leading-tight font-extrabold tracking-tight text-stone-900">
+							<h3 class="text-[15px] leading-tight font-extrabold tracking-tight text-foreground">
 								{platformName(account.platform)}
 							</h3>
 							<p
@@ -547,7 +549,7 @@
 								type="button"
 								onclick={() => reconnectAccount(account)}
 								disabled={verifying === account.id || loading}
-								class="text-xs font-bold text-stone-900 underline">Reconnect</button
+								class="text-xs font-bold text-foreground underline">Reconnect</button
 							>
 							<button
 								type="button"
@@ -601,7 +603,7 @@
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="connect-dialog-title"
-			class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-stone-200/80 bg-white p-6 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] sm:p-8"
+			class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-stone-200/80 bg-card p-6 shadow-[0_16px_40px_-12px_rgb(28_25_23/0.15)] sm:p-8"
 			transition:fly={{ y: 20, duration: 250, opacity: 0 }}
 			use:dialogFocus={{
 				onEscape: () => {
@@ -613,7 +615,7 @@
 				<div>
 					<h2
 						id="connect-dialog-title"
-						class="text-2xl font-extrabold tracking-tight text-stone-900"
+						class="text-2xl font-extrabold tracking-tight text-foreground"
 					>
 						Add Integration
 					</h2>
@@ -625,7 +627,7 @@
 					type="button"
 					bind:this={connectCloseBtn}
 					onclick={closeConnectDialog}
-					class="ml-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-50 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
+					class="ml-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-stone-50 text-stone-500 transition-colors hover:bg-stone-100 hover:text-foreground"
 					aria-label="Close add integration dialog"
 				>
 					<X class="h-5 w-5" />
@@ -644,10 +646,10 @@
 						<button
 							type="button"
 							onclick={backToPlatforms}
-							class="text-[13px] font-bold text-stone-500 hover:text-stone-900"
+							class="text-[13px] font-bold text-stone-500 hover:text-foreground"
 							>← All platforms</button
 						>
-						<h3 class="text-[17px] font-extrabold tracking-tight text-stone-900">
+						<h3 class="text-[17px] font-extrabold tracking-tight text-foreground">
 							{platformName(setupPanel)} isn't enabled yet
 						</h3>
 						<p class="text-xs font-medium text-stone-500">
@@ -660,7 +662,7 @@
 							<details class="group">
 								<summary
 									data-testid="setup-step-1"
-									class="flex cursor-pointer list-none items-center gap-2.5 p-3 text-xs font-bold text-stone-900 hover:bg-stone-50 [&::-webkit-details-marker]:hidden"
+									class="flex cursor-pointer list-none items-center gap-2.5 p-3 text-xs font-bold text-foreground hover:bg-stone-50 [&::-webkit-details-marker]:hidden"
 								>
 									<span
 										class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-stone-900 text-[10px] text-white"
@@ -677,7 +679,7 @@
 											href={setup.consoleUrl}
 											target="_blank"
 											rel="noreferrer"
-											class="font-bold text-stone-900 underline">{setup.consoleName}</a
+											class="font-bold text-foreground underline">{setup.consoleName}</a
 										>. {setup.consoleRequirement}
 									</p>
 									<p>Register this redirect URI in {setup.redirectField}:</p>
@@ -685,7 +687,7 @@
 										class="flex items-center gap-1 rounded-xl border border-stone-200/80 bg-stone-50 py-1 pr-1 pl-3"
 									>
 										<code
-											class="min-w-0 flex-1 overflow-x-auto font-mono text-[11px] whitespace-nowrap text-stone-900 select-all"
+											class="min-w-0 flex-1 overflow-x-auto font-mono text-[11px] whitespace-nowrap text-foreground select-all"
 											data-testid="setup-callback-uri">{redirectUri}</code
 										>
 										<CopyButton value={redirectUri} ariaLabel="Copy the redirect URI" />
@@ -695,7 +697,7 @@
 							<details class="group">
 								<summary
 									data-testid="setup-step-2"
-									class="flex cursor-pointer list-none items-center gap-2.5 p-3 text-xs font-bold text-stone-900 hover:bg-stone-50 [&::-webkit-details-marker]:hidden"
+									class="flex cursor-pointer list-none items-center gap-2.5 p-3 text-xs font-bold text-foreground hover:bg-stone-50 [&::-webkit-details-marker]:hidden"
 								>
 									<span
 										class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-stone-900 text-[10px] text-white"
@@ -709,16 +711,16 @@
 								<div class="space-y-2 px-3 pb-3 text-xs font-medium text-stone-600">
 									<p>
 										Put {#each missing as secret, index (secret)}{index > 0 ? ' and ' : ''}<code
-												class="font-mono text-[11px] text-stone-900">{secret}</code
+												class="font-mono text-[11px] text-foreground">{secret}</code
 											>{/each} in
-										<code class="font-mono text-[11px] text-stone-900">.dev.vars</code> — uncomment the
+										<code class="font-mono text-[11px] text-foreground">.dev.vars</code> — uncomment the
 										line if it is already there, otherwise add it — then run
 									</p>
 									{#if alreadySet.length}
 										<p>
 											Already set on the Worker:
 											{#each alreadySet as secret, index (secret)}{index > 0 ? ', ' : ''}<code
-													class="font-mono text-[11px] text-stone-900">{secret}</code
+													class="font-mono text-[11px] text-foreground">{secret}</code
 												>{/each}.
 										</p>
 									{/if}
@@ -726,7 +728,7 @@
 										class="flex items-center gap-1 rounded-xl border border-stone-200/80 bg-stone-50 py-1 pr-1 pl-3"
 									>
 										<code
-											class="min-w-0 flex-1 overflow-x-auto font-mono text-[11px] whitespace-nowrap text-stone-900 select-all"
+											class="min-w-0 flex-1 overflow-x-auto font-mono text-[11px] whitespace-nowrap text-foreground select-all"
 											data-testid="setup-command">{command}</code
 										>
 										<CopyButton value={command} ariaLabel="Copy the secrets command" />
@@ -749,7 +751,7 @@
 							href={setupGuideUrl(setupPanel)}
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block text-[13px] font-bold text-stone-900 underline"
+							class="inline-block text-[13px] font-bold text-foreground underline"
 							>Full {platformName(setupPanel)} steps</a
 						>
 					</div>
@@ -759,17 +761,17 @@
 					{#each availablePlatforms as platform (platform.id)}
 						<button
 							type="button"
-							class="group flex items-center justify-between rounded-[1.5rem] border border-stone-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-stone-300 hover:shadow-md"
+							class="group flex items-center justify-between rounded-[1.5rem] border border-stone-200/80 bg-card p-4 text-left shadow-sm transition-all hover:border-stone-300 hover:shadow-md"
 							onclick={() => pickPlatform(platform.id)}
 						>
 							<div class="flex items-center gap-4">
 								<span
-									class="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-stone-100 font-bold text-stone-600 shadow-sm transition-colors group-hover:bg-stone-200/50 group-hover:text-stone-900"
+									class="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-stone-100 font-bold text-stone-600 shadow-sm transition-colors group-hover:bg-stone-200/50 group-hover:text-foreground"
 								>
 									<SocialIcon platform={platform.id} className="h-5 w-5" />
 								</span>
 								<div>
-									<h3 class="text-[15px] font-extrabold tracking-tight text-stone-900">
+									<h3 class="text-[15px] font-extrabold tracking-tight text-foreground">
 										{platform.name}
 									</h3>
 									<p class="mt-0.5 text-[13px] font-medium text-stone-500">
@@ -797,10 +799,10 @@
 					<button
 						type="button"
 						onclick={backToPlatforms}
-						class="text-[13px] font-bold text-stone-500 hover:text-stone-900"
+						class="text-[13px] font-bold text-stone-500 hover:text-foreground"
 						>← All platforms</button
 					>
-					<h3 class="text-[17px] font-extrabold tracking-tight text-stone-900">
+					<h3 class="text-[17px] font-extrabold tracking-tight text-foreground">
 						YouTube privacy agreement
 					</h3>
 					<p class="text-sm leading-relaxed text-stone-600">
@@ -843,10 +845,10 @@
 					<button
 						type="button"
 						onclick={backToPlatforms}
-						class="text-[13px] font-bold text-stone-500 hover:text-stone-900"
+						class="text-[13px] font-bold text-stone-500 hover:text-foreground"
 						>← All platforms</button
 					>
-					<h3 class="text-[17px] font-extrabold tracking-tight text-stone-900">Bluesky</h3>
+					<h3 class="text-[17px] font-extrabold tracking-tight text-foreground">Bluesky</h3>
 					<ol class="list-decimal space-y-1 pl-4 text-xs font-medium text-stone-500">
 						<li>
 							Open
@@ -865,7 +867,7 @@
 						placeholder="handle.bsky.social"
 						aria-label="Bluesky handle"
 						bind:value={handle}
-						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2.5 text-sm font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2.5 text-sm font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 						required
 					/>
 					<input
@@ -873,7 +875,7 @@
 						placeholder="App password (xxxx-xxxx-xxxx-xxxx)"
 						aria-label="Bluesky app password"
 						bind:value={appPassword}
-						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2.5 text-sm font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2.5 text-sm font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 						required
 						autocomplete="off"
 					/>
@@ -892,10 +894,10 @@
 					<button
 						type="button"
 						onclick={backToPlatforms}
-						class="text-[13px] font-bold text-stone-500 hover:text-stone-900"
+						class="text-[13px] font-bold text-stone-500 hover:text-foreground"
 						>← All platforms</button
 					>
-					<h3 class="text-[17px] font-extrabold tracking-tight text-stone-900">Mastodon</h3>
+					<h3 class="text-[17px] font-extrabold tracking-tight text-foreground">Mastodon</h3>
 					<p class="text-xs font-medium text-stone-500">
 						Enter your instance (mastodon.social, hachyderm.io, …). You'll authorize on that site.
 					</p>
@@ -904,7 +906,7 @@
 						placeholder="https://mastodon.social"
 						aria-label="Mastodon instance URL"
 						bind:value={instanceUrl}
-						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2.5 text-sm font-bold text-stone-900 focus:border-stone-400 focus:bg-white focus:outline-none"
+						class="w-full rounded-xl border border-stone-200/80 bg-stone-50 px-3 py-2.5 text-sm font-bold text-foreground focus:border-stone-400 focus:bg-card focus:outline-none"
 						required
 					/>
 					{#if err}

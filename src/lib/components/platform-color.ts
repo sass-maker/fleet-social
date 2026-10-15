@@ -6,8 +6,8 @@ export const PLATFORM_COLOR: Record<string, string> = {
 	mastodon: 'text-indigo-500',
 	bluesky: 'text-sky-500',
 	linkedin: 'text-blue-600',
-	threads: 'text-stone-900',
-	x: 'text-stone-900'
+	threads: 'text-foreground',
+	x: 'text-foreground'
 };
 
 export function platformColorClass(platform: string): string {
