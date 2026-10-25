@@ -185,7 +185,8 @@ export function satisfiedMigrations(state) {
 				col('draft_media', 'provenance_json'),
 				idx('draft_media', 'draft_media_draft_sha_idx')
 			)
-		]
+		],
+		['0020_generation_slots.sql', all(tables.has('generators'), tables.has('generation_slots'))]
 	]
 		.filter(([, ok]) => ok)
 		.map(([name]) => String(name));

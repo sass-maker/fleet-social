@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { platformName, accountLabel } from '$lib/domain/platforms';
 	import { fleetProjects } from '$lib/domain/fleet-projects';
@@ -9,7 +10,15 @@
 	let notice = $state('');
 	let showSchedule = $state(false);
 	let showDelivery = $state(false);
-	let runAt = $state('');
+	// A generated release keeps the date it was planned for.
+	let runAt = $state(untrack(() => localInput(data.plannedFor)));
+	function localInput(date: Date | string | null) {
+		if (!date) return '';
+		const value = new Date(date);
+		return new Date(value.getTime() - value.getTimezoneOffset() * 60_000)
+			.toISOString()
+			.slice(0, 16);
+	}
 	const video = $derived(data.draft.media.find((item) => item.mime.startsWith('video/')));
 	const provenance = $derived(
 		(video ?? data.draft.media.find((item) => item.provenance))?.provenance ?? null

@@ -108,4 +108,22 @@ npm run media:push -- --project codevetter --source-ref clip-agent:run-8812 --fi
 
 Without `--receipt`, the script writes a receipt for the named generator from the file itself.
 
+## Scheduled generation
+
+**Planned** (`/generate`) lets you plan a release before its media exists. Choose a project, a generator, a brief and a release time. The generator is asked for media a lead time ahead of the release, which defaults to six hours and is set per generator.
+
+- A **cloud** or **API** generator is registered with a webhook URL and gets a signing secret, which is shown once. When a slot is due, the scheduler tick POSTs a `fleet.generation-request.v1` JSON body to the webhook. The body carries `slotId`, `projectId`, `title`, `brief`, `plannedFor` and an `intake` block with the `sourceRef` and URLs to push to. The request is signed: `X-Fleet-Signature` is `sha256=` plus the hex HMAC-SHA256 of `<X-Fleet-Timestamp>.<raw body>` under that secret. Any 2xx counts as accepted. Other responses and timeouts are retried after 2, 4, 8 and 16 minutes, and the slot is marked failed after five attempts.
+- A **local** generator cannot be reached by the Worker, so it collects its work instead. `POST /api/generation/claim` with `{ "generator": "<name>" }` and an intake key returns the due requests in the same format. Requests that are still unfinished are returned again, so a generator that crashed picks its work back up.
+- Either way, the generator answers through draft intake with the request's `projectId` and `intake.sourceRef` (`slot:<id>`), then attaches media with a receipt as above. A draft for an unknown slot, or with a different project, is refused. The slot becomes ready when the media arrives, and the review page then suggests the planned release time.
+- The calendar shows each slot as awaiting generation, generating, ready for review, failed or late. A slot is late when its release time has passed with no media. Once the delivery is scheduled, the slot no longer appears on the calendar and the delivery shows in its place. Failed or late slots can be retried, and any slot without media can be cancelled.
+
+A local generator's loop, with the same environment as `media:push`:
+
+```sh
+npm run generation:claim -- --generator mashup --json
+npm run media:push -- --project codevetter --source-ref slot:<id> --file out/video.mp4 --receipt out/media-receipt.json
+```
+
+Registering or removing a generator needs a browser session. Planning, cancelling and retrying slots work from a session or a `write` key.
+
 ## Upstream API reference
