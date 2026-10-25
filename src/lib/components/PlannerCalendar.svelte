@@ -43,7 +43,10 @@
 					range = { start: info.start, end: info.end };
 				},
 				eventClassNames(info) {
-					return ['planner-event', `state-${info.event.extendedProps.status}`];
+					return [
+						'planner-event',
+						`state-${String(info.event.extendedProps.status).replaceAll(' ', '-')}`
+					];
 				},
 				eventContent(info: EventContentArg) {
 					const wrapper = document.createElement('div');
@@ -58,7 +61,9 @@
 					const heading = document.createElement('strong');
 					heading.textContent = info.event.title;
 					const detail = document.createElement('span');
-					detail.textContent = `${info.timeText} · ${(info.event.extendedProps.platforms ?? []).map(platformName).join(' + ')}`;
+					const platforms: string[] = info.event.extendedProps.platforms ?? [];
+					// A generation slot has no destinations yet; its progress is the detail.
+					detail.textContent = `${info.timeText} · ${platforms.length ? platforms.map(platformName).join(' + ') : info.event.extendedProps.status}`;
 					copy.append(heading, detail);
 					wrapper.append(copy);
 					return { domNodes: [wrapper] };
@@ -292,6 +297,16 @@
 	.calendar-frame :global(.state-uncertain) {
 		background: var(--status-uncertain-bg);
 		border-color: #b9a5e2;
+	}
+	.calendar-frame :global(.state-generating),
+	.calendar-frame :global(.state-awaiting-generation) {
+		border-style: dashed;
+	}
+	.calendar-frame :global(.state-generation-failed),
+	.calendar-frame :global(.state-generation-late) {
+		background: var(--status-error-bg);
+		border-color: #e2958c;
+		border-style: dashed;
 	}
 	.calendar-frame :global(.fc-event:focus-visible) {
 		outline: 2px solid var(--studio-accent);

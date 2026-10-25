@@ -9,6 +9,7 @@ import { parseMediaReceipt, type MediaProvenance } from '$lib/domain/media-recei
 import { deleteMediaObjects, saveMediaBytes, saveVideoFile, sha256Hex } from '$lib/server/media';
 import { draftHasInFlightPublish } from '$lib/server/publish-plan';
 import { requireAnyScope, requireScope, requireUser } from '$lib/server/require';
+import { markSlotReady } from '$lib/server/generation';
 
 const MAX_SEGMENT_INDEX = 100;
 const MAX_ALT_LENGTH = 1500;
@@ -151,7 +152,10 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			// The digest was verified when that row was stored, so a retried push
 			// returns it without re-hashing or storing the bytes twice.
 			const already = existing.find((m) => m.sha256 === provenance.sha256);
-			if (already) return ok({ media: serializeMedia(already), items: [], existing: true });
+			if (already) {
+				await markSlotReady(locals.db, draft.sourceRef, draft.id);
+				return ok({ media: serializeMedia(already), items: [], existing: true });
+			}
 			const [file] = files;
 			const fileMime = (file.type || '').toLowerCase().split(';')[0].trim();
 			if (
@@ -260,6 +264,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			}
 			created.push(serializeMedia(media));
 		}
+		await markSlotReady(locals.db, draft.sourceRef, draft.id);
 		return ok({ media: created.length === 1 ? created[0] : created, items: created }, 201);
 	} catch (err) {
 		return handleError(err);

@@ -278,3 +278,53 @@ export const appSettings = sqliteTable('app_settings', {
 	value: text('value').notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull()
 });
+
+/** Something that makes media: a local agent, a cloud job or an API. Cloud and
+ *  API generators are called at `endpoint_url`, signed with the secret. */
+export const generators = sqliteTable(
+	'generators',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		name: text('name').notNull(),
+		kind: text('kind').notNull(),
+		endpointUrl: text('endpoint_url'),
+		secretEnc: text('secret_enc'),
+		leadMinutes: integer('lead_minutes').notNull().default(360),
+		createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+		updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull()
+	},
+	(t) => [uniqueIndex('generators_user_name_uq').on(t.userId, t.name)]
+);
+
+/** A planned release whose media a generator makes before `planned_for`. */
+export const generationSlots = sqliteTable(
+	'generation_slots',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		generatorId: text('generator_id')
+			.notNull()
+			.references(() => generators.id, { onDelete: 'cascade' }),
+		projectId: text('project_id').notNull(),
+		title: text('title'),
+		brief: text('brief').notNull(),
+		plannedFor: integer('planned_for', { mode: 'timestamp_ms' }).notNull(),
+		requestAt: integer('request_at', { mode: 'timestamp_ms' }).notNull(),
+		status: text('status').notNull().default('planned'),
+		attempts: integer('attempts').notNull().default(0),
+		lastError: text('last_error'),
+		requestedAt: integer('requested_at', { mode: 'timestamp_ms' }),
+		draftId: text('draft_id').references(() => drafts.id, { onDelete: 'set null' }),
+		createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+		updatedAt: integer('updated_at', { mode: 'timestamp_ms' }).notNull()
+	},
+	(t) => [
+		index('generation_slots_status_request_idx').on(t.status, t.requestAt),
+		index('generation_slots_user_planned_idx').on(t.userId, t.plannedFor)
+	]
+);

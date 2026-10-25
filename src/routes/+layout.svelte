@@ -49,6 +49,7 @@
 	const links = [
 		{ href: '/create', label: 'Create' },
 		{ href: '/', label: 'Calendar' },
+		{ href: '/generate', label: 'Planned' },
 		{ href: '/?view=review', label: 'Review' },
 		{ href: '/posts', label: 'Library' },
 		{ href: '/accounts', label: 'Accounts' }

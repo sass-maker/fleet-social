@@ -80,14 +80,7 @@ export async function pushMedia(options) {
 	const doFetch = options.fetch ?? fetch;
 	const step = options.onStep ?? (() => {});
 	const base = options.baseUrl.replace(/\/+$/, '');
-	/** @type {Record<string, string>} */
-	const headers = { Authorization: `Bearer ${options.apiKey}` };
-	// A deployment behind Cloudflare Access needs a service token on every
-	// machine call, alongside the app's own key.
-	if (options.accessClientId && options.accessClientSecret) {
-		headers['CF-Access-Client-Id'] = options.accessClientId;
-		headers['CF-Access-Client-Secret'] = options.accessClientSecret;
-	}
+	const headers = authHeaders(options);
 
 	const bytes = new Uint8Array(await readFile(options.file));
 	const mime = mimeFor(options.file);
@@ -148,6 +141,37 @@ export async function pushMedia(options) {
 		mediaExisted: Boolean(mediaBody.existing),
 		reviewUrl: `${base}/review/${draftId}`
 	};
+}
+
+/**
+ * Due generation slots for a generator the Worker cannot call. Each request
+ * names the sourceRef and project to push the finished media under.
+ * @param {{ baseUrl: string, apiKey: string, accessClientId?: string, accessClientSecret?: string, generator: string, fetch?: typeof fetch }} options
+ */
+export async function claimGeneration(options) {
+	const doFetch = options.fetch ?? fetch;
+	const base = options.baseUrl.replace(/\/+$/, '');
+	const response = await doFetch(`${base}/api/generation/claim`, {
+		method: 'POST',
+		headers: { ...authHeaders(options), 'Content-Type': 'application/json' },
+		body: JSON.stringify({ generator: options.generator })
+	});
+	const body = await readJson(response);
+	if (!response.ok) throw new Error(`Claim: ${body.error ?? response.status}`);
+	return body.requests;
+}
+
+/** @param {{ apiKey: string, accessClientId?: string, accessClientSecret?: string }} options */
+function authHeaders(options) {
+	/** @type {Record<string, string>} */
+	const headers = { Authorization: `Bearer ${options.apiKey}` };
+	// A deployment behind Cloudflare Access needs a service token on every
+	// machine call, alongside the app's own key.
+	if (options.accessClientId && options.accessClientSecret) {
+		headers['CF-Access-Client-Id'] = options.accessClientId;
+		headers['CF-Access-Client-Secret'] = options.accessClientSecret;
+	}
+	return headers;
 }
 
 /** @param {Response} response */

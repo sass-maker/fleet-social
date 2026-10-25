@@ -34,6 +34,7 @@ import { PUBLISH_RESERVE_CALLS, publishTarget, refreshDraftStatuses } from './pu
 import type { SubrequestBudget } from './budget';
 import { purgeExpiredMfaChallenges } from './totp';
 import { purgeExpiredSessions } from './auth';
+import { dispatchDueSlots } from './generation';
 
 export const HEARTBEAT_ID = 'default';
 /** GitHub cron is often delayed 15–75 minutes. This is display-only. */
@@ -509,6 +510,14 @@ export async function runSchedulerTick(
 	// unless the digest env is configured.
 	// Never let alerting break the publish path (e.g. env configured before
 	// the 0014 migration landed): a digest error is logged, not thrown.
+	// Generation requests go after publishing, which owns the budget first.
+	// A generator outage must never stop the tick, so errors are logged.
+	let generation: Array<{ id: string; status: string }> = [];
+	try {
+		generation = await dispatchDueSlots(db, env, { fetchImpl: opts.fetchImpl, budget });
+	} catch (err) {
+		console.error('[scheduler] generation dispatch failed', err);
+	}
 	let digest: FailureDigestResult = { sent: false, failedCount: 0, reason: 'error' };
 	try {
 		digest = await maybeSendFailureDigest(db, env, { fetchImpl: opts.fetchImpl });
@@ -516,7 +525,7 @@ export async function runSchedulerTick(
 		console.error('[scheduler] failure digest failed', err);
 	}
 	const deferred = results.filter((r) => r.status === 'deferred').length;
-	return { processed: results.length - deferred, deferred, results, digest };
+	return { processed: results.length - deferred, deferred, results, generation, digest };
 }
 
 export async function consumePublishJob(

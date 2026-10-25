@@ -19,6 +19,7 @@ import {
 import { fail, handleError, ok } from '$lib/server/http';
 import { requireAnyScope, requireScope, requireUser } from '$lib/server/require';
 import { serializeDraft } from '$lib/server/serialize';
+import { linkSlotDraft, slotForIntake } from '$lib/server/generation';
 import { normalizeSelectedConnectionIds } from '$lib/domain/request-limits';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
@@ -167,6 +168,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (!title.ok) return fail(title.error, 400);
 		const text = parseDraftBody(fields.baseBody ?? '');
 		if (!text.ok) return fail(text.error, 400);
+		const slotCheck = await slotForIntake(locals.db, user.id, sourceRef, fields.projectId);
+		if (!slotCheck.ok) return fail(slotCheck.error, 400);
+		const slot = slotCheck.slot;
 		if (sourceRef) {
 			const existing = await locals.db
 				.select()
@@ -187,7 +191,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.values({
 				id: newId(),
 				userId: user.id,
-				title: title.value,
+				title: title.value ?? slot?.title ?? null,
 				baseBody: text.value,
 				projectId: fields.projectId,
 				sourceRef,
@@ -213,6 +217,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			if (existing) return ok({ draft: serializeDraft(existing), existing: true });
 		}
 		if (!draft) return fail('Could not create draft', 409);
+		if (slot) await linkSlotDraft(locals.db, slot.id, draft.id);
 		return ok({ draft: serializeDraft(draft, { variants: [], media: [], targets: [] }) }, 201);
 	} catch (err) {
 		return handleError(err);

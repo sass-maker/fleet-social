@@ -9,7 +9,7 @@
 			extendedProps: {
 				status: event.status,
 				platforms: event.platforms,
-				posterSrc: poster(event.draftId)
+				posterSrc: event.draftId ? poster(event.draftId) : undefined
 			}
 		}))
 	);
