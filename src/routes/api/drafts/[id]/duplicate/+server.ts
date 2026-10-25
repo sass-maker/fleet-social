@@ -116,6 +116,8 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 				altText: m.altText,
 				sortOrder: m.sortOrder,
 				segmentIndex: m.segmentIndex,
+				sha256: m.sha256,
+				provenanceJson: m.provenanceJson,
 				createdAt: now
 			});
 		}

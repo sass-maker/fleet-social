@@ -50,7 +50,8 @@
 		"db:seed:local": "node scripts/seed-local.mjs",
 		"db:migrate:remote": "node scripts/migrate-remote.mjs",
 		"doctor": "node scripts/doctor.mjs",
-		"demo": "node scripts/rehearsal.mjs"
+		"demo": "node scripts/rehearsal.mjs",
+		"media:push": "node scripts/push-media.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

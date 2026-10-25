@@ -139,6 +139,29 @@ export async function saveVideoFile(
 	return { storageKey, size: file.size, mime: check.mime, width: null, height: null };
 }
 
+type DigestStreamCtor = new (algorithm: string) => WritableStream<Uint8Array> & {
+	digest: Promise<ArrayBuffer>;
+};
+
+/**
+ * Hex SHA-256 of an uploaded file. Workers' DigestStream hashes a 95MB video
+ * as it streams; `subtle.digest` would need a second full copy in an isolate
+ * that already holds the multipart body. Node (tests, rehearsal) has no
+ * DigestStream and takes the buffered path.
+ */
+export async function sha256Hex(blob: Blob): Promise<string> {
+	const DigestStream = (crypto as unknown as { DigestStream?: DigestStreamCtor }).DigestStream;
+	let digest: ArrayBuffer;
+	if (DigestStream) {
+		const stream = new DigestStream('SHA-256');
+		await blob.stream().pipeTo(stream);
+		digest = await stream.digest;
+	} else {
+		digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
+	}
+	return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 // Keys are always minted by saveMediaBytes (`<ms>-<16 hex>.<ext>`): enforce
 // that shape exactly. Blocks traversal, NUL/control chars, overlong keys and
 // `%2F`-decoded slashes (SvelteKit decodes params before this check).
