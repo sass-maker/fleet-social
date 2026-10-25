@@ -72,4 +72,40 @@ Send a canonical active `projectId` and a stable `sourceRef` for idempotency:
 
 The first request creates a draft; a repeated `(projectId, sourceRef)` returns the existing draft without changing its content. The owner selects connected destinations and approves the saved revision in Compose. Any copy, media, platform variant, or destination change requires renewed approval. If a provider response is uncertain, Posts asks the owner to inspect that account and record the live post URL or confirm no post exists before a manual retry.
 
+## Generated media
+
+Any generator hands its finished video or image to Fleet Social the same way: a local clipping agent such as Mashup, a cloud render job, or a generation API called on a schedule. Create or find the draft as above, then attach the file to it with `POST /api/drafts/:id/media` as multipart form data with a `file` field and a `receipt` field holding this JSON:
+
+```json
+{
+	"schema": "fleet.media-receipt.v1",
+	"generator": { "kind": "cloud", "name": "clip-agent", "version": "2.1.0", "runId": "run-8812" },
+	"output": { "sha256": "<hex digest of the file>", "bytes": 4819230, "mime": "video/mp4" },
+	"sources": [
+		{
+			"title": "Founder interview",
+			"creator": "Example Show",
+			"sourceUrl": "https://example.com/episode-4",
+			"license": "CC BY 4.0",
+			"licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+		}
+	]
+}
+```
+
+- `generator.kind` is `local`, `cloud` or `api`. Mashup's own `fleet.mashup-media-receipt.v1` export is also accepted as it is.
+- The server hashes the upload and refuses it with **400** unless the size, type and SHA-256 match the receipt. Posting the same file to the same draft again returns **200** with `existing: true` and stores nothing new, so a generator can retry after a dropped connection.
+- An intake key needs a receipt, and it can only add media to a draft that intake created and that the owner has not yet approved or scheduled. After that it gets **409**, and changes are made by the owner.
+- Review shows the generator, the matched digest and the credited sources. Approval still belongs to the owner's session.
+- Uploads are limited to 95 MB per file.
+
+The `media:push` script does both calls for a file on disk. It sends the instance's own `Origin`, which SvelteKit requires on every multipart POST. Any other client must send it too. Set `FLEET_SOCIAL_URL` and `FLEET_SOCIAL_API_KEY`, plus `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` when the instance is behind [Cloudflare Access](access.md):
+
+```sh
+npm run media:push -- --project codevetter --source-ref mashup:edit-42 --file out/video.mp4 --receipt out/media-receipt.json
+npm run media:push -- --project codevetter --source-ref clip-agent:run-8812 --file clip.mp4 --generator clip-agent --kind local --caption "Draft caption"
+```
+
+Without `--receipt`, the script writes a receipt for the named generator from the file itself.
+
 ## Upstream API reference

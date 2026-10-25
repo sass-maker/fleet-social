@@ -108,12 +108,15 @@ CREATE TABLE IF NOT EXISTS \`draft_media\` (
 	\`alt_text\` text,
 	\`sort_order\` integer NOT NULL DEFAULT 0,
 	\`segment_index\` integer NOT NULL DEFAULT 0,
+	\`sha256\` text,
+	\`provenance_json\` text,
 	\`created_at\` integer NOT NULL,
 	FOREIGN KEY (\`draft_id\`) REFERENCES \`drafts\`(\`id\`) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS \`draft_media_draft_idx\` ON \`draft_media\` (\`draft_id\`);
 CREATE INDEX IF NOT EXISTS \`draft_media_draft_segment_idx\` ON \`draft_media\` (\`draft_id\`, \`segment_index\`);
 CREATE INDEX IF NOT EXISTS \`draft_media_storage_key_idx\` ON \`draft_media\` (\`storage_key\`);
+CREATE INDEX IF NOT EXISTS \`draft_media_draft_sha_idx\` ON \`draft_media\` (\`draft_id\`, \`sha256\`);
 
 CREATE TABLE IF NOT EXISTS \`publish_targets\` (
 	\`id\` text PRIMARY KEY NOT NULL,
@@ -236,7 +239,8 @@ const BACKFILL_INDEXES = [
 	'CREATE INDEX IF NOT EXISTS connections_user_created_idx ON connections (user_id, created_at)',
 	'CREATE INDEX IF NOT EXISTS publish_targets_status_updated_idx ON publish_targets (status, updated_at)',
 	'CREATE INDEX IF NOT EXISTS sessions_expires_idx ON sessions (expires_at)',
-	'CREATE INDEX IF NOT EXISTS mfa_challenges_expires_idx ON mfa_challenges (expires_at)'
+	'CREATE INDEX IF NOT EXISTS mfa_challenges_expires_idx ON mfa_challenges (expires_at)',
+	'CREATE INDEX IF NOT EXISTS draft_media_draft_sha_idx ON draft_media (draft_id, sha256)'
 ];
 
 async function tableColumns(d1: D1Database, table: string): Promise<Set<string>> {
@@ -303,6 +307,13 @@ const COLUMN_BACKFILLS: Array<{ table: string; columns: { name: string; ddl: str
 			{ name: 'source_ref', ddl: 'source_ref text' },
 			{ name: 'approval_hash', ddl: 'approval_hash text' },
 			{ name: 'approved_at', ddl: 'approved_at integer' }
+		]
+	},
+	{
+		table: 'draft_media',
+		columns: [
+			{ name: 'sha256', ddl: 'sha256 text' },
+			{ name: 'provenance_json', ddl: 'provenance_json text' }
 		]
 	},
 	{ table: 'api_keys', columns: [{ name: 'scopes', ddl: 'scopes text' }] },

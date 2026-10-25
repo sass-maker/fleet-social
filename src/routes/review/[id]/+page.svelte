@@ -11,6 +11,14 @@
 	let showDelivery = $state(false);
 	let runAt = $state('');
 	const video = $derived(data.draft.media.find((item) => item.mime.startsWith('video/')));
+	const provenance = $derived(
+		(video ?? data.draft.media.find((item) => item.provenance))?.provenance ?? null
+	);
+	const generatorKind = {
+		local: 'Local generator',
+		cloud: 'Cloud generator',
+		api: 'Generation API'
+	};
 	const destinations = $derived(
 		data.connections.filter((connection) =>
 			data.draft.selectedConnectionIds?.includes(connection.id)
@@ -138,6 +146,35 @@
 					<p class="caption">{'Edited with Mashup.\n\n' + sourceCredits}</p>
 				</details>{/if}
 		</section>
+		{#if provenance}<section>
+				<h3>Generated media</h3>
+				<p>
+					{provenance.generator.name} · {generatorKind[provenance.generator.kind]}{provenance
+						.generator.version
+						? ` · ${provenance.generator.version}`
+						: ''}
+				</p>
+				<p class="studio-muted">
+					SHA-256 {provenance.sha256.slice(0, 12)}… matched the uploaded file.{provenance.sources
+						.length
+						? ` ${provenance.sources.length} source${provenance.sources.length === 1 ? '' : 's'} credited.`
+						: ' No sources declared.'}
+				</p>
+				{#if provenance.sources.length}<details class="source-credits">
+						<summary>Sources</summary>
+						<ul>
+							{#each provenance.sources as source (source.sourceUrl)}<li>
+									{#if source.sourceUrl.startsWith('https://')}<a
+											href={source.sourceUrl}
+											target="_blank"
+											rel="noreferrer">{source.title}</a
+										>{:else}{source.title}{/if}{source.creator
+										? ` — ${source.creator}`
+										: ''}{source.license ? ` · ${source.license}` : ''}
+								</li>{/each}
+						</ul>
+					</details>{/if}
+			</section>{/if}
 		<section>
 			<h3>Destinations to approve</h3>
 			{#each destinations as destination (destination.id)}
@@ -171,7 +208,9 @@
 					? 'Mashup proof video · CC BY 3.0'
 					: data.draft.sourceRef?.startsWith('mashup-receipt:')
 						? 'Verified Mashup export · sources retained'
-						: data.draft.sourceRef || 'Owner-created draft'}
+						: provenance
+							? `Verified ${provenance.generator.name} export · ${data.draft.sourceRef}`
+							: data.draft.sourceRef || 'Owner-created draft'}
 			</p>
 			<p class="studio-muted">
 				Approval covers this saved media, caption and destination set. Editing any of them requires
@@ -266,8 +305,12 @@
 	.source-credits summary {
 		cursor: pointer;
 	}
-	.source-credits p {
+	.source-credits p,
+	.source-credits ul {
 		margin-top: 13px;
+	}
+	.source-credits li {
+		line-height: 1.6;
 	}
 	.review-heading {
 		margin: 24px 0 30px;

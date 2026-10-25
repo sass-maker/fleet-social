@@ -64,6 +64,7 @@ export const INTROSPECTION_SQL = `SELECT
   (SELECT group_concat(name, ' ') FROM pragma_table_info('sessions')) AS sessions_cols,
   (SELECT group_concat(name, ' ') FROM pragma_table_info('api_keys')) AS api_keys_cols,
   (SELECT group_concat(name, ' ') FROM pragma_table_info('drafts')) AS drafts_cols,
+  (SELECT group_concat(name, ' ') FROM pragma_table_info('draft_media')) AS draft_media_cols,
   (SELECT group_concat(name || ':' || "unique", ' ') FROM pragma_index_list('publish_targets')) AS publish_targets_idx,
   (SELECT group_concat(name, ' ') FROM pragma_index_list('oauth_pending')) AS oauth_pending_idx,
   (SELECT group_concat(name, ' ') FROM pragma_index_list('mfa_challenges')) AS mfa_challenges_idx,
@@ -87,7 +88,7 @@ export function readState(row) {
 			.filter(Boolean);
 	/** @type {Map<string, Set<string>>} */
 	const columns = new Map();
-	for (const table of ['users', 'sessions', 'api_keys', 'drafts']) {
+	for (const table of ['users', 'sessions', 'api_keys', 'drafts', 'draft_media']) {
 		columns.set(table, new Set(list(row?.[`${table}_cols`])));
 	}
 	/** @type {Map<string, Map<string, boolean>>} */
@@ -175,6 +176,14 @@ export function satisfiedMigrations(state) {
 				col('drafts', 'approval_hash'),
 				col('drafts', 'approved_at'),
 				idx('drafts', 'drafts_project_source_uq')
+			)
+		],
+		[
+			'0019_media_provenance.sql',
+			all(
+				col('draft_media', 'sha256'),
+				col('draft_media', 'provenance_json'),
+				idx('draft_media', 'draft_media_draft_sha_idx')
 			)
 		]
 	]

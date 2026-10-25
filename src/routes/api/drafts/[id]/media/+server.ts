@@ -4,9 +4,11 @@ import { canAttachMoreImages, MAX_IMAGES_PER_SEGMENT } from '$lib/domain/media-l
 import { chunkIds, first, newId } from '$lib/server/db/client';
 import { draftMedia, draftVariants, drafts, publishTargets } from '$lib/server/db/schema';
 import { fail, handleError, ok } from '$lib/server/http';
-import { deleteMediaObjects, saveMediaBytes, saveVideoFile } from '$lib/server/media';
+import { hasApiScope, type ApiScope } from '$lib/domain/api-scopes';
+import { parseMediaReceipt, type MediaProvenance } from '$lib/domain/media-receipt';
+import { deleteMediaObjects, saveMediaBytes, saveVideoFile, sha256Hex } from '$lib/server/media';
 import { draftHasInFlightPublish } from '$lib/server/publish-plan';
-import { requireScope, requireUser } from '$lib/server/require';
+import { requireAnyScope, requireScope, requireUser } from '$lib/server/require';
 
 const MAX_SEGMENT_INDEX = 100;
 const MAX_ALT_LENGTH = 1500;
@@ -91,9 +93,26 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			return fail('Upload too large', 413);
 		}
 		const user = requireUser(locals.user);
-		requireScope(locals, 'write');
+		requireAnyScope(locals, ['write', 'intake']);
+		// A generator's intake key may attach receipted media to the draft it
+		// created, and only before the owner has acted on it. Approval, edits and
+		// scheduling stay with the owner's session.
+		const intakeOnly = Boolean(
+			locals.apiKeyScopes && !hasApiScope(locals.apiKeyScopes as ApiScope[], 'write')
+		);
 		const draft = await ownDraft(locals, params.id, user.id);
 		if (!draft) return fail('Not found', 404);
+		if (intakeOnly) {
+			if (!draft.sourceRef) return fail('Intake keys can only add media to intake drafts', 403);
+			const targets = await locals.db
+				.select({ id: publishTargets.id })
+				.from(publishTargets)
+				.where(eq(publishTargets.draftId, params.id))
+				.limit(1);
+			if (draft.approvedAt || targets.length) {
+				return fail('This draft is already in review; the owner changes it from here', 409);
+			}
+		}
 		const busy = await rejectIfPublishing(locals.db, params.id);
 		if (busy) return busy;
 		const form = await request.formData();
@@ -111,6 +130,38 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			if (entry instanceof File && entry.size > 0 && !files.includes(entry)) files.push(entry);
 		}
 		if (!files.length) return fail('file required');
+
+		let provenance: MediaProvenance | null = null;
+		const rawReceipt = form.get('receipt');
+		if (typeof rawReceipt === 'string' && rawReceipt.trim()) {
+			let parsedJson: unknown;
+			try {
+				parsedJson = JSON.parse(rawReceipt);
+			} catch {
+				return fail('receipt must be JSON', 400);
+			}
+			const parsed = parseMediaReceipt(parsedJson);
+			if (!parsed.ok) return fail(parsed.error, 400);
+			provenance = parsed.value;
+		} else if (intakeOnly) {
+			return fail('receipt required for media intake', 400);
+		}
+		if (provenance) {
+			if (files.length !== 1) return fail('A receipt describes exactly one file', 400);
+			// The digest was verified when that row was stored, so a retried push
+			// returns it without re-hashing or storing the bytes twice.
+			const already = existing.find((m) => m.sha256 === provenance.sha256);
+			if (already) return ok({ media: serializeMedia(already), items: [], existing: true });
+			const [file] = files;
+			const fileMime = (file.type || '').toLowerCase().split(';')[0].trim();
+			if (
+				file.size !== provenance.bytes ||
+				(provenance.mime && provenance.mime !== fileMime) ||
+				(await sha256Hex(file)) !== provenance.sha256
+			) {
+				return fail('File does not match its receipt', 400);
+			}
+		}
 		// formData() materialises the body once. Videos go to R2 as Blobs below
 		// so a 95MB MP4 does not require a second full ArrayBuffer in the Worker.
 		// Content-Length bounds the first copy before the multipart parse.
@@ -196,6 +247,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 						altText: i === 0 ? altText : null,
 						sortOrder: existingOnSegment + i,
 						segmentIndex,
+						sha256: provenance?.sha256 ?? null,
+						provenanceJson: provenance ? JSON.stringify(provenance) : null,
 						createdAt: new Date()
 					})
 					.returning();

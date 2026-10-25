@@ -1,3 +1,4 @@
+import { parseStoredProvenance } from '$lib/domain/media-receipt';
 import { parseJson } from './db/client';
 import type { InferSelectModel } from 'drizzle-orm';
 import type { connections, draftMedia, drafts, draftVariants, publishTargets } from './db/schema';
@@ -46,6 +47,8 @@ export function serializeMedia(m: Media) {
 		altText: m.altText,
 		sortOrder: m.sortOrder,
 		segmentIndex: m.segmentIndex,
+		sha256: m.sha256 ?? null,
+		provenance: parseStoredProvenance(m.provenanceJson),
 		createdAt: m.createdAt
 	};
 }

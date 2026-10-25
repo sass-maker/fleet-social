@@ -146,10 +146,16 @@ export const draftMedia = sqliteTable(
 		altText: text('alt_text'),
 		sortOrder: integer('sort_order').notNull().default(0),
 		segmentIndex: integer('segment_index').notNull().default(0),
+		// Set when a generator pushed the file with a media receipt: the verified
+		// digest (retries of the same push are idempotent on it) and the
+		// generator/source provenance shown at review.
+		sha256: text('sha256'),
+		provenanceJson: text('provenance_json'),
 		createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull()
 	},
 	(t) => [
 		index('draft_media_draft_idx').on(t.draftId),
+		index('draft_media_draft_sha_idx').on(t.draftId, t.sha256),
 		index('draft_media_draft_segment_idx').on(t.draftId, t.segmentIndex),
 		index('draft_media_storage_key_idx').on(t.storageKey)
 	]
