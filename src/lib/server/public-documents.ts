@@ -43,7 +43,8 @@ export async function handlePublicDocuments(
 							'Disallow: /',
 							...[
 								...publicDocumentPaths.flatMap((route) => [`${route}$`, `${route}.md$`]),
-								...discoveryPaths
+								...discoveryPaths,
+								...(bot === '*' ? ['/api/media/public/'] : [])
 							].map((route) => `Allow: ${route}`),
 							''
 						])
@@ -81,7 +82,6 @@ export async function handlePublicDocuments(
 		name: 'Fleet Social',
 		url: origin,
 		summary: documents['/about'].description,
-		contact: 'https://sarthakagrawal.dev/',
 		trainingAllowed: true,
 		pages,
 		sitemap: `${origin}/sitemap.xml`,

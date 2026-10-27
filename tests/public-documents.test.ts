@@ -111,6 +111,14 @@ describe('public document representations', () => {
 			'Bytespider'
 		])
 			expect(robots).toContain(`User-agent: ${bot}\nDisallow: /\nAllow: /about$`);
+		const groups = robots.split('\n\n');
+		expect(groups.find((group) => group.startsWith('User-agent: *\n'))).toContain(
+			'Allow: /api/media/public/'
+		);
+		expect(groups.find((group) => group.startsWith('User-agent: GPTBot\n'))).not.toContain(
+			'Allow: /api/media/public/'
+		);
+		expect(await (await read('/ai.txt'))!.text()).not.toContain('sarthakagrawal.dev');
 		const sitemap = await (await read('/sitemap.xml'))!.text();
 		expect([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1])).toEqual(
 			publicDocumentPaths.map((path) => origin + path)
