@@ -52,7 +52,9 @@
 		"doctor": "node scripts/doctor.mjs",
 		"demo": "node scripts/rehearsal.mjs",
 		"media:push": "node scripts/push-media.mjs",
-		"generation:claim": "node scripts/claim-generation.mjs"
+		"generation:claim": "node scripts/claim-generation.mjs",
+		"prebuild": "node scripts/generate-public-documents.mjs",
+		"pretest": "node scripts/generate-public-documents.mjs --check"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

@@ -11,7 +11,7 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	// The local Mashup module has its own Python and Astro checks (see CI).
-	{ ignores: ['tools/mashup/**'] },
+	{ ignores: ['tools/mashup/**', 'src/lib/server/agent-surfaces/**'] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,
