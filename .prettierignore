@@ -13,3 +13,7 @@ THIRD-PARTY-NOTICES.md
 
 # Local Mashup module: Python + Astro with its own ruff and Astro tooling
 /tools/mashup/
+
+# Vendored shared protocol and generated literal page content
+/src/lib/server/agent-surfaces/
+/src/lib/server/public-documents.generated.json

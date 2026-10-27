@@ -1,3 +1,9 @@
+import {
+	handlePublicDocuments,
+	advertisePublicDocument,
+	publicDocumentOrigin,
+	publicDocumentPaths
+} from '$lib/server/public-documents';
 import type { Handle } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
@@ -45,7 +51,7 @@ import {
 import { recordEndpointRequest } from '$lib/server/endpoint-telemetry';
 
 export function isPublicPath(path: string): boolean {
-	if (path === '/about' || path === '/privacy' || path === '/terms') return true;
+	if (publicDocumentPaths.includes(path)) return true;
 	if (path === '/login' || path === '/login/setup-2fa' || path === '/login/verify') return true;
 	if (
 		path === '/api/health' ||
@@ -87,6 +93,11 @@ let lastLocalTickAt = 0;
 let warnedMissingMedia = false;
 
 const handleRequest: Handle = async ({ event, resolve }) => {
+	const publicResponse = await handlePublicDocuments(
+		event.request,
+		publicDocumentOrigin(event.request, event.platform?.env?.APP_URL)
+	);
+	if (publicResponse) return publicResponse;
 	const path = event.url.pathname;
 	const secureRequest = event.url.protocol === 'https:';
 	if (import.meta.env.DEV && process.env.FLEET_SOCIAL_REHEARSAL === '1') {
@@ -370,5 +381,9 @@ export const handle: Handle = async (input) => {
 		throw error;
 	}
 	recordEndpointRequest(input.event, response.status, performance.now() - startedAt);
-	return response;
+	return advertisePublicDocument(
+		input.event.request,
+		response,
+		publicDocumentOrigin(input.event.request, input.event.platform?.env?.APP_URL)
+	);
 };

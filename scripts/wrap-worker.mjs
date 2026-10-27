@@ -1,5 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
+const publicDocumentPaths = Object.keys(
+	JSON.parse(readFileSync('src/lib/server/public-documents.generated.json', 'utf8'))
+);
 const dest = '.svelte-kit/cloudflare/_worker.js';
 let src = readFileSync(dest, 'utf8');
 if (src.includes('__COGSEND_HANDLERS__')) process.exit(0);
@@ -47,7 +50,16 @@ async function cogsendInternal(worker, env, ctx, path, body) {
 }
 
 export default {
-	fetch: (...args) => worker_default.fetch(...args),
+	fetch(request, env, ctx) {
+		// The adapter cache keys only by URL and ignores Vary: Accept.
+		// Bypass its lookup for negotiated HTML URLs; explicit .md URLs remain cacheable.
+		if (${JSON.stringify(publicDocumentPaths)}.includes(new URL(request.url).pathname)) {
+			const headers = new Headers(request.headers);
+			headers.set('Cache-Control', 'no-cache');
+			request = new Request(request, { headers });
+		}
+		return worker_default.fetch(request, env, ctx);
+	},
 	scheduled(controller, env, ctx) {
 		// The internal call authenticates as a pinger would; with nothing to
 		// authenticate with it is a no-op rather than a 401 every minute.
