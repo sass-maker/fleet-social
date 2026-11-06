@@ -1,11 +1,15 @@
 import { spawnSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const project = fileURLToPath(new URL('../', import.meta.url));
 const target = fileURLToPath(new URL('../tests/test_extension.py', import.meta.url));
-const result = spawnSync('uv', [
-  'run', '--project', project, '--locked', '--no-default-groups', '--extra', 'mcp',
-  '--with', 'pytest', 'python', '-m', 'pytest', target, '-q'
-], { stdio: 'inherit', timeout: 180_000 });
-if (result.error) console.error(result.error.message);
-process.exit(result.status ?? 1);
+test('local media extension behavior and MCP protocol', { timeout: 180_000 }, () => {
+  const result = spawnSync('uv', [
+    'run', '--project', project, '--locked', '--no-default-groups', '--extra', 'mcp',
+    '--with', 'pytest', 'python', '-m', 'pytest', target, '-q'
+  ], { stdio: 'inherit', timeout: 180_000 });
+  assert.ifError(result.error);
+  assert.equal(result.status, 0, 'authoritative Python extension tests failed');
+});
