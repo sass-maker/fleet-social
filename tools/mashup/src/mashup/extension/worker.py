@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import time
+from importlib.metadata import version
 from pathlib import Path
 
 from mashup.extension.assets import MEDIA_FORMATS, Assets, probe
@@ -81,7 +82,7 @@ def render_command(edit: dict, assets: Assets, output: Path) -> list[str]:
     ]
 
 
-def render_job(jobs: Jobs, job: dict) -> dict:
+def render_job(jobs: Jobs, job: dict) -> dict | None:
     assets = Assets(jobs.state, [])
     edit = job["edit"]
     composition = validate(edit, assets)
@@ -130,41 +131,45 @@ def render_job(jobs: Jobs, job: dict) -> dict:
     if not 0 < partial.stat().st_size <= MAX_OUTPUT_BYTES:
         raise ValueError("Rendered media does not meet the output size budget")
     video = directory / "video.mp4"
-    os.replace(partial, video)
-    receipt = build_media_receipt(
-        edit,
-        video_path=video,
-        duration_seconds=info["duration"],
-        width=width,
-        height=height,
-        recipe_id=composition.template,
-        runtime_revision="mashup-extension@0.1.0",
-        operation={
-            "schema": "fleet.video-agent-operation.v1",
-            "id": job["id"],
-            "requestHash": job["requestHash"],
-            "state": "completed",
-        },
-    )
-    receipt["template"] = edit["template"]
-    receipt_path = directory / "media-receipt.json"
-    save_media_receipt(receipt, receipt_path)
-    return {
-        "video": {**receipt["output"]["video"], "uri": video.as_uri()},
-        "receipt": {"path": str(receipt_path), "uri": receipt_path.as_uri()},
-        "durationSeconds": info["duration"],
-        "width": width,
-        "height": height,
-        "planHash": edit["template"]["planHash"],
-    }
+
+    def publish() -> dict:
+        os.replace(partial, video)
+        receipt = build_media_receipt(
+            edit,
+            video_path=video,
+            duration_seconds=info["duration"],
+            width=width,
+            height=height,
+            recipe_id=composition.template,
+            runtime_revision="mashup-extension@" + version("mashup"),
+            operation={
+                "schema": "fleet.video-agent-operation.v1",
+                "id": job["id"],
+                "requestHash": job["requestHash"],
+                "state": "completed",
+            },
+        )
+        receipt["template"] = edit["template"]
+        receipt["validation"]["approvalAuthority"] = "mcp-client-attested"
+        receipt_path = directory / "media-receipt.json"
+        save_media_receipt(receipt, receipt_path)
+        return {
+            "video": {**receipt["output"]["video"], "uri": video.as_uri()},
+            "receipt": {"path": str(receipt_path), "uri": receipt_path.as_uri()},
+            "durationSeconds": info["duration"],
+            "width": width,
+            "height": height,
+            "planHash": edit["template"]["planHash"],
+        }
+
+    return jobs.complete(job["id"], publish)
 
 
 def run(state: Path) -> None:
     jobs = Jobs(state)
     while job := jobs.claim():
         try:
-            result = render_job(jobs, job)
-            jobs.finish(job["id"], result=result)
+            render_job(jobs, job)
         except Exception as exc:
             jobs.finish(job["id"], error=str(exc)[:1200])
 

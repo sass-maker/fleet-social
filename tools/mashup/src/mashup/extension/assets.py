@@ -69,9 +69,13 @@ class Assets:
         requested = Path(source).expanduser()
         if not requested.is_absolute() or ".." in requested.parts:
             raise ValueError("Provide an absolute local path without traversal")
-        path = requested.resolve(strict=True)
+        try:
+            path = requested.resolve(strict=False)
+        except (OSError, RuntimeError) as exc:
+            raise ValueError("Asset is outside the explicitly allowed input roots") from exc
         if not any(path.is_relative_to(root) for root in self.roots):
             raise ValueError("Asset is outside the explicitly allowed input roots")
+        path = path.resolve(strict=True)
         if not path.is_file() or path.suffix.lower() not in MEDIA_SUFFIXES:
             raise ValueError("Unsupported local asset type")
         if not 0 < path.stat().st_size <= MAX_ASSET_BYTES:

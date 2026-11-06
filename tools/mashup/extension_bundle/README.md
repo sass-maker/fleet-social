@@ -24,6 +24,8 @@ Repeat input and skills roots as needed. Configure the canonical target director
 
 Each bundle gets its own immutable runtime. Installation verifies the real stdio protocol in new scratch state before writing the completion receipt. An identical install checks its runtime hashes and reuses it. A failed, incomplete, or altered runtime is preserved and refused; choose a new destination to retry, then inspect or recover the previous directory separately. An upgrade leaves prior runtimes and proposals in place.
 
+Runtime hashes cover installed files and symlink targets, not external interpreter bytes or its standard library. Every reuse repeats the stdio check against the available interpreter. Dependency setup preserves standard proxy and certificate environment settings; it does not import custom uv index configuration.
+
 ## Connect Pace
 
 The installer returns `configuration` and `paceSkill` paths. Merge the `mcpServers.mashup-media` entry from that proposed JSON into Pace's existing MCP configuration, preserving its other entries. The entry uses an absolute installed interpreter and explicit FFmpeg PATH, so no checkout, bundle path, shell activation, or working directory is needed. Keep the venv interpreter path rather than resolving its symlink to base Python.

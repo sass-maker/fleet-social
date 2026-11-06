@@ -19,12 +19,15 @@ class Skills:
         entries = {}
         for root in self.roots:
             for candidate in sorted(root.glob("*/SKILL.md")):
-                path = candidate.resolve(strict=True)
-                if (
-                    not path.is_relative_to(root)
-                    or not path.is_file()
-                    or path.stat().st_size > MAX_SKILL_BYTES
-                ):
+                try:
+                    path = candidate.resolve(strict=True)
+                    if (
+                        not path.is_relative_to(root)
+                        or not path.is_file()
+                        or path.stat().st_size > MAX_SKILL_BYTES
+                    ):
+                        continue
+                except (OSError, RuntimeError):
                     continue
                 skill_id = hashlib.sha256(str(path).encode()).hexdigest()[:24]
                 entries[skill_id] = path
@@ -35,8 +38,11 @@ class Skills:
     def list(self) -> list[dict]:
         result = []
         for skill_id, path in self._entries().items():
-            with open_beneath(path, self.roots) as source:
-                text = source.read(MAX_SKILL_BYTES + 1).decode("utf-8")
+            try:
+                with open_beneath(path, self.roots) as source:
+                    text = source.read(MAX_SKILL_BYTES + 1).decode("utf-8")
+            except (OSError, ValueError):
+                continue
             if len(text.encode("utf-8")) > MAX_SKILL_BYTES:
                 continue
             description = re.search(r"^description:\s*(.+)$", text, re.MULTILINE)

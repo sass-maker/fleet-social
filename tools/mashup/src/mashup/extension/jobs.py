@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 import uuid
+from collections.abc import Callable
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -137,8 +138,14 @@ class Jobs:
                 alive = False
                 if row["worker_pid"]:
                     try:
-                        os.kill(row["worker_pid"], 0)
-                        alive = True
+                        exited, _ = os.waitpid(row["worker_pid"], os.WNOHANG)
+                        alive = exited == 0
+                    except ChildProcessError:
+                        try:
+                            os.kill(row["worker_pid"], 0)
+                            alive = True
+                        except (ProcessLookupError, PermissionError):
+                            pass
                     except (ProcessLookupError, PermissionError):
                         pass
                 if not alive or time.time() - row["started"] > MAX_RENDER_SECONDS + 30:
@@ -211,7 +218,7 @@ class Jobs:
             ).fetchone()
         return not row or bool(row["cancel_requested"]) or row["state"] != "running"
 
-    def finish(self, job_id: str, *, result: dict | None = None, error: str | None = None) -> None:
+    def finish(self, job_id: str, *, error: str) -> None:
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute(
@@ -219,17 +226,36 @@ class Jobs:
             ).fetchone()
             if row["state"] != "running":
                 return
-            state = "cancelled" if row["cancel_requested"] else "failed" if error else "succeeded"
+            state = "cancelled" if row["cancel_requested"] else "failed"
             db.execute(
-                "UPDATE jobs SET state=?,finished=?,error=?,result=? WHERE id=?",
+                "UPDATE jobs SET state=?,finished=?,error=? WHERE id=?",
                 (
                     state,
                     now(),
                     error if state == "failed" else None,
-                    json.dumps(result) if state == "succeeded" else None,
                     job_id,
                 ),
             )
+
+    def complete(self, job_id: str, publish: Callable[[], dict]) -> dict | None:
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute(
+                "SELECT state,cancel_requested FROM jobs WHERE id=?", (job_id,)
+            ).fetchone()
+            if row["state"] != "running":
+                return None
+            if row["cancel_requested"]:
+                db.execute(
+                    "UPDATE jobs SET state='cancelled',finished=? WHERE id=?", (now(), job_id)
+                )
+                return None
+            result = publish()
+            db.execute(
+                "UPDATE jobs SET state='succeeded',finished=?,result=? WHERE id=?",
+                (now(), json.dumps(result), job_id),
+            )
+            return result
 
     def result(self, job_id: str) -> dict:
         job = self.get(job_id)

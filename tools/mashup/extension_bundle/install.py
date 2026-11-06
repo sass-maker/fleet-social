@@ -67,11 +67,15 @@ class BundleManifest:
             raise ValueError("Unsupported extension bundle")
         version = data.get("version", "")
         wheel = data.get("wheel", "")
-        if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version) or wheel != (
-            "mashup-" + version + "-py3-none-any.whl"
+        if (
+            not isinstance(version, str)
+            or not isinstance(wheel, str)
+            or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version)
+            or wheel != ("mashup-" + version + "-py3-none-any.whl")
         ):
             raise ValueError("Bundle wheel does not match its version")
-        if not re.fullmatch(r"[a-f0-9]{40}", data.get("sourceRevision", "")):
+        revision = data.get("sourceRevision", "")
+        if not isinstance(revision, str) or not re.fullmatch(r"[a-f0-9]{40}", revision):
             raise ValueError("Bundle must name an exact source revision")
         files = data.get("files", {})
         if not isinstance(files, dict) or set(files) != REQUIRED_FILES | {wheel}:
@@ -120,10 +124,14 @@ class InstallReceipt:
 
 def runtime_files(runtime: Path) -> dict[str, str]:
     return {
-        str(path.relative_to(runtime)): digest(path)
+        str(path.relative_to(runtime)): "symlink:" + os.readlink(path)
+        if path.is_symlink()
+        else digest(path)
         for base in (runtime / "venv", runtime / "resources")
         for path in sorted(base.rglob("*"))
-        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+        if (path.is_file() or path.is_symlink())
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
     }
 
 
@@ -187,6 +195,21 @@ def install(args: argparse.Namespace) -> dict:
         "PYTHONNOUSERSITE": "1",
         "UV_NO_CONFIG": "1",
     }
+    for key in (
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+        "NO_PROXY",
+        "http_proxy",
+        "https_proxy",
+        "all_proxy",
+        "no_proxy",
+        "SSL_CERT_FILE",
+        "SSL_CERT_DIR",
+        "REQUESTS_CA_BUNDLE",
+    ):
+        if key in os.environ:
+            environment[key] = os.environ[key]
     python = runtime / "venv" / "bin" / "python"
     server_args = ["-m", "mashup.extension.mcp", "--state-dir", str(state)]
     for flag, roots in (
@@ -215,6 +238,8 @@ def install(args: argparse.Namespace) -> dict:
         "activation": "not-performed",
     }
     if args.dry_run:
+        if runtime.exists():
+            InstallReceipt.load(runtime / "install-receipt.json", bundle, python)
         return {**report, "action": "verify-and-reuse" if runtime.exists() else "install"}
     destination.mkdir(mode=0o700, parents=True, exist_ok=True)
     with (destination / ".install.lock").open("a") as lock:

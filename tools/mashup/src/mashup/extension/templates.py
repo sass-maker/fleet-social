@@ -128,5 +128,6 @@ def approve(edit: dict, approval: Approval, assets: Assets) -> dict:
         "status": "approved",
         "approvedBy": approval.approvedBy.strip(),
         "approvedAt": now(),
+        "attestation": "mcp-client",
     }
     return approved

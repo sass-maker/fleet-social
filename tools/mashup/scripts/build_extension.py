@@ -36,11 +36,14 @@ def build(output: Path, *, allow_dirty: bool) -> dict:
     output = output.expanduser().resolve()
     if output == PROJECT or PROJECT in output.parents:
         raise ValueError("Build output must be outside the source project")
+    version = tomllib.loads((PROJECT / "pyproject.toml").read_text())["project"]["version"]
+    extension = json.loads((PROJECT / "extension.json").read_text())
+    if extension.get("version") != version:
+        raise ValueError("Extension manifest version must match the package version")
     revision = run("git", "rev-parse", "HEAD")
     dirty = bool(run("git", "status", "--porcelain", "--", "."))
     if dirty and not allow_dirty:
         raise ValueError("Commit the package before building, or use --allow-dirty for development")
-    version = tomllib.loads((PROJECT / "pyproject.toml").read_text())["project"]["version"]
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="mashup-build-", dir=output) as temporary:
         bundle = Path(temporary) / "bundle"
@@ -49,7 +52,6 @@ def build(output: Path, *, allow_dirty: bool) -> dict:
             target = bundle / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(PROJECT / "extension_bundle" / name, target)
-        extension = json.loads((PROJECT / "extension.json").read_text())
         extension["installation"]["guide"] = "README.md"
         (bundle / "extension.json").write_text(json.dumps(extension, indent=2) + "\n")
         wheel_directory = Path(temporary) / "wheel"

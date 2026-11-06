@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -165,6 +167,14 @@ def main() -> None:
     roots = [root.expanduser().resolve(strict=True) for root in args.input_root]
     skills = [root.expanduser().resolve(strict=True) for root in args.skills_root]
     if args.print_pace_config:
+        binaries = [shutil.which(name) for name in ("ffmpeg", "ffprobe")]
+        if not all(binaries):
+            parser.error("Install ffmpeg and ffprobe before generating a Pace connection")
+        runtime_path = os.pathsep.join(
+            dict.fromkeys(
+                [str(Path(binary).parent) for binary in binaries] + os.defpath.split(os.pathsep)
+            )
+        )
         command_args = ["-m", "mashup.extension.mcp", "--state-dir", str(state)]
         for root in roots:
             command_args += ["--input-root", str(root)]
@@ -177,6 +187,7 @@ def main() -> None:
                         "mashup-media": {
                             "command": str(Path(sys.executable).absolute()),
                             "args": command_args,
+                            "env": {"PATH": runtime_path, "PYTHONNOUSERSITE": "1"},
                         }
                     }
                 },

@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import time
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
@@ -153,6 +154,9 @@ def test_actual_alpha_overlay_preserves_background_placement_and_foreground_loop
     receipt = json.loads(Path(result["receipt"]["path"]).read_text())
     validate_media_receipt(receipt)
     assert receipt["approval"]["status"] == "approved"
+    assert receipt["approval"]["attestation"] == "mcp-client"
+    assert receipt["validation"]["approvalAuthority"] == "mcp-client-attested"
+    assert receipt["runtime"]["revision"] == "mashup-extension@" + version("mashup")
     assert receipt["recipe"]["id"] == "character-overlay@1"
     assert receipt["template"]["planHash"] == result["planHash"]
     early = frame(Path(result["video"]["path"]), 0.04)
@@ -181,6 +185,105 @@ def test_motion_moves_pixels_and_unlooped_short_foreground_is_rejected(media):
     r, g, b = pixel(at_peak, 745, 360)
     assert r > 180 and g < 70 and b < 70
     assert jobs.get(job["jobId"])["state"] == "succeeded"
+
+
+def test_late_cancel_before_publication_never_produces_completed_artifacts(media, monkeypatch):
+    jobs, _, _, job = approved_job(media)
+    complete = Jobs.complete
+
+    def cancel_before_complete(self, job_id, publish):
+        self.cancel(job_id)
+        return complete(self, job_id, publish)
+
+    monkeypatch.setattr(Jobs, "complete", cancel_before_complete)
+    run(jobs.state)
+    assert jobs.get(job["jobId"])["state"] == "cancelled"
+    directory = jobs.state / "jobs" / job["jobId"]
+    assert (directory / "render.partial.mp4").is_file()
+    assert not (directory / "video.mp4").exists()
+    assert not (directory / "media-receipt.json").exists()
+    with pytest.raises(ValueError, match="no published result"):
+        jobs.result(job["jobId"])
+
+
+def test_cancel_after_publication_keeps_the_committed_success(media):
+    jobs, _, _, job = approved_job(media)
+    run(jobs.state)
+    result = jobs.result(job["jobId"])
+    assert jobs.cancel(job["jobId"])["state"] == "succeeded"
+    assert Path(result["receipt"]["path"]).is_file()
+
+
+def test_cancel_during_publication_waits_for_the_success_commit(media, monkeypatch):
+    import threading
+
+    from mashup.extension import worker as runtime
+
+    jobs, _, _, job = approved_job(media)
+    publishing = threading.Event()
+    release = threading.Event()
+    real_receipt = runtime.build_media_receipt
+
+    def blocked_receipt(*args, **kwargs):
+        publishing.set()
+        assert release.wait(timeout=5)
+        return real_receipt(*args, **kwargs)
+
+    monkeypatch.setattr(runtime, "build_media_receipt", blocked_receipt)
+    worker = threading.Thread(target=run, args=(jobs.state,))
+    cancelled = []
+    cancel = threading.Thread(target=lambda: cancelled.append(jobs.cancel(job["jobId"])))
+    worker.start()
+    try:
+        assert publishing.wait(timeout=5)
+        cancel.start()
+        cancel.join(timeout=0.05)
+        assert cancel.is_alive()
+    finally:
+        release.set()
+        worker.join(timeout=8)
+        if cancel.ident is not None:
+            cancel.join(timeout=8)
+    assert not worker.is_alive() and not cancel.is_alive()
+    assert cancelled[0]["state"] == "succeeded"
+    assert Path(jobs.result(job["jobId"])["receipt"]["path"]).is_file()
+
+
+def test_exited_child_is_reaped_without_waiting_for_render_deadline(media):
+    jobs, _, _, job = approved_job(media)
+    jobs.claim()
+    child = subprocess.Popen([sys.executable, "-c", "pass"])
+    try:
+        with jobs.connection() as db:
+            db.execute("UPDATE jobs SET worker_pid=? WHERE id=?", (child.pid, job["jobId"]))
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if jobs.get(job["jobId"])["state"] == "failed":
+                break
+            time.sleep(0.01)
+        assert jobs.get(job["jobId"])["state"] == "failed"
+        with pytest.raises(ChildProcessError):
+            os.waitpid(child.pid, os.WNOHANG)
+    finally:
+        child.wait(timeout=5)
+
+
+def test_outside_path_existence_is_not_exposed_and_allowed_aliases_work(media, tmp_path):
+    _, assets, bg, _, inputs = media
+    existing = tmp_path / "outside.png"
+    existing.write_bytes(b"not imported")
+    errors = []
+    for path in (existing, tmp_path / "does-not-exist.png"):
+        with pytest.raises(ValueError) as error:
+            assets.register(str(path), rights())
+        errors.append(str(error.value))
+    assert errors == ["Asset is outside the explicitly allowed input roots"] * 2
+    alias = tmp_path / "allowed-alias"
+    alias.symlink_to(inputs, target_is_directory=True)
+    assert (
+        assets.register(str(alias / "background.mp4"), rights("Moving background"))["id"]
+        == bg["id"]
+    )
 
 
 def test_paths_rights_unknown_fields_and_plan_approval_are_bounded(media, tmp_path):
@@ -307,6 +410,12 @@ def test_canonical_skill_catalog_is_read_only_and_rejects_escapes(tmp_path):
     outside.mkdir()
     (outside / "SKILL.md").write_text("private outside file")
     (root / "escaped").symlink_to(outside)
+    invalid = root / "invalid"
+    invalid.mkdir()
+    (invalid / "SKILL.md").write_bytes(b"\xff\xfe")
+    broken = root / "broken"
+    broken.mkdir()
+    (broken / "SKILL.md").symlink_to(tmp_path / "missing-guide")
     catalog = Skills([root])
     listed = catalog.list()
     assert len(listed) == 1
@@ -356,6 +465,9 @@ def test_real_stdio_mcp_discovery_and_render_survive_client_disconnect(media):
         ).stdout
     )["mcpServers"]["mashup-media"]
     assert Path(config["command"]).is_absolute()
+    assert config["env"]["PYTHONNOUSERSITE"] == "1"
+    for binary in ("ffmpeg", "ffprobe"):
+        assert shutil.which(binary, path=config["env"]["PATH"])
     params = mcp.StdioServerParameters(
         command=config["command"],
         args=config["args"],

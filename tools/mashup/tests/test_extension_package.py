@@ -184,5 +184,65 @@ def test_incomplete_runtime_is_preserved_and_refused(bundle, tmp_path):
     evidence.write_text("keep this recovery data")
     result = execute(*command, cwd=tmp_path, check=False)
     assert result.returncode != 0 and "Incomplete or conflicting install" in result.stderr
+    dry_run = execute(*command, "--dry-run", cwd=tmp_path, check=False)
+    assert dry_run.returncode != 0 and "Incomplete or conflicting install" in dry_run.stderr
     assert evidence.read_text() == "keep this recovery data"
     assert not Path(plan["configuration"]).exists()
+
+
+@pytest.mark.parametrize("field,value", [("version", 1), ("sourceRevision", None), ("wheel", [])])
+def test_malformed_manifest_fields_fail_without_traceback(bundle, tmp_path, field, value):
+    copied = tmp_path / "bundle"
+    shutil.copytree(bundle["bundle"], copied)
+    path = copied / "bundle.json"
+    manifest = json.loads(path.read_text())
+    manifest[field] = value
+    path.write_text(json.dumps(manifest))
+    destination = tmp_path / "install"
+    result = execute(
+        sys.executable,
+        copied / "install.py",
+        "--destination",
+        destination,
+        "--state-dir",
+        tmp_path / "state",
+        cwd=tmp_path,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "Installation failed:" in result.stderr and "Traceback" not in result.stderr
+    assert not destination.exists()
+
+
+def test_runtime_symlinks_track_link_identity_without_hashing_external_bytes(tmp_path):
+    runtime = tmp_path / "runtime"
+    binary = runtime / "venv" / "bin"
+    binary.mkdir(parents=True)
+    first = tmp_path / "python-first"
+    first.write_bytes(b"first interpreter bytes")
+    second = tmp_path / "python-second"
+    second.write_bytes(b"second interpreter bytes")
+    python = binary / "python"
+    python.symlink_to(first)
+    before = installer.runtime_files(runtime)
+    first.write_bytes(b"patched external interpreter")
+    assert installer.runtime_files(runtime) == before
+    python.unlink()
+    python.symlink_to(second)
+    assert installer.runtime_files(runtime) != before
+
+
+def test_builder_refuses_manifest_version_drift(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "pyproject.toml").write_text('[project]\nversion = "0.2.0"\n')
+    (source / "extension.json").write_text('{"version": "0.1.0"}')
+    spec = importlib.util.spec_from_file_location(
+        "mashup_bundle_builder", PROJECT / "scripts" / "build_extension.py"
+    )
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    monkeypatch.setattr(builder, "PROJECT", source)
+    with pytest.raises(ValueError, match="manifest version"):
+        builder.build(tmp_path / "output", allow_dirty=True)
+    assert not (tmp_path / "output").exists()
