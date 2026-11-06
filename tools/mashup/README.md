@@ -23,7 +23,9 @@ but never chooses or writes to a publishing channel.
 
 ### Local MCP extension
 
-The optional stdio extension in [`extension.json`](extension.json) exposes reusable templates and durable render jobs to Pace or another MCP host. Install it without local model dependencies:
+The optional stdio extension in [`extension.json`](extension.json) exposes reusable templates and durable render jobs to Pace or another MCP host. For a source-independent wheel bundle with pinned dependencies, an installer, a Pace procedure, and an installation receipt, follow the [extension package guide](extension_bundle/README.md). Its generated configuration is a proposal; installation does not activate Pace.
+
+For development directly from this source checkout, install it without local model dependencies:
 
 ```bash
 uv sync --locked --no-default-groups --extra mcp

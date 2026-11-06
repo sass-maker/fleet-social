@@ -212,7 +212,14 @@ jobs:
       - run: uv sync --dev --frozen --extra mcp
       - run: uv run --extra mcp ruff check .
       - run: uv run --extra mcp ruff format --check .
-      - run: sudo apt-get update && sudo apt-get install --yes ffmpeg
+      - name: Ensure FFmpeg runtime
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            timeout 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
+            timeout 120s sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 install --yes ffmpeg
+          fi
+          command -v ffmpeg
+          command -v ffprobe
       - run: uv run --extra mcp pytest -q
 
   mashup-web:

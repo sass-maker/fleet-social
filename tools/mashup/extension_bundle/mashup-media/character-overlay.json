@@ -1,0 +1,13 @@
+{
+  "template": "character-overlay@1",
+  "background": "asset-0000000000000000000000000000000000000000000000000000000000000000",
+  "foreground": "asset-1111111111111111111111111111111111111111111111111111111111111111",
+  "duration": 8.0,
+  "preset": "landscape",
+  "fps": 30,
+  "x": 0.65,
+  "y": 0.58,
+  "width": 0.4,
+  "loop": true,
+  "motion": "orbit"
+}

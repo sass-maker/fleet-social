@@ -21,8 +21,10 @@
     "templates": ["character-overlay@1"]
   },
   "installation": {
-    "source": "Install this directory with its optional mcp extra into an isolated Python environment.",
-    "configure": "Run mashup-mcp with explicit state/input/skills roots and --print-pace-config. Use its absolute command and args in Pace; no cwd is required.",
-    "activate": "The printed configuration is a proposal. This package never modifies the host application."
+    "build": "python3 scripts/build_extension.py --output /absolute/bundles",
+    "guide": "extension_bundle/README.md",
+    "source": "The bundle contains a runtime wheel, hashed requirements.lock, install.py, smoke.py and a small usage guide. Setup downloads pinned dependencies; no models or providers are installed.",
+    "configure": "Run bundle/install.py with explicit destination/state/input/skills roots. It verifies an isolated installed runtime and returns a stable proposed pace-mcp.json plus an optional Pace procedure.",
+    "activate": "Merge the proposed mcpServers entry through the host's generic MCP configuration. Pace has a fixed native catalog; this bundle does not register a new catalog row or modify the host application."
   }
 }
