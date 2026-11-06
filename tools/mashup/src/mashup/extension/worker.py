@@ -131,6 +131,8 @@ def render_job(jobs: Jobs, job: dict) -> dict | None:
     if not 0 < partial.stat().st_size <= MAX_OUTPUT_BYTES:
         raise ValueError("Rendered media does not meet the output size budget")
     video = directory / "video.mp4"
+    receipt_path = directory / "media-receipt.json"
+    runtime_revision = "mashup-extension@" + version("mashup")
 
     def publish() -> dict:
         os.replace(partial, video)
@@ -141,7 +143,7 @@ def render_job(jobs: Jobs, job: dict) -> dict | None:
             width=width,
             height=height,
             recipe_id=composition.template,
-            runtime_revision="mashup-extension@" + version("mashup"),
+            runtime_revision=runtime_revision,
             operation={
                 "schema": "fleet.video-agent-operation.v1",
                 "id": job["id"],
@@ -151,7 +153,6 @@ def render_job(jobs: Jobs, job: dict) -> dict | None:
         )
         receipt["template"] = edit["template"]
         receipt["validation"]["approvalAuthority"] = "mcp-client-attested"
-        receipt_path = directory / "media-receipt.json"
         save_media_receipt(receipt, receipt_path)
         return {
             "video": {**receipt["output"]["video"], "uri": video.as_uri()},
@@ -162,7 +163,24 @@ def render_job(jobs: Jobs, job: dict) -> dict | None:
             "planHash": edit["template"]["planHash"],
         }
 
-    return jobs.complete(job["id"], publish)
+    try:
+        return jobs.complete(job["id"], publish)
+    except Exception as error:
+        recovery_errors = []
+        for completed, recovery in (
+            (video, partial),
+            (receipt_path, directory / "receipt.partial.json"),
+        ):
+            if completed.exists():
+                try:
+                    os.replace(completed, recovery)
+                except OSError as recovery_error:
+                    recovery_errors.append(str(recovery_error))
+        if recovery_errors:
+            raise RuntimeError(
+                f"Finalization failed: {error}; recovery moves failed: {'; '.join(recovery_errors)}"
+            ) from error
+        raise
 
 
 def run(state: Path) -> None:

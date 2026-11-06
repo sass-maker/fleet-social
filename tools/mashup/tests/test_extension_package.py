@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import importlib.util
 import json
 import os
@@ -188,6 +189,29 @@ def test_incomplete_runtime_is_preserved_and_refused(bundle, tmp_path):
     assert dry_run.returncode != 0 and "Incomplete or conflicting install" in dry_run.stderr
     assert evidence.read_text() == "keep this recovery data"
     assert not Path(plan["configuration"]).exists()
+
+
+def test_dry_run_reports_active_install_instead_of_abandoned_runtime(bundle, tmp_path):
+    destination = tmp_path / "install"
+    command = [
+        sys.executable,
+        Path(bundle["bundle"]) / "install.py",
+        "--destination",
+        destination,
+        "--state-dir",
+        tmp_path / "state",
+        "--dry-run",
+    ]
+    plan = json.loads(execute(*command, cwd=tmp_path).stdout)
+    runtime = Path(plan["runtime"])
+    runtime.mkdir(parents=True)
+    with (destination / ".install.lock").open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        result = execute(*command, cwd=tmp_path, check=False)
+    assert result.returncode != 0
+    assert "Another installation is active" in result.stderr
+    assert "choose a new destination" not in result.stderr
+    assert runtime.is_dir() and not Path(plan["configuration"]).exists()
 
 
 @pytest.mark.parametrize("field,value", [("version", 1), ("sourceRevision", None), ("wheel", [])])

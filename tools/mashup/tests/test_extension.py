@@ -171,6 +171,28 @@ def test_actual_alpha_overlay_preserves_background_placement_and_foreground_loop
     assert early[: 1280 * 150 * 3] != late[: 1280 * 150 * 3]
 
 
+def test_receipt_write_failure_keeps_recovery_files_without_completed_artifacts(media, monkeypatch):
+    from mashup.extension import worker
+
+    jobs, _, _, job = approved_job(media)
+    real_save = worker.save_media_receipt
+
+    def failed_save(receipt, path):
+        real_save(receipt, path)
+        raise OSError("Injected failure after writing receipt")
+
+    monkeypatch.setattr(worker, "save_media_receipt", failed_save)
+    run(jobs.state)
+    assert jobs.get(job["jobId"])["state"] == "failed"
+    directory = jobs.state / "jobs" / job["jobId"]
+    assert not (directory / "video.mp4").exists()
+    assert not (directory / "media-receipt.json").exists()
+    assert (directory / "render.partial.mp4").is_file()
+    assert (directory / "receipt.partial.json").is_file()
+    with pytest.raises(ValueError, match="no published result"):
+        jobs.result(job["jobId"])
+
+
 def test_motion_moves_pixels_and_unlooped_short_foreground_is_rejected(media):
     state, assets, bg, fg, _ = media
     jobs = Jobs(state)

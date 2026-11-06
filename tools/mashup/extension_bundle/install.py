@@ -238,9 +238,24 @@ def install(args: argparse.Namespace) -> dict:
         "activation": "not-performed",
     }
     if args.dry_run:
-        if runtime.exists():
-            InstallReceipt.load(runtime / "install-receipt.json", bundle, python)
-        return {**report, "action": "verify-and-reuse" if runtime.exists() else "install"}
+        reused = runtime.exists()
+        if reused:
+            try:
+                lock = (destination / ".install.lock").open("rb")
+            except FileNotFoundError:
+                lock = None
+            if lock is None:
+                InstallReceipt.load(runtime / "install-receipt.json", bundle, python)
+            else:
+                with lock:
+                    try:
+                        fcntl.flock(lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
+                    except BlockingIOError as exc:
+                        raise ValueError(
+                            "Another installation is active at this destination"
+                        ) from exc
+                    InstallReceipt.load(runtime / "install-receipt.json", bundle, python)
+        return {**report, "action": "verify-and-reuse" if reused else "install"}
     destination.mkdir(mode=0o700, parents=True, exist_ok=True)
     with (destination / ".install.lock").open("a") as lock:
         try:
