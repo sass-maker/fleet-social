@@ -1,0 +1,28 @@
+{
+  "schema": "fleet.local-extension.v1",
+  "id": "mashup-media",
+  "version": "0.1.0",
+  "title": "Mashup local media",
+  "package": "mashup[mcp]",
+  "entrypoint": "mashup-mcp",
+  "transport": "stdio",
+  "runtime": { "python": ">=3.11", "platforms": ["darwin", "linux"], "binaries": ["ffmpeg", "ffprobe"] },
+  "configuration": {
+    "required": ["--state-dir"],
+    "repeatable": ["--input-root", "--skills-root"],
+    "printClientConfiguration": "--print-pace-config"
+  },
+  "capabilities": {
+    "localOnly": true,
+    "publishing": false,
+    "arbitraryExecution": false,
+    "skillExecution": "guidance-only",
+    "detachedRenders": true,
+    "templates": ["character-overlay@1"]
+  },
+  "installation": {
+    "source": "Install this directory with its optional mcp extra into an isolated Python environment.",
+    "configure": "Run mashup-mcp with explicit state/input/skills roots and --print-pace-config. Use its absolute command and args in Pace; no cwd is required.",
+    "activate": "The printed configuration is a proposal. This package never modifies the host application."
+  }
+}
