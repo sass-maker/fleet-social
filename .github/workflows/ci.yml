@@ -209,11 +209,11 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: tools/mashup/uv.lock
-      - run: uv sync --dev --frozen
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
+      - run: uv sync --dev --frozen --extra mcp
+      - run: uv run --extra mcp ruff check .
+      - run: uv run --extra mcp ruff format --check .
       - run: sudo apt-get update && sudo apt-get install --yes ffmpeg
-      - run: uv run pytest -q
+      - run: uv run --extra mcp pytest -q
 
   mashup-web:
     runs-on: ubuntu-latest
