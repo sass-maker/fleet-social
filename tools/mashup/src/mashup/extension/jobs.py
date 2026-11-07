@@ -108,7 +108,7 @@ class Jobs:
                 )
         if launch:
             self.launch()
-        return self.get(job_id, resume=launch)
+        return self.get(job_id)
 
     def launch(self) -> None:
         self.reconcile()
@@ -184,7 +184,7 @@ class Jobs:
                 "requestHash": row["request_hash"],
             }
 
-    def get(self, job_id: str, *, resume: bool = True) -> dict:
+    def get(self, job_id: str, *, resume: bool = False) -> dict:
         if not IDENTIFIER.fullmatch(job_id):
             raise ValueError("Invalid job ID")
         self.reconcile()

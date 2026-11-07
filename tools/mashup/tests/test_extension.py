@@ -401,10 +401,10 @@ def test_status_poll_restarts_queue_after_worker_dies(media):
     with jobs.connection() as db:
         db.execute("UPDATE jobs SET worker_pid=? WHERE id=?", (2_000_000_000, running["jobId"]))
 
-    assert jobs.get(running["jobId"])["state"] == "failed"
+    assert jobs.get(running["jobId"], resume=True)["state"] == "failed"
     deadline = time.monotonic() + 10
     while time.monotonic() < deadline:
-        state = jobs.get(queued["jobId"])["state"]
+        state = jobs.get(queued["jobId"], resume=True)["state"]
         if state in {"succeeded", "failed", "cancelled"}:
             break
         time.sleep(0.02)
@@ -416,8 +416,9 @@ def test_start_can_suppress_worker_launch(media, monkeypatch):
         pytest.fail("launch=False must not start a detached render worker")
 
     monkeypatch.setattr("mashup.extension.jobs.subprocess.Popen", unexpected_launch)
-    _, _, _, job = approved_job(media)
+    jobs, _, _, job = approved_job(media)
     assert job["state"] == "queued"
+    assert jobs.cancel(job["jobId"])["state"] == "cancelled"
 
 
 def test_cancellation_only_stops_owned_ffmpeg_and_never_publishes(media, monkeypatch):

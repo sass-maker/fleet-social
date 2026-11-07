@@ -97,7 +97,7 @@ def create_server(state: Path, input_roots: list[Path], skills_roots: list[Path]
     @server.tool()
     def job_status(job_id: str) -> dict[str, Any]:
         """Read durable queued/running/succeeded/failed/cancelled state after reconnecting."""
-        return jobs.get(job_id)
+        return jobs.get(job_id, resume=True)
 
     @server.tool()
     def job_cancel(job_id: str) -> dict[str, Any]:
