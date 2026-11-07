@@ -113,7 +113,10 @@ class Jobs:
     def launch(self) -> None:
         self.reconcile()
         with self.connection() as db:
-            if not db.execute("SELECT 1 FROM jobs WHERE state='queued'").fetchone():
+            if not db.execute(
+                "SELECT 1 FROM jobs WHERE state='queued' "
+                "AND NOT EXISTS (SELECT 1 FROM jobs WHERE state='running')"
+            ).fetchone():
                 return
         subprocess.Popen(
             [sys.executable, "-m", "mashup.extension.worker", "--state-dir", str(self.state)],
@@ -189,6 +192,7 @@ class Jobs:
             row = db.execute("SELECT * FROM jobs WHERE id=?", (job_id,)).fetchone()
         if not row:
             raise ValueError("Job not found")
+        self.launch()
         return {
             "jobId": job_id,
             "state": row["state"],

@@ -394,6 +394,23 @@ def test_durable_queue_idempotency_cancel_and_dead_worker_recovery(media):
         jobs.start(plan["planId"], approval, "overflow", media[1], launch=False)
 
 
+def test_status_poll_restarts_queue_after_worker_dies(media):
+    jobs, plan, approval, running = approved_job(media, key="dead-worker")
+    assert jobs.claim()["id"] == running["jobId"]
+    queued = jobs.start(plan["planId"], approval, "after-dead-worker", media[1], launch=False)
+    with jobs.connection() as db:
+        db.execute("UPDATE jobs SET worker_pid=? WHERE id=?", (2_000_000_000, running["jobId"]))
+
+    assert jobs.get(running["jobId"])["state"] == "failed"
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline:
+        state = jobs.get(queued["jobId"])["state"]
+        if state in {"succeeded", "failed", "cancelled"}:
+            break
+        time.sleep(0.02)
+    assert state == "succeeded", jobs.get(queued["jobId"])
+
+
 def test_cancellation_only_stops_owned_ffmpeg_and_never_publishes(media, monkeypatch):
     jobs, _, _, job = approved_job(media)
     real_command = render_command
