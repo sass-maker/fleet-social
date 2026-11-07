@@ -411,6 +411,18 @@ def test_status_poll_restarts_queue_after_worker_dies(media):
     assert state == "succeeded", jobs.get(queued["jobId"])
 
 
+def test_status_poll_does_not_launch_while_render_is_active(media, monkeypatch):
+    jobs, plan, approval, running = approved_job(media, key="active-worker")
+    assert jobs.claim()["id"] == running["jobId"]
+    queued = jobs.start(plan["planId"], approval, "waiting-for-active-worker", media[1])
+
+    def unexpected_launch(*args, **kwargs):
+        pytest.fail("status polling must not launch another worker during an active render")
+
+    monkeypatch.setattr("mashup.extension.jobs.subprocess.Popen", unexpected_launch)
+    assert jobs.get(queued["jobId"], resume=True)["state"] == "queued"
+
+
 def test_start_can_suppress_worker_launch(media, monkeypatch):
     def unexpected_launch(*args, **kwargs):
         pytest.fail("launch=False must not start a detached render worker")

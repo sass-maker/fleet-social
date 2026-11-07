@@ -96,7 +96,7 @@ def create_server(state: Path, input_roots: list[Path], skills_roots: list[Path]
 
     @server.tool()
     def job_status(job_id: str) -> dict[str, Any]:
-        """Read durable queued/running/succeeded/failed/cancelled state after reconnecting."""
+        """Read durable job state and resume queued work after a worker stops."""
         return jobs.get(job_id, resume=True)
 
     @server.tool()
