@@ -411,6 +411,15 @@ def test_status_poll_restarts_queue_after_worker_dies(media):
     assert state == "succeeded", jobs.get(queued["jobId"])
 
 
+def test_start_can_suppress_worker_launch(media, monkeypatch):
+    def unexpected_launch(*args, **kwargs):
+        pytest.fail("launch=False must not start a detached render worker")
+
+    monkeypatch.setattr("mashup.extension.jobs.subprocess.Popen", unexpected_launch)
+    _, _, _, job = approved_job(media)
+    assert job["state"] == "queued"
+
+
 def test_cancellation_only_stops_owned_ffmpeg_and_never_publishes(media, monkeypatch):
     jobs, _, _, job = approved_job(media)
     real_command = render_command

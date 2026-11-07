@@ -108,7 +108,7 @@ class Jobs:
                 )
         if launch:
             self.launch()
-        return self.get(job_id)
+        return self.get(job_id, resume=launch)
 
     def launch(self) -> None:
         self.reconcile()
@@ -184,7 +184,7 @@ class Jobs:
                 "requestHash": row["request_hash"],
             }
 
-    def get(self, job_id: str) -> dict:
+    def get(self, job_id: str, *, resume: bool = True) -> dict:
         if not IDENTIFIER.fullmatch(job_id):
             raise ValueError("Invalid job ID")
         self.reconcile()
@@ -192,7 +192,8 @@ class Jobs:
             row = db.execute("SELECT * FROM jobs WHERE id=?", (job_id,)).fetchone()
         if not row:
             raise ValueError("Job not found")
-        self.launch()
+        if resume:
+            self.launch()
         return {
             "jobId": job_id,
             "state": row["state"],
