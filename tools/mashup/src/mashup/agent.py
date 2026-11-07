@@ -565,6 +565,10 @@ def _approved_edit(path: Path) -> dict:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("schema") != "fleet.podcast-edit.v1":
         raise AgentError("INVALID_EDIT", "expected fleet.podcast-edit.v1")
+    if "template" in payload:
+        raise AgentError(
+            "TEMPLATE_RENDER_REQUIRED", "Template edits require the Mashup template renderer"
+        )
     if payload.get("approval", {}).get("status") != "approved":
         raise AgentError("APPROVAL_REQUIRED", "Mashup rendering requires an approved edit")
     EDL.model_validate(payload.get("editorial"))

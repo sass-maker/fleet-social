@@ -1,0 +1,30 @@
+{
+  "schema": "fleet.local-extension.v1",
+  "id": "mashup-media",
+  "version": "0.1.0",
+  "title": "Mashup local media",
+  "package": "mashup[mcp]",
+  "entrypoint": "mashup-mcp",
+  "transport": "stdio",
+  "runtime": { "python": ">=3.11", "platforms": ["darwin", "linux"], "binaries": ["ffmpeg", "ffprobe"] },
+  "configuration": {
+    "required": ["--state-dir"],
+    "repeatable": ["--input-root", "--skills-root"],
+    "printClientConfiguration": "--print-pace-config"
+  },
+  "capabilities": {
+    "localOnly": true,
+    "publishing": false,
+    "arbitraryExecution": false,
+    "skillExecution": "guidance-only",
+    "detachedRenders": true,
+    "templates": ["character-overlay@1"]
+  },
+  "installation": {
+    "build": "python3 scripts/build_extension.py --output /absolute/bundles",
+    "guide": "extension_bundle/README.md",
+    "source": "The bundle contains a runtime wheel, hashed requirements.lock, install.py, smoke.py and a small usage guide. Setup downloads pinned dependencies; no models or providers are installed.",
+    "configure": "Run bundle/install.py with explicit destination/state/input/skills roots. It verifies an isolated installed runtime and returns a stable proposed pace-mcp.json plus an optional Pace procedure.",
+    "activate": "Merge the proposed mcpServers entry through the host's generic MCP configuration. Pace has a fixed native catalog; this bundle does not register a new catalog row or modify the host application."
+  }
+}

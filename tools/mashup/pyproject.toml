@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+mcp = ["mcp>=1.24,<2"]
 # Local subtitle generation for archives that ship without SRT/VTT.
 # Apple-silicon only; the rest of the pipeline never imports these.
 transcribe = ["mlx-whisper>=0.4.2"]
@@ -29,6 +30,7 @@ localchat = ["mlx-lm>=0.28.0; sys_platform == 'darwin' and platform_machine == '
 
 [project.scripts]
 mashup = "mashup.cli:app"
+mashup-mcp = "mashup.extension.mcp:main"
 
 [build-system]
 requires = ["uv_build>=0.5.0,<0.9.0"]

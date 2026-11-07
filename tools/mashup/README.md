@@ -21,6 +21,23 @@ still requires an approved editorial contract, and every generated media
 receipt links back to the normalized operation identity. Mashup produces media
 but never chooses or writes to a publishing channel.
 
+### Local MCP extension
+
+The optional stdio extension in [`extension.json`](extension.json) exposes reusable templates and durable render jobs to Pace or another MCP host. For a source-independent wheel bundle with pinned dependencies, an installer, a Pace procedure, and an installation receipt, follow the [extension package guide](extension_bundle/README.md). Its generated configuration is a proposal; installation does not activate Pace.
+
+For development directly from this source checkout, install it without local model dependencies:
+
+```bash
+uv sync --locked --no-default-groups --extra mcp
+uv run --locked --no-default-groups --extra mcp mashup-mcp --state-dir /absolute/private/state --input-root /absolute/media --skills-root /absolute/skills --print-pace-config
+```
+
+The second command only prints a proposed `mcpServers` entry; it does not install or activate a Pace connection. Preserve its absolute virtual-environment interpreter path. Configure explicit input directories and canonical skill directories, including the canonical targets of any skill symlinks. `skills_list` and `skill_read` share read-only guidance; they do not grant execution of computer or agent tools.
+
+Start with `media_capabilities`, `templates_list`, and `template_describe`. The first template, `character-overlay@1`, places a transparent PNG, GIF, or alpha MOV animation over a local image or video, with size, position, looping, and optional bob, orbit, or slide motion. Tagged WebM alpha is not supported. Assets require explicit rights metadata; no character assets are bundled.
+
+Use `asset_register` for both inputs, `render_plan` for a composition, and `render_validate` before starting. `render_start` requires approval naming the exact proposal hash and a unique idempotency key. It returns immediately; poll `job_status`, cancel with `job_cancel`, and retrieve verified local paths with `job_result`. Jobs survive an MCP disconnect. Rendering is limited to one active job, four waiting jobs, and 60 seconds per output; there are no arbitrary shell commands, remote generation providers, or publishing operations. Finished videos retain the existing approval and media-receipt boundary.
+
 The public website screens approved finished results and their provenance. It
 is intentionally static: uploads, archives, rendering, approvals, and posting
 remain local operator responsibilities.
